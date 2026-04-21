@@ -24,41 +24,36 @@
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;}
 .app{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);}
-.topbar{background:var(--bg2);border-bottom:0.5px solid var(--border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.topbar{background:var(--bg2);border-bottom:0.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
 .topbar-title{font-size:16px;font-weight:600;color:var(--text);}
 .topbar-sub{font-size:11px;color:var(--text2);margin-top:1px;}
 .notif-wrap{display:flex;align-items:center;gap:5px;}
 .notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;display:none;}
 .notif-dot.show{display:block;}
 .notif-lbl{font-size:11px;color:var(--text2);}
-.nav{display:flex;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:57px;z-index:10;}
-.nav-btn{flex:1;padding:10px 2px 8px;font-size:11px;color:var(--text2);background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;}
+.nav{display:flex;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:53px;z-index:10;}
+.nav-btn{flex:1;padding:9px 2px 7px;font-size:11px;color:var(--text2);background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;}
 .nav-btn.active{color:var(--purple);}
-.nav-icon{font-size:18px;}
+.nav-icon{font-size:17px;}
 .content{padding:14px;flex:1;}
-
 .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
-.card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;}
 .section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
 .section-label{font-size:12px;font-weight:500;color:var(--text2);}
 .add-btn{background:var(--purple);color:white;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;}
-
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
 .stat{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;}
 .stat-n{font-size:20px;font-weight:600;color:var(--text);}
 .stat-l{font-size:10px;color:var(--text2);margin-top:2px;}
-
 .skin-banner{background:linear-gradient(135deg,var(--purple-light),var(--teal-light));border:0.5px solid var(--purple-mid);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
 .skin-val{font-size:13px;font-weight:600;color:#3C3489;}
 .skin-sub{font-size:11px;color:var(--purple);margin-top:2px;}
 .skin-btn{font-size:11px;color:var(--purple);background:white;border:0.5px solid var(--purple-mid);border-radius:20px;padding:4px 10px;cursor:pointer;}
-
 .alert-banner{border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;font-size:12px;display:flex;align-items:flex-start;gap:8px;}
 .alert-warn{background:var(--amber-light);border:0.5px solid var(--amber);color:#633806;}
 .alert-danger{background:var(--red-light);border:0.5px solid var(--red);color:#791F1F;}
 .alert-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
 .alert-title{font-weight:600;margin-bottom:2px;}
-
 .product-list{display:flex;flex-direction:column;gap:8px;}
 .pcard{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;gap:12px;padding:11px 13px;cursor:pointer;}
 .pcard-emoji{width:44px;height:44px;border-radius:var(--radius-sm);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;}
@@ -73,18 +68,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tok{background:var(--teal-light);color:#085041;}
 .twarn{background:var(--amber-light);color:#633806;}
 .tdanger{background:var(--red-light);color:#791F1F;}
-
-/* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:flex-end;}
+.tgray{background:var(--bg3);color:var(--text2);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:flex-end;max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%);}
 .modal{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:20px 16px 36px;}
 .modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
 .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.modal-title{font-size:16px;font-weight:600;color:var(--text);}
+.modal-title{font-size:15px;font-weight:600;color:var(--text);}
 .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text2);line-height:1;padding:0;}
 .fl{font-size:12px;color:var(--text2);margin-bottom:5px;display:block;font-weight:500;}
 .fi{width:100%;border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg2);margin-bottom:12px;-webkit-appearance:none;}
 .fi:focus{outline:none;border-color:var(--purple);}
+.fi-opt{border-style:dashed;opacity:0.8;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.expiry-hint{font-size:11px;color:var(--text3);background:var(--bg3);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:12px;line-height:1.5;}
 .tabs{display:flex;border:0.5px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:14px;}
 .tab-btn{flex:1;padding:9px 4px;font-size:12px;background:none;border:none;cursor:pointer;font-family:inherit;color:var(--text2);}
 .tab-btn.active{background:var(--purple);color:white;font-weight:600;}
@@ -96,9 +92,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sloading{background:var(--purple-light);border:0.5px solid var(--purple-mid);color:var(--purple);}
 .ssuccess{background:var(--teal-light);border:0.5px solid #5DCAA5;color:#085041;}
 .swarn{background:var(--amber-light);border:0.5px solid var(--amber);color:#633806;}
+.sinfo{background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);}
 .search-wrap{display:flex;gap:8px;margin-bottom:10px;}
-.search-input{flex:1;border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg2);-webkit-appearance:none;}
-.search-input:focus{outline:none;border-color:var(--purple);}
+.search-input{flex:1;border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg2);}
 .search-btn{background:var(--purple);color:white;border:none;border-radius:var(--radius-sm);padding:10px 16px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:500;}
 .search-btn:disabled{opacity:.5;}
 .rcard{border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px;cursor:pointer;background:var(--bg2);}
@@ -110,32 +106,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .rtag{font-size:10px;padding:2px 7px;background:var(--bg3);color:var(--text2);border-radius:8px;}
 .submit-btn{width:100%;background:var(--purple);color:white;border:none;border-radius:var(--radius-sm);padding:13px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;}
 .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+.ghost-btn{width:100%;background:none;border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px;font-size:13px;cursor:pointer;color:var(--text2);font-family:inherit;margin-top:8px;}
+.edit-btn{width:100%;background:var(--purple-light);border:0.5px solid var(--purple-mid);color:var(--purple);border-radius:var(--radius-sm);padding:10px;font-size:13px;cursor:pointer;margin-top:8px;font-family:inherit;font-weight:500;}
+.danger-btn{width:100%;background:none;border:0.5px solid #F09595;color:#A32D2D;border-radius:var(--radius-sm);padding:10px;font-size:13px;cursor:pointer;margin-top:8px;font-family:inherit;}
 .divider{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
-
-.det-hero{width:100%;height:160px;background:var(--bg3);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:56px;margin-bottom:14px;overflow:hidden;}
+.seg-row{display:flex;gap:8px;margin-bottom:12px;}
+.seg-tag{padding:6px 14px;border:0.5px solid var(--border2);border-radius:20px;font-size:12px;cursor:pointer;color:var(--text2);background:var(--bg2);font-family:inherit;}
+.seg-tag.active{background:var(--purple);color:white;border-color:var(--purple);font-weight:500;}
+.det-hero{width:100%;height:150px;background:var(--bg3);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:14px;overflow:hidden;}
 .det-hero img{width:100%;height:100%;object-fit:cover;}
 .det-brand{font-size:12px;color:var(--text2);}
-.det-name{font-size:19px;font-weight:600;color:var(--text);margin-bottom:14px;}
-.det-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.det-name{font-size:18px;font-weight:600;color:var(--text);margin-bottom:12px;}
+.det-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
 .det-k{color:var(--text2);}
 .det-v{color:var(--text);font-weight:500;}
-.infobox{border-radius:var(--radius-sm);padding:12px 14px;margin-top:12px;}
+.infobox{border-radius:var(--radius-sm);padding:12px 14px;margin-top:10px;}
 .infobox-purple{background:var(--purple-light);border:0.5px solid var(--purple-mid);}
-.infobox-teal{background:var(--teal-light);border:0.5px solid #5DCAA5;}
-.infobox-amber{background:var(--amber-light);border:0.5px solid var(--amber);}
 .infobox-coral{background:var(--coral-light);border:0.5px solid #F0997B;}
-.infobox-title{font-size:11px;font-weight:600;margin-bottom:6px;}
+.infobox-teal{background:var(--teal-light);border:0.5px solid #5DCAA5;}
+.infobox-title{font-size:11px;font-weight:600;margin-bottom:5px;}
 .infobox-purple .infobox-title{color:var(--purple);}
-.infobox-teal .infobox-title{color:#085041;}
-.infobox-amber .infobox-title{color:#633806;}
 .infobox-coral .infobox-title{color:#993C1D;}
+.infobox-teal .infobox-title{color:#085041;}
 .infobox-body{font-size:12px;line-height:1.7;}
 .infobox-purple .infobox-body{color:#3C3489;}
-.infobox-teal .infobox-body{color:#0F6E56;}
-.infobox-amber .infobox-body{color:#633806;}
 .infobox-coral .infobox-body{color:#993C1D;}
-.del-btn{width:100%;background:none;border:0.5px solid #F09595;color:#A32D2D;border-radius:var(--radius-sm);padding:11px;font-size:13px;cursor:pointer;margin-top:12px;font-family:inherit;}
-
+.infobox-teal .infobox-body{color:#0F6E56;}
 .advice-seg{display:flex;border:0.5px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:14px;}
 .aseg-btn{flex:1;padding:9px 2px;font-size:11px;background:none;border:none;cursor:pointer;font-family:inherit;color:var(--text2);}
 .aseg-btn.active{background:var(--purple);color:white;font-weight:600;}
@@ -145,13 +141,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .step-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}
 .step-desc{font-size:12px;color:var(--text2);line-height:1.6;}
 .step-product{font-size:11px;color:var(--purple);margin-top:4px;font-weight:500;}
-.condition-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:4px;}
+.condition-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 .cond-btn{padding:11px 8px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;cursor:pointer;text-align:center;background:var(--bg2);color:var(--text);font-family:inherit;}
 .compat-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.compat-item:last-child{border:none;}
 .compat-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
 .compat-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
 .compat-desc{font-size:12px;color:var(--text2);line-height:1.5;}
-
 .opt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 .opt-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .opt-btn{padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;cursor:pointer;text-align:center;background:var(--bg2);color:var(--text);font-family:inherit;}
@@ -162,12 +158,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ac-emoji{font-size:16px;}
 .ac-title{font-size:13px;font-weight:600;color:var(--text);}
 .ac-body{font-size:12px;color:var(--text2);line-height:1.7;}
-
-.dot-anim{animation:blink 1s infinite;display:inline-block;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.reminder-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);}
+.reminder-row:last-of-type{border:none;}
+.reminder-label{font-size:13px;font-weight:500;color:var(--text);}
+.reminder-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.toggle{width:44px;height:26px;background:var(--border2);border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none;outline:none;}
+.toggle.on{background:var(--purple);}
+.toggle::after{content:'';position:absolute;width:20px;height:20px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;}
+.toggle.on::after{left:21px;}
+.time-input{border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg2);}
 .empty{text-align:center;padding:40px 16px;color:var(--text2);font-size:14px;}
 .empty-icon{font-size:36px;margin-bottom:10px;}
-.ghost-btn{width:100%;background:none;border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:9px;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;margin-top:8px;}
+.dot-anim{animation:blink 1s infinite;display:inline-block;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 </style>
 </head>
 <body>
@@ -186,98 +189,97 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="nav-btn active" onclick="gotoTab('home')" id="tab-home"><span class="nav-icon">🏠</span>首頁</button>
     <button class="nav-btn" onclick="gotoTab('products')" id="tab-products"><span class="nav-icon">🧴</span>產品庫</button>
     <button class="nav-btn" onclick="gotoTab('advice')" id="tab-advice"><span class="nav-icon">📋</span>保養建議</button>
-    <button class="nav-btn" onclick="gotoTab('skin')" id="tab-skin"><span class="nav-icon">✨</span>膚質</button>
+    <button class="nav-btn" onclick="gotoTab('skin')" id="tab-skin"><span class="nav-icon">✨</span>設定</button>
   </div>
   <div class="content" id="main-content"></div>
   <div id="modal-root"></div>
 </div>
-
 <script>
-// ── CONFIG ─────────────────────────────────────────────────
-const API_ENDPOINT = '/api/claude'; // 走自己的後端，不暴露 key
+const API_ENDPOINT='/api/claude';
+const STORAGE_KEY='skincarevault_v2';
+function loadState(){try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}return null;}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
 
-// ── STATE ──────────────────────────────────────────────────
-const STORAGE_KEY = 'skincarevault_v1';
-function loadState() { try { const r=localStorage.getItem(STORAGE_KEY); if(r) return JSON.parse(r); } catch(e){} return null; }
-function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
-
-const DEFAULT = {
+const DEFAULT={
   tab:'home',
   products:[
-    {id:1,brand:'Laneige',name:'水凝保濕乳霜',category:'乳霜',openedDate:'2024-10-01',pao:12,emoji:'🫙',advice:'適合乾肌晚間使用，塗抹於精華後鎖住水分。',ingredients:'甘油、神經醯胺、玻尿酸',imgData:null},
-    {id:2,brand:'SK-II',name:'神仙水（青春露）',category:'化妝水',openedDate:'2024-11-15',pao:6,emoji:'💧',advice:'含豐富 Pitera，洗臉後第一步使用，改善膚質。',ingredients:'Pitera、菸鹼醯胺',imgData:null},
-    {id:3,brand:'Sulwhasoo',name:'人蔘精華',category:'精華',openedDate:'2024-12-01',pao:12,emoji:'🌿',advice:'富含紅蔘，適合熟齡肌使用。',ingredients:'紅蔘萃取、甘草萃取',imgData:null},
+    {id:1,brand:'Laneige',name:'水凝保濕乳霜',category:'乳霜',mfgDate:'',openedDate:'2024-10-01',pao:12,expiryDate:'',emoji:'🫙',advice:'適合乾肌晚間使用，塗抹於精華後鎖住水分。',ingredients:'甘油、神經醯胺、玻尿酸',imgData:null},
+    {id:2,brand:'SK-II',name:'神仙水（青春露）',category:'化妝水',mfgDate:'',openedDate:'2024-11-15',pao:6,expiryDate:'',emoji:'💧',advice:'含豐富 Pitera，洗臉後第一步使用，改善膚質。',ingredients:'Pitera、菸鹼醯胺',imgData:null},
+    {id:3,brand:'Sulwhasoo',name:'人蔘精華',category:'精華',mfgDate:'',openedDate:'2024-12-01',pao:12,expiryDate:'',emoji:'🌿',advice:'富含紅蔘，適合熟齡肌使用。',ingredients:'紅蔘萃取、甘草萃取',imgData:null},
   ],
   skin:{type:'混合肌',concerns:['毛孔','暗沉']},
   nextId:4,
+  reminders:{morningEnabled:false,morningTime:'07:30',eveningEnabled:false,eveningTime:'21:00',expiryEnabled:true}
 };
-let state = loadState() || JSON.parse(JSON.stringify(DEFAULT));
 
-// ── MODAL / ADD STATE ──────────────────────────────────────
-let addMode='search', currentImgData=null, searchResults=[], selectedResult=null, isSearching=false;
-let currentAdviceTab='morning', currentConditionResult=null;
+let state=loadState()||JSON.parse(JSON.stringify(DEFAULT));
+if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
+state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
 
-// ── UTILS ──────────────────────────────────────────────────
-const daysLeft=(d,p)=>{const e=new Date(d);e.setMonth(e.getMonth()+p);return Math.floor((e-new Date())/86400000);};
-const expStatus=d=>d<0?'expired':d<=30?'danger':d<=60?'warn':'ok';
-const expColor=s=>s==='ok'?'#1D9E75':s==='warn'?'#EF9F27':'#E24B4A';
-const expPct=(d,p)=>{const o=new Date(d),e=new Date(d);e.setMonth(e.getMonth()+p);return Math.min(100,Math.max(0,Math.round(((new Date()-o)/(e-o))*100)));};
-const tagCls=s=>s==='ok'?'tok':s==='warn'?'twarn':'tdanger';
-const tagTxt=d=>d<0?'已過期':d<=60?`剩 ${d} 天`:'良好';
+let addMode='search',currentImgData=null,searchResults=[],selectedResult=null,isSearching=false;
+let currentAdviceTab='morning',currentConditionResult=null,editingId=null,productFilter='all';
+
+function computeExpiry(p){
+  if(p.expiryDate)return new Date(p.expiryDate);
+  if(p.openedDate&&p.pao){const d=new Date(p.openedDate);d.setMonth(d.getMonth()+parseInt(p.pao));return d;}
+  if(p.mfgDate&&p.pao){const d=new Date(p.mfgDate);d.setMonth(d.getMonth()+parseInt(p.pao));return d;}
+  return null;
+}
+function daysLeft(p){const e=computeExpiry(p);if(!e)return null;return Math.floor((e-new Date())/86400000);}
+function expStatus(d){if(d===null)return 'unknown';if(d<0)return 'expired';if(d<=30)return 'danger';if(d<=60)return 'warn';return 'ok';}
+function expColor(s){return s==='ok'?'#1D9E75':s==='warn'?'#EF9F27':s==='unknown'?'#B4B2A9':'#E24B4A';}
+function expPct(p){const e=computeExpiry(p);if(!e)return 0;const st=p.openedDate?new Date(p.openedDate):p.mfgDate?new Date(p.mfgDate):new Date();return Math.min(100,Math.max(0,Math.round(((new Date()-st)/(e-st))*100)));}
+function tagCls(s){return s==='ok'?'tok':s==='warn'?'twarn':s==='unknown'?'tgray':'tdanger';}
+function tagTxt(d){if(d===null)return '未設效期';if(d<0)return '已過期';if(d<=60)return `剩 ${d} 天`;return '良好';}
 const today=()=>new Date().toISOString().split('T')[0];
 const fmt=s=>s?s.replace(/-/g,'/'):'—';
 
-async function callClaude(prompt) {
-  const res = await fetch(API_ENDPOINT, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:1500, messages:[{role:'user',content:prompt}]})
-  });
-  if (!res.ok) throw new Error('API '+res.status);
-  const data = await res.json();
-  return (data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
+async function callClaude(prompt){
+  const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+  if(!res.ok)throw new Error('API '+res.status);
+  const data=await res.json();
+  return(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
 }
-function parseJSON(raw) {
+function parseJSON(raw){
   const c=raw.replace(/```json|```/g,'').trim();
   const s=c.indexOf('['),e=c.lastIndexOf(']');
-  if(s>=0&&e>=0) return JSON.parse(c.slice(s,e+1));
+  if(s>=0&&e>=0)return JSON.parse(c.slice(s,e+1));
   const s2=c.indexOf('{'),e2=c.lastIndexOf('}');
   return JSON.parse(c.slice(s2,e2+1));
 }
 
-// ── ROUTING ────────────────────────────────────────────────
-function gotoTab(t) {
-  state.tab=t; saveState();
+function gotoTab(t){
+  state.tab=t;saveState();
   ['home','products','advice','skin'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
   render();
 }
-function render() {
-  document.getElementById('main-content').innerHTML =
+function render(){
+  document.getElementById('main-content').innerHTML=
     state.tab==='home'?renderHome():
     state.tab==='products'?renderProducts():
     state.tab==='advice'?renderAdvice():renderSkin();
   updateTopbar();
 }
-function updateTopbar() {
-  const d=new Date();
-  document.getElementById('topbar-date').textContent=d.toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
-  const urgent=state.products.filter(p=>{const d=daysLeft(p.openedDate,p.pao);return d>=0&&d<=14;});
-  const expired=state.products.filter(p=>daysLeft(p.openedDate,p.pao)<0);
+function updateTopbar(){
+  document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
+  const urgent=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d>=0&&d<=14;});
+  const expired=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d<0;});
   const n=urgent.length+expired.length;
   document.getElementById('notif-dot').classList.toggle('show',n>0);
   document.getElementById('notif-lbl').textContent=n>0?`${n} 項需注意`:'';
 }
 
-// ── HOME ───────────────────────────────────────────────────
-function renderHome() {
+// HOME
+function renderHome(){
   const total=state.products.length;
-  const expiring=state.products.filter(p=>{const d=daysLeft(p.openedDate,p.pao);return d>=0&&d<=30;}).length;
-  const expired=state.products.filter(p=>daysLeft(p.openedDate,p.pao)<0).length;
-  const ok=state.products.filter(p=>expStatus(daysLeft(p.openedDate,p.pao))==='ok').length;
-  const soon=state.products.filter(p=>{const d=daysLeft(p.openedDate,p.pao);return d>=0&&d<=14;});
+  const expiring=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d>=0&&d<=30;}).length;
+  const expired=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d<0;}).length;
+  const ok=state.products.filter(p=>{const d=daysLeft(p);return d===null||d>60;}).length;
+  const soon=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d>=0&&d<=14;});
   let alerts='';
-  if(expired>0) alerts+=`<div class="alert-banner alert-danger"><span class="alert-icon">⚠</span><div><div class="alert-title">${expired} 個產品已過期</div>請儘快更換，以免刺激肌膚</div></div>`;
-  if(soon.length>0) alerts+=`<div class="alert-banner alert-warn"><span class="alert-icon">⏰</span><div><div class="alert-title">${soon.map(p=>p.name).join('、')} 即將到期</div>建議優先使用以免浪費</div></div>`;
-  const sorted=[...state.products].sort((a,b)=>daysLeft(a.openedDate,a.pao)-daysLeft(b.openedDate,b.pao)).slice(0,4);
+  if(expired>0)alerts+=`<div class="alert-banner alert-danger"><span class="alert-icon">⚠</span><div><div class="alert-title">${expired} 個產品已過期</div>請儘快更換，以免刺激肌膚</div></div>`;
+  if(soon.length>0)alerts+=`<div class="alert-banner alert-warn"><span class="alert-icon">⏰</span><div><div class="alert-title">${soon.map(p=>p.name).join('、')} 即將到期</div>建議優先使用以免浪費</div></div>`;
+  const sorted=[...state.products].sort((a,b)=>{const da=daysLeft(a),db=daysLeft(b);if(da===null&&db===null)return 0;if(da===null)return 1;if(db===null)return -1;return da-db;}).slice(0,4);
   return `
     <div class="skin-banner" onclick="gotoTab('skin')">
       <div><div class="skin-val">${state.skin.type}</div><div class="skin-sub">困擾：${state.skin.concerns.join('、')} · 點擊更新</div></div>
@@ -300,140 +302,98 @@ function renderHome() {
     </div>`;
 }
 
-// ── PRODUCTS ───────────────────────────────────────────────
-function renderProducts() {
+// PRODUCTS
+function renderProducts(){
+  const showList=productFilter==='美容儀器'?state.products.filter(p=>p.category==='美容儀器'):productFilter==='保養品'?state.products.filter(p=>p.category!=='美容儀器'):state.products;
   return `
     <div class="section-hd"><span class="section-label">產品庫 (${state.products.length})</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
-    ${state.products.length?`<div class="product-list">${state.products.map(renderPcard).join('')}</div>`:`<div class="empty"><div class="empty-icon">🧴</div>還沒有產品<br>點擊新增開始建立你的保養品庫</div>`}`;
+    <div class="seg-row">
+      ${['all','保養品','美容儀器'].map(f=>`<button class="seg-tag ${productFilter===f?'active':''}" onclick="setFilter('${f}')">${f==='all'?'全部':f}</button>`).join('')}
+    </div>
+    ${showList.length?`<div class="product-list">${showList.map(renderPcard).join('')}</div>`:`<div class="empty"><div class="empty-icon">${productFilter==='美容儀器'?'💡':'🧴'}</div>還沒有${productFilter==='all'?'':productFilter}，點擊新增吧！</div>`}`;
 }
+function setFilter(f){productFilter=f;render();}
 
-function renderPcard(p) {
-  const d=daysLeft(p.openedDate,p.pao),s=expStatus(d),pct=expPct(p.openedDate,p.pao);
+function renderPcard(p){
+  const d=daysLeft(p),s=expStatus(d),pct=expPct(p);
+  const isDevice=p.category==='美容儀器';
   return `<div class="pcard" onclick="openDetail(${p.id})">
     <div class="pcard-emoji">${p.imgData?`<img src="${p.imgData}">`:(p.emoji||'🧴')}</div>
     <div class="pcard-body">
       <div class="pcard-brand">${p.brand} · ${p.category}</div>
       <div class="pcard-name">${p.name}</div>
+      ${isDevice?`<span class="tag tgray" style="margin-top:5px;">美容儀器</span>`:`
       <div class="pcard-bar-wrap">
         <div class="pbar"><div class="pbar-fill" style="width:${pct}%;background:${expColor(s)};"></div></div>
         <span class="tag ${tagCls(s)}">${tagTxt(d)}</span>
-      </div>
+      </div>`}
     </div>
   </div>`;
 }
 
-// ── ADVICE ─────────────────────────────────────────────────
-function renderAdvice() {
+// PRODUCT FORM
+function buildProductForm(p){
+  p=p||{};
+  const cats=['化妝水','精華','乳液','乳霜','防曬','潔顏','面膜','美容儀器','其他'];
+  const isDevice=(p.category||'')==='美容儀器';
   return `
-    <div class="advice-seg">
-      ${[['morning','☀ 早上'],['evening','🌙 晚上'],['condition','⚡ 狀況'],['compat','🔬 成分']].map(([id,lbl])=>`<button class="aseg-btn ${currentAdviceTab===id?'active':''}" onclick="setAdviceTab('${id}')">${lbl}</button>`).join('')}
+    <span class="fl">品牌</span>
+    <input class="fi" id="fb" placeholder="例：Laneige" value="${p.brand||''}" oninput="checkAddBtn()">
+    <span class="fl">產品名稱</span>
+    <input class="fi" id="fn" placeholder="例：水凝保濕乳霜" value="${p.name||''}" oninput="checkAddBtn()">
+    <div class="form-row">
+      <div>
+        <span class="fl">類別</span>
+        <select class="fi" id="fc" onchange="onCatChange()">
+          ${cats.map(c=>`<option value="${c}" ${(p.category||'')==c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <span class="fl">主要成分（選填）</span>
+        <input class="fi fi-opt" id="fing" placeholder="玻尿酸、維他命C..." value="${p.ingredients||''}">
+      </div>
     </div>
-    <div id="advice-content">${renderAdviceContent()}</div>`;
-}
-function setAdviceTab(t) {
-  currentAdviceTab=t;
-  document.querySelectorAll('.aseg-btn').forEach((b,i)=>b.classList.toggle('active',['morning','evening','condition','compat'][i]===t));
-  document.getElementById('advice-content').innerHTML=renderAdviceContent();
-}
-function renderAdviceContent() {
-  if(currentAdviceTab==='morning') return renderRoutine('morning');
-  if(currentAdviceTab==='evening') return renderRoutine('evening');
-  if(currentAdviceTab==='condition') return renderCondition();
-  return renderCompat();
-}
-function renderRoutine(tod) {
-  const lbl=tod==='morning'?'早':'晚';
-  const key='_routine_'+tod;
-  if(window[key]&&window[key].skin===state.skin.type) return renderRoutineResult(window[key].steps,tod);
-  return `<div class="card"><div class="card-title">💡 ${lbl}間保養流程</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">根據你的 <b style="color:var(--purple)">${state.skin.type}</b> 和目前保養品，AI 規劃最佳${lbl}間步驟。</div><button class="submit-btn" onclick="genRoutine('${tod}')">✨ 生成${lbl}間保養流程</button></div><div id="routine-result-${tod}"></div>`;
-}
-function renderRoutineResult(steps,tod) {
-  const lbl=tod==='morning'?'☀ 早':'🌙 晚';
-  return `<div class="card"><div class="card-title">${lbl}間保養流程</div>${steps.map((s,i)=>`<div class="routine-step"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-title">${s.step}</div><div class="step-desc">${s.how}</div>${s.product?`<div class="step-product">推薦：${s.product}</div>`:''}</div></div>`).join('')}<button class="ghost-btn" onclick="clearRoutine('${tod}')">重新生成</button></div>`;
-}
-async function genRoutine(tod) {
-  const el=document.getElementById('routine-result-'+tod);
-  if(el) el.innerHTML=`<div class="sbox sloading">AI 規劃中 <span class="dot-anim">●</span></div>`;
-  const prods=state.products.map(p=>`${p.brand} ${p.name}（${p.category}，成分：${p.ingredients||'未知'}）`).join('；');
-  try {
-    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。保養品：${prods}。規劃${tod==='morning'?'早':'晚'}間保養步驟，最多6步。只回純JSON：[{"step":"步驟名","how":"操作說明1-2句","product":"推薦產品名或空字串"}]`);
-    const steps=parseJSON(raw);
-    window['_routine_'+tod]={steps,skin:state.skin.type};
-    document.getElementById('advice-content').innerHTML=renderRoutineResult(steps,tod);
-  } catch { if(el) el.innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`; }
-}
-function clearRoutine(tod) { window['_routine_'+tod]=null; document.getElementById('advice-content').innerHTML=renderAdviceContent(); }
-
-function renderCondition() {
-  if(currentConditionResult) return `<div class="card"><div class="card-title">⚡ ${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
-  const conds=[['breakout','😣 突然冒痘'],['dry','😖 乾燥緊繃'],['sensitive','😮 泛紅敏感'],['oily','😅 油光滿面'],['dull','😑 暗沉疲倦'],['pores','😤 毛孔粗大']];
-  return `<div class="card"><div class="card-title">⚡ 今天肌膚狀況</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">選擇今天的狀況，AI 給出調整建議</div><div class="condition-grid">${conds.map(([id,lbl])=>`<button class="cond-btn" onclick="handleCondition('${id}','${lbl}')">${lbl}</button>`).join('')}</div></div><div id="condition-result"></div>`;
-}
-async function handleCondition(id,label) {
-  document.getElementById('condition-result').innerHTML=`<div class="sbox sloading">AI 分析中 <span class="dot-anim">●</span></div>`;
-  const prods=state.products.map(p=>`${p.brand} ${p.name}（${p.category}，成分：${p.ingredients||'未知'}）`).join('；');
-  try {
-    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}，保養品：${prods}。今天狀況：${label}。給4-5點應對建議。只回純JSON：[{"icon":"emoji","title":"建議標題","desc":"具體說明1-2句"}]`);
-    currentConditionResult={label,tips:parseJSON(raw)};
-    document.getElementById('advice-content').innerHTML=renderAdviceContent();
-  } catch { document.getElementById('condition-result').innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`; }
-}
-function clearCondition() { currentConditionResult=null; document.getElementById('advice-content').innerHTML=renderAdviceContent(); }
-
-function renderCompat() {
-  if(window._compat) return renderCompatResult(window._compat);
-  return `<div class="card"><div class="card-title">🔬 成分相容性分析</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 分析你的保養品成分，找出衝突與最佳搭配。</div><button class="submit-btn" onclick="runCompat()">🔍 開始分析</button></div><div id="compat-result"></div>`;
-}
-async function runCompat() {
-  document.getElementById('compat-result').innerHTML=`<div class="sbox sloading">AI 分析成分中 <span class="dot-anim">●</span></div>`;
-  const prods=state.products.map(p=>`${p.brand} ${p.name}（成分：${p.ingredients||'一般成分'}）`).join('；');
-  try {
-    const raw=await callClaude(`分析以下保養品成分相容性：${prods}。找出衝突搭配和建議組合。只回純JSON：[{"icon":"emoji","title":"標題","desc":"說明","type":"warning或tip"}]`);
-    window._compat=parseJSON(raw);
-    document.getElementById('advice-content').innerHTML=renderCompatResult(window._compat);
-  } catch { document.getElementById('compat-result').innerHTML=`<div class="sbox swarn">分析失敗，請再試一次</div>`; }
-}
-function renderCompatResult(items) {
-  const warns=items.filter(i=>i.type==='warning'), tips=items.filter(i=>i.type!=='warning');
-  return `<div class="card"><div class="card-title">🔬 成分分析結果</div>${warns.length?`<div class="infobox infobox-coral" style="margin-bottom:10px;"><div class="infobox-title">⚠ 注意事項</div>${warns.map(w=>`<div class="compat-item"><span class="compat-icon">${w.icon}</span><div><div class="compat-title">${w.title}</div><div class="compat-desc">${w.desc}</div></div></div>`).join('')}</div>`:''} ${tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._compat=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新分析</button></div>`;
+    <div id="expiry-section" ${isDevice?'style="display:none"':''}>
+      <div class="expiry-hint">💡 效期資料不需全填，app 會依你填的資料自動推算到期日</div>
+      <div class="form-row">
+        <div><span class="fl">製造日期（選填）</span><input class="fi fi-opt" type="date" id="fmfg" value="${p.mfgDate||''}"></div>
+        <div><span class="fl">開封日期（選填）</span><input class="fi fi-opt" type="date" id="fopened" value="${p.openedDate||today()}"></div>
+      </div>
+      <div class="form-row">
+        <div><span class="fl">開封後可用月數（選填）</span><input class="fi fi-opt" type="number" id="fp" placeholder="12" min="1" max="60" value="${p.pao||''}"></div>
+        <div><span class="fl">明確到期日（選填）</span><input class="fi fi-opt" type="date" id="fexpiry" value="${p.expiryDate||''}"></div>
+      </div>
+    </div>`;
 }
 
-// ── SKIN ───────────────────────────────────────────────────
-function renderSkin() {
-  const types=['油性肌','乾性肌','混合肌','敏感肌','中性肌'];
-  const concerns=['暗沉','毛孔','細紋','痘痘','黑眼圈','乾燥','泛紅','斑點'];
-  return `
-    <div class="card"><div class="card-title">👤 我的膚質</div><div class="opt-grid">${types.map(t=>`<button class="opt-btn ${state.skin.type===t?'sel':''}" onclick="setSkinType('${t}')">${t}</button>`).join('')}</div></div>
-    <div class="card"><div class="card-title">😟 膚況困擾（可複選）</div><div class="opt-grid3">${concerns.map(c=>`<button class="opt-btn ${state.skin.concerns.includes(c)?'sel':''}" onclick="toggleConcern('${c}')">${c}</button>`).join('')}</div></div>
-    <button class="save-btn" onclick="saveSkin()">✓ 儲存並更新建議</button>
-    <div id="skin-advice" style="margin-top:12px;"></div>`;
-}
-function setSkinType(t){state.skin.type=t;saveState();render();}
-function toggleConcern(c){const i=state.skin.concerns.indexOf(c);if(i>=0)state.skin.concerns.splice(i,1);else state.skin.concerns.push(c);saveState();render();}
-async function saveSkin() {
-  saveState(); window._routine_morning=null; window._routine_evening=null; window._compat=null;
-  const el=document.getElementById('skin-advice');
-  el.innerHTML=`<div class="sbox sloading">AI 生成個人化建議 <span class="dot-anim">●</span></div>`;
-  const prods=state.products.map(p=>`${p.brand} ${p.name}（${p.category}）`).join('、');
-  try {
-    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。保養品：${prods}。給3點核心建議，只回純JSON：[{"emoji":"","title":"","body":"1-2句"}]`);
-    const advices=parseJSON(raw);
-    el.innerHTML=advices.map(a=>`<div class="advice-card"><div class="ac-hd"><span class="ac-emoji">${a.emoji}</span><span class="ac-title">${a.title}</span></div><div class="ac-body">${a.body}</div></div>`).join('');
-  } catch { el.innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`; }
+function onCatChange(){
+  const cat=(document.getElementById('fc')||{}).value||'';
+  const sec=document.getElementById('expiry-section');
+  if(sec)sec.style.display=cat==='美容儀器'?'none':'block';
 }
 
-// ── ADD MODAL ──────────────────────────────────────────────
-function openAdd() {
-  addMode='search'; searchResults=[]; selectedResult=null; currentImgData=null; window._photoInfo=null;
+function getFormValues(){
+  const g=id=>((document.getElementById(id)||{}).value||'').trim();
+  return{brand:g('fb'),name:g('fn'),category:g('fc')||'其他',ingredients:g('fing'),mfgDate:g('fmfg'),openedDate:g('fopened'),pao:parseInt(g('fp'))||0,expiryDate:g('fexpiry')};
+}
+function checkAddBtn(){
+  const b=(document.getElementById('fb')||{}).value||'',n=(document.getElementById('fn')||{}).value||'';
+  const btn=document.getElementById('add-submit');
+  if(btn)btn.disabled=!(b.trim()&&n.trim());
+}
+
+// ADD MODAL
+function openAdd(){
+  editingId=null;addMode='search';searchResults=[];selectedResult=null;currentImgData=null;window._photoInfo=null;
   showModal(buildAddModal());
 }
-function showModal(html) { document.getElementById('modal-root').innerHTML=html; }
-function closeModal() { document.getElementById('modal-root').innerHTML=''; currentImgData=null; window._photoInfo=null; }
+function showModal(html){document.getElementById('modal-root').innerHTML=html;}
+function closeModal(){document.getElementById('modal-root').innerHTML='';currentImgData=null;window._photoInfo=null;editingId=null;}
 
-function buildAddModal() {
+function buildAddModal(){
   return `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-hd"><span class="modal-title">新增保養品</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-hd"><span class="modal-title">新增產品</span><button class="modal-close" onclick="closeModal()">✕</button></div>
     <div class="tabs">
       <button class="tab-btn ${addMode==='search'?'active':''}" onclick="setAddMode('search')">🔍 搜尋</button>
       <button class="tab-btn ${addMode==='photo'?'active':''}" onclick="setAddMode('photo')">📷 照片</button>
@@ -441,17 +401,18 @@ function buildAddModal() {
     </div>
     <div id="add-mode-body">${buildAddModeBody()}</div>
     <hr class="divider">
-    <div id="add-form-body">${buildAddFormBody()}</div>
+    <div id="add-form-body">${buildProductForm(selectedResult!=null?searchResults[selectedResult]:null)}</div>
     <button class="submit-btn" id="add-submit" onclick="confirmAdd()" disabled>加入產品庫</button>
   </div></div>`;
 }
 function setAddMode(m){addMode=m;searchResults=[];selectedResult=null;showModal(buildAddModal());}
-function buildAddModeBody() {
-  if(addMode==='search') return `<div class="search-wrap"><input class="search-input" id="sq" placeholder="例：SK-II 神仙水、Cetaphil 乳液..." onkeydown="if(event.key==='Enter')doSearch()"><button class="search-btn" id="sbtn" onclick="doSearch()">搜尋</button></div><div id="ss"></div><div id="sr">${searchResults.map(buildRcard).join('')}</div>`;
-  if(addMode==='photo') return `<div class="upload-area"><input type="file" accept="image/*" onchange="handlePhoto(event)">${currentImgData?`<img src="${currentImgData}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px;">`:`<div class="upload-icon">📷</div><div class="upload-text">點擊上傳或拍照</div>`}</div><div id="photo-status"></div>`;
-  return `<p style="font-size:12px;color:var(--text2);margin-bottom:6px;">直接填寫下方資訊</p>`;
+
+function buildAddModeBody(){
+  if(addMode==='search')return `<div class="search-wrap"><input class="search-input" id="sq" placeholder="例：SK-II 神仙水、美容儀器..." onkeydown="if(event.key==='Enter')doSearch()"><button class="search-btn" id="sbtn" onclick="doSearch()">搜尋</button></div><div id="ss"></div><div id="sr">${searchResults.map(buildRcard).join('')}</div>`;
+  if(addMode==='photo')return `<div class="upload-area"><input type="file" accept="image/*" onchange="handlePhoto(event)">${currentImgData?`<img src="${currentImgData}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px;">`:`<div class="upload-icon">📷</div><div class="upload-text">點擊上傳或拍照</div>`}</div><div id="photo-status"></div>`;
+  return `<div class="sbox sinfo">直接填寫下方資訊</div>`;
 }
-function buildRcard(r,i) {
+function buildRcard(r,i){
   return `<div class="rcard ${selectedResult===i?'sel':''}" id="rc${i}" onclick="pickResult(${i})">
     <div class="rcard-name">${r.emoji||'🧴'} ${r.name}${selectedResult===i?' <span style="color:var(--purple);font-size:11px;font-weight:600;">✓ 已選</span>':''}</div>
     <div class="rcard-brand">${r.brand}</div>
@@ -459,46 +420,34 @@ function buildRcard(r,i) {
     <div class="rcard-tags">${(r.tags||[]).map(t=>`<span class="rtag">${t}</span>`).join('')}</div>
   </div>`;
 }
-function buildAddFormBody() {
-  const r=selectedResult!=null?searchResults[selectedResult]:{};
-  return `
-    <span class="fl">品牌</span><input class="fi" id="fb" placeholder="例：Laneige" value="${r.brand||''}" oninput="checkAddBtn()">
-    <span class="fl">產品名稱</span><input class="fi" id="fn" placeholder="例：水凝保濕乳霜" value="${r.name||''}" oninput="checkAddBtn()">
-    <div class="form-row">
-      <div><span class="fl">類別</span><input class="fi" id="fc" placeholder="乳霜、精華..." value="${r.category||''}"></div>
-      <div><span class="fl">主要成分（選填）</span><input class="fi" id="fing" placeholder="玻尿酸、維他命C..." value="${r.ingredients||''}"></div>
-    </div>
-    <div class="form-row">
-      <div><span class="fl">開封日期</span><input class="fi" type="date" id="fd" value="${today()}"></div>
-      <div><span class="fl">PAO（開封後月數）</span><input class="fi" type="number" id="fp" placeholder="12" min="1" max="36" value="${r.pao||''}"></div>
-    </div>`;
-}
-function checkAddBtn(){const b=(document.getElementById('fb')||{}).value||'',n=(document.getElementById('fn')||{}).value||'';const btn=document.getElementById('add-submit');if(btn)btn.disabled=!(b.trim()&&n.trim());}
 
-async function doSearch() {
+async function doSearch(){
   const q=(document.getElementById('sq')||{}).value||'';
-  if(!q.trim()||isSearching) return;
+  if(!q.trim()||isSearching)return;
   isSearching=true;
   const btn=document.getElementById('sbtn'),ss=document.getElementById('ss');
   if(btn)btn.disabled=true;
-  if(ss)ss.innerHTML=`<div class="sbox sloading">🔍 查詢「${q}」中 <span class="dot-anim">●</span></div>`;
-  try {
-    const raw=await callClaude(`你是保養品專家資料庫。搜尋：「${q}」。回傳最多3個符合的真實保養品，只回純JSON：[{"brand":"","name":"","category":"","pao":月數,"emoji":"","desc":"功效1句","tags":["標籤"],"advice":"使用建議1-2句","ingredients":"主要成分逗號分隔"}]`);
-    searchResults=parseJSON(raw); selectedResult=null;
+  if(ss)ss.innerHTML=`<div class="sbox sloading">🔍 查詢中 <span class="dot-anim">●</span></div>`;
+  try{
+    const raw=await callClaude(`你是保養品與美容儀器專家資料庫。搜尋：「${q}」。回傳最多3個符合的真實產品，只回純JSON：[{"brand":"","name":"","category":"化妝水或精華或乳液或乳霜或防曬或潔顏或面膜或美容儀器或其他","pao":月數或0,"emoji":"","desc":"功效1句","tags":["標籤"],"advice":"使用建議1-2句","ingredients":"主要成分或空字串"}]`);
+    searchResults=parseJSON(raw);selectedResult=null;
     if(ss)ss.innerHTML=`<div class="sbox ssuccess">✓ 找到 ${searchResults.length} 個結果，點選後自動填入</div>`;
     const sr=document.getElementById('sr');
     if(sr)sr.innerHTML=searchResults.map(buildRcard).join('');
-  } catch { if(ss)ss.innerHTML=`<div class="sbox swarn">查詢失敗，請換關鍵字或改用手動輸入</div>`; }
-  isSearching=false; if(btn)btn.disabled=false;
+  }catch{if(ss)ss.innerHTML=`<div class="sbox swarn">查詢失敗，請換關鍵字或改用手動輸入</div>`;}
+  isSearching=false;if(btn)btn.disabled=false;
 }
-function pickResult(i) {
-  selectedResult=i; const r=searchResults[i];
+
+function pickResult(i){
+  selectedResult=i;const r=searchResults[i];
   searchResults.forEach((_,j)=>{const el=document.getElementById('rc'+j);if(el){el.classList.toggle('sel',j===i);el.querySelector('.rcard-name').innerHTML=`${_.emoji||'🧴'} ${_.name}${j===i?' <span style="color:var(--purple);font-size:11px;font-weight:600;">✓ 已選</span>':''}`;}}); 
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
-  set('fb',r.brand||'');set('fn',r.name||'');set('fc',r.category||'');set('fp',r.pao||12);set('fing',r.ingredients||'');
-  checkAddBtn();
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined&&v!==null)el.value=v;};
+  set('fb',r.brand);set('fn',r.name);set('fc',r.category);set('fp',r.pao||'');set('fing',r.ingredients||'');
+  window._pendingAdvice=r.advice;window._pendingEmoji=r.emoji;
+  checkAddBtn();onCatChange();
 }
-function handlePhoto(e) {
+
+function handlePhoto(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=async ev=>{
@@ -508,33 +457,52 @@ function handlePhoto(e) {
     if(ua)ua.innerHTML=`<input type="file" accept="image/*" onchange="handlePhoto(event)"><img src="${currentImgData}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px;">`;
     const ps=document.getElementById('photo-status');
     if(ps)ps.innerHTML=`<div class="sbox sloading">AI 辨識中 <span class="dot-anim">●</span></div>`;
-    try {
-      const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品，只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":"主要成分"}'}]}]})});
+    try{
+      const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器，只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":""}'}]}]})});
       const data=await res.json();
       const info=JSON.parse((data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('').replace(/```json|```/g,'').trim());
       window._photoInfo=info;
-      const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
-      set('fb',info.brand||'');set('fn',info.name||'');set('fc',info.category||'');set('fp',info.pao||12);set('fing',info.ingredients||'');
+      const set=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v;};
+      set('fb',info.brand);set('fn',info.name);set('fc',info.category);set('fp',info.pao||'');set('fing',info.ingredients||'');
       if(ps)ps.innerHTML=`<div class="sbox ssuccess">✓ 辨識完成，請確認資料</div>`;
-      checkAddBtn();
-    } catch{if(ps)ps.innerHTML=`<div class="sbox swarn">辨識失敗，請手動填寫</div>`;}
+      checkAddBtn();onCatChange();
+    }catch{if(ps)ps.innerHTML=`<div class="sbox swarn">辨識失敗，請手動填寫</div>`;}
   };
   reader.readAsDataURL(file);
 }
-function confirmAdd() {
-  const g=id=>((document.getElementById(id)||{}).value||'').trim();
-  const brand=g('fb'),name=g('fn');
-  if(!brand||!name)return;
+
+function confirmAdd(){
+  const v=getFormValues();if(!v.brand||!v.name)return;
   const src=selectedResult!=null?searchResults[selectedResult]:(window._photoInfo||{});
-  state.products.push({id:state.nextId++,brand,name,category:g('fc')||'其他',ingredients:g('fing')||'',openedDate:g('fd')||today(),pao:parseInt(g('fp'))||12,emoji:src.emoji||'🧴',advice:src.advice||'',imgData:addMode==='photo'?currentImgData:null});
+  state.products.push({id:state.nextId++,...v,emoji:src.emoji||window._pendingEmoji||'🧴',advice:src.advice||window._pendingAdvice||'',imgData:addMode==='photo'?currentImgData:null});
+  saveState();window._photoInfo=null;window._pendingAdvice=null;window._pendingEmoji=null;currentImgData=null;searchResults=[];selectedResult=null;
+  closeModal();render();
+}
+
+// EDIT
+function openEdit(id){
+  editingId=id;
+  const p=state.products.find(x=>x.id===id);if(!p)return;
+  showModal(`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><span class="modal-title">編輯產品</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+    ${buildProductForm(p)}
+    <button class="submit-btn" onclick="saveEdit()" style="margin-top:8px;">儲存變更</button>
+    <button class="danger-btn" onclick="deleteProduct(${p.id})">刪除此產品</button>
+  </div></div>`);
+}
+function saveEdit(){
+  const v=getFormValues();if(!v.brand||!v.name)return;
+  const idx=state.products.findIndex(p=>p.id===editingId);if(idx<0)return;
+  state.products[idx]={...state.products[idx],...v};
   saveState();closeModal();render();
 }
 
-// ── DETAIL ─────────────────────────────────────────────────
-function openDetail(id) {
+// DETAIL
+function openDetail(id){
   const p=state.products.find(x=>x.id===id);if(!p)return;
-  const d=daysLeft(p.openedDate,p.pao),s=expStatus(d);
-  const exp=new Date(p.openedDate);exp.setMonth(exp.getMonth()+p.pao);
+  const d=daysLeft(p),s=expStatus(d),exp=computeExpiry(p);
+  const isDevice=p.category==='美容儀器';
   showModal(`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-hd"><span class="modal-title">產品詳情</span><button class="modal-close" onclick="closeModal()">✕</button></div>
@@ -542,21 +510,210 @@ function openDetail(id) {
     <div class="det-brand">${p.brand}</div>
     <div class="det-name">${p.name}</div>
     <div class="det-row"><span class="det-k">類別</span><span class="det-v">${p.category}</span></div>
-    <div class="det-row"><span class="det-k">開封日期</span><span class="det-v">${fmt(p.openedDate)}</span></div>
-    <div class="det-row"><span class="det-k">建議用完日期</span><span class="det-v">${exp.toISOString().split('T')[0].replace(/-/g,'/')}</span></div>
-    <div class="det-row"><span class="det-k">效期狀態</span><span class="det-v"><span class="tag ${tagCls(s)}">${d<0?'已過期':'還有 '+d+' 天'}</span></span></div>
+    ${p.mfgDate?`<div class="det-row"><span class="det-k">製造日期</span><span class="det-v">${fmt(p.mfgDate)}</span></div>`:''}
+    ${p.openedDate&&!isDevice?`<div class="det-row"><span class="det-k">開封日期</span><span class="det-v">${fmt(p.openedDate)}</span></div>`:''}
+    ${p.pao&&!isDevice?`<div class="det-row"><span class="det-k">開封後可用</span><span class="det-v">${p.pao} 個月</span></div>`:''}
+    ${exp&&!isDevice?`<div class="det-row"><span class="det-k">建議用完日期</span><span class="det-v">${exp.toISOString().split('T')[0].replace(/-/g,'/')}</span></div>`:''}
+    ${!isDevice?`<div class="det-row"><span class="det-k">效期狀態</span><span class="det-v"><span class="tag ${tagCls(s)}">${tagTxt(d)}</span></span></div>`:''}
     ${p.ingredients?`<div class="det-row"><span class="det-k">主要成分</span><span class="det-v" style="font-size:11px;text-align:right;max-width:60%;">${p.ingredients}</span></div>`:''}
     ${p.advice?`<div class="infobox infobox-purple"><div class="infobox-title">✨ AI 使用建議</div><div class="infobox-body">${p.advice}</div></div>`:''}
-    <button class="del-btn" onclick="deleteProduct(${p.id})">刪除此產品</button>
+    ${isDevice?`<button class="ghost-btn" style="margin-top:10px;" onclick="closeModal();currentAdviceTab='device';gotoTab('advice')">查看儀器搭配建議 →</button>`:''}
+    <button class="edit-btn" onclick="closeModal();openEdit(${p.id})">✏️ 編輯產品資料</button>
+    <button class="danger-btn" onclick="deleteProduct(${p.id})">刪除此產品</button>
   </div></div>`);
 }
 function deleteProduct(id){if(!confirm('確定要刪除？'))return;state.products=state.products.filter(p=>p.id!==id);saveState();closeModal();render();}
 
-// ── PWA ────────────────────────────────────────────────────
-if('serviceWorker' in navigator) {
-  window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(()=>{}));
+// ADVICE
+function renderAdvice(){
+  const tabs=[['morning','☀ 早上'],['evening','🌙 晚上'],['condition','⚡ 狀況'],['device','💡 儀器'],['compat','🔬 成分']];
+  return `
+    <div class="advice-seg">${tabs.map(([id,lbl])=>`<button class="aseg-btn ${currentAdviceTab===id?'active':''}" onclick="setAdviceTab('${id}')">${lbl}</button>`).join('')}</div>
+    <div id="advice-content">${renderAdviceContent()}</div>`;
+}
+function setAdviceTab(t){
+  currentAdviceTab=t;
+  const tabs=['morning','evening','condition','device','compat'];
+  document.querySelectorAll('.aseg-btn').forEach((b,i)=>b.classList.toggle('active',tabs[i]===t));
+  document.getElementById('advice-content').innerHTML=renderAdviceContent();
+}
+function renderAdviceContent(){
+  if(currentAdviceTab==='morning')return renderRoutine('morning');
+  if(currentAdviceTab==='evening')return renderRoutine('evening');
+  if(currentAdviceTab==='condition')return renderCondition();
+  if(currentAdviceTab==='device')return renderDevice();
+  return renderCompat();
 }
 
+function renderRoutine(tod){
+  const lbl=tod==='morning'?'早':'晚';
+  const key='_routine_'+tod;
+  if(window[key]&&window[key].skin===state.skin.type)return renderRoutineResult(window[key].steps,tod);
+  return `<div class="card"><div class="card-title">💡 ${lbl}間保養流程</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">根據你的 <b style="color:var(--purple)">${state.skin.type}</b> 和目前保養品，AI 規劃最佳${lbl}間步驟。</div><button class="submit-btn" onclick="genRoutine('${tod}')">✨ 生成${lbl}間保養流程</button></div><div id="routine-result-${tod}"></div>`;
+}
+function renderRoutineResult(steps,tod){
+  const lbl=tod==='morning'?'☀ 早':'🌙 晚';
+  return `<div class="card"><div class="card-title">${lbl}間保養流程</div>${steps.map((s,i)=>`<div class="routine-step"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-title">${s.step}</div><div class="step-desc">${s.how}</div>${s.product?`<div class="step-product">推薦：${s.product}</div>`:''}</div></div>`).join('')}<button class="ghost-btn" onclick="clearRoutine('${tod}')">重新生成</button></div>`;
+}
+async function genRoutine(tod){
+  const el=document.getElementById('routine-result-'+tod);
+  if(el)el.innerHTML=`<div class="sbox sloading">AI 規劃中 <span class="dot-anim">●</span></div>`;
+  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}，成分：${p.ingredients||'未知'}）`).join('；');
+  try{
+    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。保養品：${prods}。規劃${tod==='morning'?'早':'晚'}間保養步驟，最多6步。只回純JSON：[{"step":"步驟名","how":"操作說明1-2句","product":"推薦產品名或空字串"}]`);
+    const steps=parseJSON(raw);
+    window['_routine_'+tod]={steps,skin:state.skin.type};
+    document.getElementById('advice-content').innerHTML=renderRoutineResult(steps,tod);
+  }catch{if(el)el.innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`;}
+}
+function clearRoutine(tod){window['_routine_'+tod]=null;document.getElementById('advice-content').innerHTML=renderAdviceContent();}
+
+function renderCondition(){
+  if(currentConditionResult)return `<div class="card"><div class="card-title">⚡ ${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
+  const conds=[['breakout','😣 突然冒痘'],['dry','😖 乾燥緊繃'],['sensitive','😮 泛紅敏感'],['oily','😅 油光滿面'],['dull','😑 暗沉疲倦'],['pores','😤 毛孔粗大']];
+  return `<div class="card"><div class="card-title">⚡ 今天肌膚狀況</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">選擇今天的狀況，AI 給出調整建議</div><div class="condition-grid">${conds.map(([id,lbl])=>`<button class="cond-btn" onclick="handleCondition('${id}','${lbl}')">${lbl}</button>`).join('')}</div></div><div id="condition-result"></div>`;
+}
+async function handleCondition(id,label){
+  document.getElementById('condition-result').innerHTML=`<div class="sbox sloading">AI 分析中 <span class="dot-anim">●</span></div>`;
+  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}，成分：${p.ingredients||'未知'}）`).join('；');
+  try{
+    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}，保養品：${prods}。今天狀況：${label}。給4-5點應對建議。只回純JSON：[{"icon":"emoji","title":"建議標題","desc":"具體說明1-2句"}]`);
+    currentConditionResult={label,tips:parseJSON(raw)};
+    document.getElementById('advice-content').innerHTML=renderAdviceContent();
+  }catch{document.getElementById('condition-result').innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`;}
+}
+function clearCondition(){currentConditionResult=null;document.getElementById('advice-content').innerHTML=renderAdviceContent();}
+
+function renderDevice(){
+  const devices=state.products.filter(p=>p.category==='美容儀器');
+  if(!devices.length)return `<div class="card"><div class="card-title">💡 美容儀器搭配建議</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">你還沒有加入美容儀器，請先到「產品庫」新增。</div><button class="submit-btn" onclick="gotoTab('products')">前往新增儀器</button></div>`;
+  if(window._device_advice)return renderDeviceResult(window._device_advice);
+  return `<div class="card"><div class="card-title">💡 美容儀器搭配建議</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">你的儀器：<b style="color:var(--purple)">${devices.map(d=>d.name).join('、')}</b><br>AI 建議最佳搭配方式與保養品配合。</div><button class="submit-btn" onclick="genDeviceAdvice()">✨ 生成儀器搭配建議</button></div><div id="device-result"></div>`;
+}
+async function genDeviceAdvice(){
+  document.getElementById('device-result').innerHTML=`<div class="sbox sloading">AI 分析中 <span class="dot-anim">●</span></div>`;
+  const devices=state.products.filter(p=>p.category==='美容儀器').map(p=>`${p.brand} ${p.name}`).join('、');
+  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}）`).join('、');
+  try{
+    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。美容儀器：${devices}。保養品：${prods}。請給儀器搭配使用建議，包括使用前後搭配哪些保養品、使用頻率、注意事項。只回純JSON：[{"icon":"emoji","title":"建議標題","desc":"具體說明2-3句"}]，最多5點。`);
+    window._device_advice=parseJSON(raw);
+    document.getElementById('advice-content').innerHTML=renderDeviceResult(window._device_advice);
+  }catch{document.getElementById('device-result').innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`;}
+}
+function renderDeviceResult(items){
+  return `<div class="card"><div class="card-title">💡 儀器搭配建議</div>${items.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._device_advice=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
+}
+
+function renderCompat(){
+  if(window._compat)return renderCompatResult(window._compat);
+  return `<div class="card"><div class="card-title">🔬 成分相容性分析</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 分析你的保養品成分，找出衝突與最佳搭配。</div><button class="submit-btn" onclick="runCompat()">🔍 開始分析</button></div><div id="compat-result"></div>`;
+}
+async function runCompat(){
+  document.getElementById('compat-result').innerHTML=`<div class="sbox sloading">AI 分析成分中 <span class="dot-anim">●</span></div>`;
+  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（成分：${p.ingredients||'一般成分'}）`).join('；');
+  try{
+    const raw=await callClaude(`分析以下保養品成分相容性：${prods}。找出衝突搭配和建議組合。只回純JSON：[{"icon":"emoji","title":"標題","desc":"說明","type":"warning或tip"}]`);
+    window._compat=parseJSON(raw);
+    document.getElementById('advice-content').innerHTML=renderCompatResult(window._compat);
+  }catch{document.getElementById('compat-result').innerHTML=`<div class="sbox swarn">分析失敗，請再試一次</div>`;}
+}
+function renderCompatResult(items){
+  const warns=items.filter(i=>i.type==='warning'),tips=items.filter(i=>i.type!=='warning');
+  return `<div class="card"><div class="card-title">🔬 成分分析結果</div>${warns.length?`<div class="infobox infobox-coral" style="margin-bottom:10px;"><div class="infobox-title">⚠ 注意事項</div>${warns.map(w=>`<div class="compat-item"><span class="compat-icon">${w.icon}</span><div><div class="compat-title">${w.title}</div><div class="compat-desc">${w.desc}</div></div></div>`).join('')}</div>`:''}${tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._compat=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新分析</button></div>`;
+}
+
+// SKIN + REMINDERS
+function renderSkin(){
+  const types=['油性肌','乾性肌','混合肌','敏感肌','中性肌'];
+  const concerns=['暗沉','毛孔','細紋','痘痘','黑眼圈','乾燥','泛紅','斑點'];
+  const r=state.reminders;
+  return `
+    <div class="card"><div class="card-title">👤 我的膚質</div><div class="opt-grid">${types.map(t=>`<button class="opt-btn ${state.skin.type===t?'sel':''}" onclick="setSkinType('${t}')">${t}</button>`).join('')}</div></div>
+    <div class="card"><div class="card-title">😟 膚況困擾（可複選）</div><div class="opt-grid3">${concerns.map(c=>`<button class="opt-btn ${state.skin.concerns.includes(c)?'sel':''}" onclick="toggleConcern('${c}')">${c}</button>`).join('')}</div></div>
+    <button class="save-btn" onclick="saveSkin()">✓ 儲存並更新建議</button>
+    <div id="skin-advice" style="margin-top:12px;"></div>
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">🔔 每日提醒設定</div>
+      <div class="reminder-row">
+        <div><div class="reminder-label">早間保養提醒</div><div class="reminder-sub">提醒早間保養 routine</div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="time" class="time-input" id="morning-time" value="${r.morningTime}" onchange="saveReminderTime()">
+          <button class="toggle ${r.morningEnabled?'on':''}" onclick="toggleReminder('morning')"></button>
+        </div>
+      </div>
+      <div class="reminder-row">
+        <div><div class="reminder-label">晚間保養提醒</div><div class="reminder-sub">提醒晚間保養 routine</div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="time" class="time-input" id="evening-time" value="${r.eveningTime}" onchange="saveReminderTime()">
+          <button class="toggle ${r.eveningEnabled?'on':''}" onclick="toggleReminder('evening')"></button>
+        </div>
+      </div>
+      <div class="reminder-row">
+        <div><div class="reminder-label">效期到期提醒</div><div class="reminder-sub">產品 7 天內到期時通知</div></div>
+        <button class="toggle ${r.expiryEnabled?'on':''}" onclick="toggleReminder('expiry')"></button>
+      </div>
+      <div id="notif-status" style="margin-top:4px;"></div>
+    </div>`;
+}
+function setSkinType(t){state.skin.type=t;saveState();render();}
+function toggleConcern(c){const i=state.skin.concerns.indexOf(c);if(i>=0)state.skin.concerns.splice(i,1);else state.skin.concerns.push(c);saveState();render();}
+async function saveSkin(){
+  saveState();window._routine_morning=null;window._routine_evening=null;window._compat=null;window._device_advice=null;
+  const el=document.getElementById('skin-advice');
+  el.innerHTML=`<div class="sbox sloading">AI 生成個人化建議 <span class="dot-anim">●</span></div>`;
+  const prods=state.products.map(p=>`${p.brand} ${p.name}（${p.category}）`).join('、');
+  try{
+    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。保養品：${prods}。給3點核心建議，只回純JSON：[{"emoji":"","title":"","body":"1-2句"}]`);
+    const advices=parseJSON(raw);
+    el.innerHTML=advices.map(a=>`<div class="advice-card"><div class="ac-hd"><span class="ac-emoji">${a.emoji}</span><span class="ac-title">${a.title}</span></div><div class="ac-body">${a.body}</div></div>`).join('');
+  }catch{el.innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`;}
+}
+
+function saveReminderTime(){
+  const mt=document.getElementById('morning-time'),et=document.getElementById('evening-time');
+  if(mt)state.reminders.morningTime=mt.value;
+  if(et)state.reminders.eveningTime=et.value;
+  saveState();
+}
+async function toggleReminder(type){
+  const key=type+'Enabled';
+  state.reminders[key]=!state.reminders[key];
+  if(state.reminders[key]){
+    await requestNotifPermission();
+  }
+  saveState();render();
+}
+async function requestNotifPermission(){
+  if(!('Notification' in window)){
+    alert('請先將 SkincareVault 加入主畫面，再開啟通知功能');
+    return false;
+  }
+  if(Notification.permission==='granted')return true;
+  const perm=await Notification.requestPermission();
+  if(perm==='granted'){
+    setTimeout(()=>new Notification('SkincareVault ✨',{body:'通知設定成功！你將收到保養提醒',icon:'/icon-192.png'}),500);
+    return true;
+  }
+  return false;
+}
+function checkExpiryNotifications(){
+  if(!state.reminders.expiryEnabled)return;
+  if(typeof Notification==='undefined'||Notification.permission!=='granted')return;
+  state.products.forEach(p=>{
+    const d=daysLeft(p);
+    if(d===null||d<0||d>7)return;
+    const key='notif_exp_'+p.id+'_'+d;
+    if(!localStorage.getItem(key)){
+      new Notification(`⏰ ${p.name} 即將到期`,{body:`還有 ${d} 天！記得盡快使用完畢`,icon:'/icon-192.png'});
+      localStorage.setItem(key,'1');
+    }
+  });
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(()=>{}));
+}
+setTimeout(checkExpiryNotifications,3000);
 render();
 </script>
 </body>
