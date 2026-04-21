@@ -200,9 +200,17 @@ const STORAGE_KEY='skincarevault_v2';
 function loadState(){
   try{
     const r=localStorage.getItem(STORAGE_KEY);
-    if(r)return JSON.parse(r);
-    const old=localStorage.getItem('skincarevault_v1');
-    if(old){const d=JSON.parse(old);localStorage.setItem(STORAGE_KEY,old);return d;}
+    if(r){const d=JSON.parse(r);if(d&&d.products)return d;}
+    const keys=['skincarevault_v1','skincarevault_v2','skincarevault'];
+    for(const k of keys){
+      if(k===STORAGE_KEY)continue;
+      try{const d=JSON.parse(localStorage.getItem(k)||'');if(d&&d.products&&d.products.length>0){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));return d;}}catch(e){}
+    }
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k===STORAGE_KEY)continue;
+      try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.products&&Array.isArray(d.products)&&d.products.length>0){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));return d;}}catch(e){}
+    }
   }catch(e){}
   return null;
 }
