@@ -197,7 +197,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 const API_ENDPOINT='/api/claude';
 const STORAGE_KEY='skincarevault_v2';
-function loadState(){try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}return null;}
+function loadState(){
+  try{
+    const r=localStorage.getItem(STORAGE_KEY);
+    if(r)return JSON.parse(r);
+    const old=localStorage.getItem('skincarevault_v1');
+    if(old){const d=JSON.parse(old);localStorage.setItem(STORAGE_KEY,old);return d;}
+  }catch(e){}
+  return null;
+}
 function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
 
 const DEFAULT={
