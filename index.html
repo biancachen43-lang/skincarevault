@@ -332,8 +332,25 @@ function renderPcard(p){
 }
 
 // PRODUCT FORM
+function normCategory(cat){
+  if(!cat)return'其他';
+  const cats=['化妝水','精華','乳液','乳霜','防曬','潔顏','面膜','美容儀器','其他'];
+  const exact=cats.find(c=>c===cat);
+  if(exact)return exact;
+  const partial=cats.find(c=>cat.includes(c)||c.includes(cat));
+  if(partial)return partial;
+  if(cat.includes('toner')||cat.includes('lotion')&&cat.length<8)return'化妝水';
+  if(cat.includes('serum')||cat.includes('essence'))return'精華';
+  if(cat.includes('cream')||cat.includes('moisturizer'))return'乳霜';
+  if(cat.includes('sunscreen')||cat.includes('spf'))return'防曬';
+  if(cat.includes('cleanser')||cat.includes('wash'))return'潔顏';
+  if(cat.includes('mask'))return'面膜';
+  if(cat.includes('device')||cat.includes('tool')||cat.includes('儀'))return'美容儀器';
+  return'其他';
+}
 function buildProductForm(p){
   p=p||{};
+  if(p.category)p={...p,category:normCategory(p.category)};
   const cats=['化妝水','精華','乳液','乳霜','防曬','潔顏','面膜','美容儀器','其他'];
   const isDevice=(p.category||'')==='美容儀器';
   return `
