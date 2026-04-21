@@ -443,7 +443,9 @@ function pickResult(i){
   searchResults.forEach((_,j)=>{const el=document.getElementById('rc'+j);if(el){el.classList.toggle('sel',j===i);el.querySelector('.rcard-name').innerHTML=`${_.emoji||'🧴'} ${_.name}${j===i?' <span style="color:var(--purple);font-size:11px;font-weight:600;">✓ 已選</span>':''}`;}}); 
   const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined&&v!==null)el.value=v;};
   set('fb',r.brand);set('fn',r.name);set('fp',r.pao||'');set('fing',r.ingredients||'');
-  const fcEl=document.getElementById('fc');if(fcEl&&r.category){fcEl.value=r.category;}
+  // 重新渲染表單以確保 select 正確顯示
+  const formBody=document.getElementById('add-form-body');
+  if(formBody){formBody.innerHTML=buildProductForm(r);}
   window._pendingAdvice=r.advice;window._pendingEmoji=r.emoji;
   checkAddBtn();onCatChange();
 }
@@ -463,9 +465,8 @@ function handlePhoto(e){
       const data=await res.json();
       const info=JSON.parse((data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('').replace(/```json|```/g,'').trim());
       window._photoInfo=info;
-      const set=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v;};
-      set('fb',info.brand);set('fn',info.name);set('fp',info.pao||'');set('fing',info.ingredients||'');
-      const fcEl2=document.getElementById('fc');if(fcEl2&&info.category){fcEl2.value=info.category;}
+      const formBody2=document.getElementById('add-form-body');
+      if(formBody2){formBody2.innerHTML=buildProductForm(info);}
       if(ps)ps.innerHTML=`<div class="sbox ssuccess">✓ 辨識完成，請確認資料</div>`;
       checkAddBtn();onCatChange();
     }catch{if(ps)ps.innerHTML=`<div class="sbox swarn">辨識失敗，請手動填寫</div>`;}
