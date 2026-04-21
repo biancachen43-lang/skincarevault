@@ -554,47 +554,165 @@ function deleteProduct(id){if(!confirm('確定要刪除？'))return;state.produc
 
 // ADVICE
 function renderAdvice(){
-  const tabs=[['morning','☀ 早上'],['evening','🌙 晚上'],['condition','⚡ 狀況'],['device','💡 儀器'],['compat','🔬 成分']];
+  const tabs=[['morning','☀ 早上'],['evening','🌙 晚上'],['week','📅 週計畫'],['condition','⚡ 狀況'],['device','💡 儀器'],['compat','🔬 成分']];
   return `
     <div class="advice-seg">${tabs.map(([id,lbl])=>`<button class="aseg-btn ${currentAdviceTab===id?'active':''}" onclick="setAdviceTab('${id}')">${lbl}</button>`).join('')}</div>
     <div id="advice-content">${renderAdviceContent()}</div>`;
 }
 function setAdviceTab(t){
   currentAdviceTab=t;
-  const tabs=['morning','evening','condition','device','compat'];
+  const tabs=['morning','evening','week','condition','device','compat'];
   document.querySelectorAll('.aseg-btn').forEach((b,i)=>b.classList.toggle('active',tabs[i]===t));
   document.getElementById('advice-content').innerHTML=renderAdviceContent();
 }
 function renderAdviceContent(){
   if(currentAdviceTab==='morning')return renderRoutine('morning');
   if(currentAdviceTab==='evening')return renderRoutine('evening');
+  if(currentAdviceTab==='week')return renderWeekPlan();
   if(currentAdviceTab==='condition')return renderCondition();
   if(currentAdviceTab==='device')return renderDevice();
   return renderCompat();
 }
 
+// 找到產品物件（支援模糊比對名稱）
+function findProduct(name){
+  if(!name)return null;
+  const prods=state.products.filter(p=>p.category!=='美容儀器');
+  return prods.find(p=>name.includes(p.name)||p.name.includes(name)||name.includes(p.brand))||null;
+}
+
+// 產品縮圖 HTML
+function prodThumb(name){
+  const p=findProduct(name);
+  if(!p)return`<div style="width:36px;height:36px;border-radius:8px;background:var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${'🧴'}</div>`;
+  return`<div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">${p.imgData?`<img src="${p.imgData}" style="width:100%;height:100%;object-fit:cover;">`:(p.emoji||'🧴')}</div>`;
+}
+
 function renderRoutine(tod){
   const lbl=tod==='morning'?'早':'晚';
   const key='_routine_'+tod;
-  if(window[key]&&window[key].skin===state.skin.type)return renderRoutineResult(window[key].steps,tod);
-  return `<div class="card"><div class="card-title">💡 ${lbl}間保養流程</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">根據你的 <b style="color:var(--purple)">${state.skin.type}</b> 和目前保養品，AI 規劃最佳${lbl}間步驟。</div><button class="submit-btn" onclick="genRoutine('${tod}')">✨ 生成${lbl}間保養流程</button></div><div id="routine-result-${tod}"></div>`;
+  if(window[key]&&window[key].skin===state.skin.type)return renderRoutineResult(window[key],tod);
+  const prodCount=state.products.filter(p=>p.category!=='美容儀器').length;
+  return `<div class="card"><div class="card-title">💡 ${lbl}間保養流程</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">根據你的 <b style="color:var(--purple)">${state.skin.type}</b> 和 <b style="color:var(--purple)">${prodCount} 個保養品</b>，AI 將規劃每日必用步驟及輪替計畫，讓所有產品都用得到。</div><button class="submit-btn" onclick="genRoutine('${tod}')">✨ 生成${lbl}間保養流程</button></div><div id="routine-result-${tod}"></div>`;
 }
-function renderRoutineResult(steps,tod){
+
+function renderRoutineResult(data,tod){
   const lbl=tod==='morning'?'☀ 早':'🌙 晚';
-  return `<div class="card"><div class="card-title">${lbl}間保養流程</div>${steps.map((s,i)=>`<div class="routine-step"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-title">${s.step}</div><div class="step-desc">${s.how}</div>${s.product?`<div class="step-product">推薦：${s.product}</div>`:''}</div></div>`).join('')}<button class="ghost-btn" onclick="clearRoutine('${tod}')">重新生成</button></div>`;
+  const dailyHtml=data.daily.map((s,i)=>{
+    const names=(s.product||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
+    const thumbsHtml=names.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${names.map(n=>`
+      <div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border-radius:20px;padding:4px 10px 4px 4px;">
+        ${prodThumb(n)}
+        <span style="font-size:11px;color:var(--text);font-weight:500;">${n}</span>
+      </div>`).join('')}</div>`:'';
+    return`<div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start;">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--purple);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:2px;">${i+1}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;">${s.step}</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">${s.how}</div>
+        ${thumbsHtml}
+      </div>
+    </div>`;
+  }).join('');
+  const rotateHtml=data.rotate&&data.rotate.length?`
+    <div style="margin-top:14px;border-top:0.5px solid var(--border);padding-top:14px;">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">🔄 輪替使用計畫</div>
+      ${data.rotate.map(r=>{
+        const names=(r.products||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
+        return`<div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:600;color:var(--purple);margin-bottom:6px;">${r.days}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">${names.map(n=>`
+            <div style="display:flex;align-items:center;gap:6px;background:white;border-radius:20px;padding:4px 10px 4px 4px;">
+              ${prodThumb(n)}
+              <span style="font-size:11px;color:var(--text);font-weight:500;">${n}</span>
+            </div>`).join('')}</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.5;">${r.reason}</div>
+        </div>`;
+      }).join('')}
+    </div>`:
+    `<div style="margin-top:10px;font-size:12px;color:var(--text2);">✓ 所有保養品都已安排在每日步驟中</div>`;
+  return`<div class="card"><div class="card-title">${lbl}間保養流程</div>${dailyHtml}${rotateHtml}<button class="ghost-btn" onclick="clearRoutine('${tod}')">重新生成</button></div>`;
 }
+
 async function genRoutine(tod){
   const el=document.getElementById('routine-result-'+tod);
-  if(el)el.innerHTML=`<div class="sbox sloading">AI 規劃中 <span class="dot-anim">●</span></div>`;
-  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}，成分：${p.ingredients||'未知'}）`).join('；');
+  if(el)el.innerHTML=`<div class="sbox sloading">AI 規劃所有產品的使用計畫 <span class="dot-anim">●</span></div>`;
+  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
+  const lbl=tod==='morning'?'早':'晚';
   try{
-    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。保養品：${prods}。規劃${tod==='morning'?'早':'晚'}間保養步驟，最多6步。只回純JSON：[{"step":"步驟名","how":"操作說明1-2句","product":"推薦產品名或空字串"}]`);
-    const steps=parseJSON(raw);
-    window['_routine_'+tod]={steps,skin:state.skin.type};
-    document.getElementById('advice-content').innerHTML=renderRoutineResult(steps,tod);
-  }catch{if(el)el.innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`;}
+    const raw=await callClaude(`你是專業保養師。使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
+她的所有保養品：${prods}。
+請規劃完整的${lbl}間保養計畫，必須把所有保養品都安排進去，不能遺漏任何一個。
+有些產品適合每天用，有些適合輪替（例如週一三五用A，週二四六用B）。
+只回純JSON格式：
+{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"產品名稱，多個用逗號分隔"}],"rotate":[{"days":"哪幾天，例如：週一、三、五","products":"產品名稱，多個用逗號分隔","reason":"輪替原因1句"}]}
+rotate放需要輪替的產品，若所有產品都適合每天用則rotate為空陣列。`);
+    const data=parseJSON(raw);
+    window['_routine_'+tod]={...data,skin:state.skin.type};
+    document.getElementById('advice-content').innerHTML=renderRoutineResult(window['_routine_'+tod],tod);
+  }catch(e){if(el)el.innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`;}
 }
 function clearRoutine(tod){window['_routine_'+tod]=null;document.getElementById('advice-content').innerHTML=renderAdviceContent();}
+
+// 週計畫
+function renderWeekPlan(){
+  if(window._weekplan&&window._weekplan.skin===state.skin.type)return renderWeekPlanResult(window._weekplan);
+  const prodCount=state.products.filter(p=>p.category!=='美容儀器').length;
+  return`<div class="card"><div class="card-title">📅 一週保養排程</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 將把你的 <b style="color:var(--purple)">${prodCount} 個保養品</b> 安排成完整的一週早晚排程，讓每個產品都能在最適合的時間發揮效果。</div><button class="submit-btn" onclick="genWeekPlan()">✨ 生成一週排程</button></div><div id="week-result"></div>`;
+}
+
+async function genWeekPlan(){
+  document.getElementById('week-result').innerHTML=`<div class="sbox sloading">AI 規劃一週排程中 <span class="dot-anim">●</span></div>`;
+  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}）`).join('；');
+  try{
+    const raw=await callClaude(`你是專業保養師。使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
+保養品：${prods}。
+請規劃完整一週（週一到週日）的早晚保養排程，必須把所有保養品都安排進去。
+每天早晚各列出要用的產品清單（按使用順序）。
+只回純JSON：
+{"week":[{"day":"週一","morning":["產品名1","產品名2"],"evening":["產品名1","產品名2"]},{"day":"週二",...},...]}
+共7天，每天都要有morning和evening，產品名稱要和我給的完全一致。`);
+    const data=parseJSON(raw);
+    window._weekplan={...data,skin:state.skin.type};
+    document.getElementById('advice-content').innerHTML=renderWeekPlanResult(window._weekplan);
+  }catch(e){document.getElementById('week-result').innerHTML=`<div class="sbox swarn">生成失敗，請再試一次</div>`;}
+}
+
+function renderWeekPlanResult(data){
+  const days=data.week||[];
+  const todayIdx=new Date().getDay();
+  const dayMap={'週一':1,'週二':2,'週三':3,'週四':4,'週五':5,'週六':6,'週日':0};
+  const html=days.map(d=>{
+    const isToday=dayMap[d.day]===todayIdx;
+    const morningProds=(d.morning||[]).map(n=>`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+        ${prodThumb(n)}
+        <span style="font-size:11px;color:var(--text);">${n}</span>
+      </div>`).join('');
+    const eveningProds=(d.evening||[]).map(n=>`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+        ${prodThumb(n)}
+        <span style="font-size:11px;color:var(--text);">${n}</span>
+      </div>`).join('');
+    return`<div style="background:${isToday?'var(--purple-light)':'var(--bg2)'};border:${isToday?'1.5px solid var(--purple-mid)':'0.5px solid var(--border)'};border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <span style="font-size:13px;font-weight:600;color:${isToday?'var(--purple)':'var(--text)'};">${d.day}</span>
+        ${isToday?`<span style="font-size:10px;background:var(--purple);color:white;padding:2px 7px;border-radius:10px;font-weight:500;">今天</span>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--amber);margin-bottom:6px;">☀ 早間</div>
+          ${morningProds||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:#534AB7;margin-bottom:6px;">🌙 晚間</div>
+          ${eveningProds||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  return`<div class="card"><div class="card-title">📅 一週保養排程</div>${html}<button class="ghost-btn" onclick="window._weekplan=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
+}
 
 function renderCondition(){
   if(currentConditionResult)return `<div class="card"><div class="card-title">⚡ ${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
