@@ -807,10 +807,61 @@ function renderSkin(){
         <button class="toggle ${r.expiryEnabled?'on':''}" onclick="toggleReminder('expiry')"></button>
       </div>
       <div id="notif-status" style="margin-top:4px;"></div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">💾 資料備份</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">定期匯出備份，避免資料遺失。匯入時會覆蓋現有資料。</div>
+      <div style="display:flex;gap:8px;">
+        <button class="submit-btn" style="flex:1;" onclick="exportBackup()">⬇ 匯出備份</button>
+        <button class="ghost-btn" style="flex:1;margin-top:0;" onclick="document.getElementById('import-input').click()">⬆ 匯入備份</button>
+      </div>
+      <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importBackup(event)">
+      <div id="backup-status" style="margin-top:8px;"></div>
     </div>`;
 }
 function setSkinType(t){state.skin.type=t;saveState();render();}
 function toggleConcern(c){const i=state.skin.concerns.indexOf(c);if(i>=0)state.skin.concerns.splice(i,1);else state.skin.concerns.push(c);saveState();render();}
+
+function exportBackup(){
+  try{
+    const data=JSON.stringify(state,null,2);
+    const blob=new Blob([data],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const date=new Date().toISOString().split('T')[0];
+    a.href=url;a.download=`skincarevault_backup_${date}.json`;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const el=document.getElementById('backup-status');
+    if(el)el.innerHTML=`<div class="sbox ssuccess">✓ 備份已下載！請存到安全的地方</div>`;
+  }catch(e){
+    const el=document.getElementById('backup-status');
+    if(el)el.innerHTML=`<div class="sbox swarn">匯出失敗，請再試一次</div>`;
+  }
+}
+
+function importBackup(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!data.products||!Array.isArray(data.products))throw new Error('格式錯誤');
+      if(!confirm(`確定要匯入備份嗎？\n這將覆蓋現有的 ${state.products.length} 個產品資料，匯入後將有 ${data.products.length} 個產品。`))return;
+      state={...DEFAULT,...data};
+      if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
+      state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
+      saveState();render();
+      const el=document.getElementById('backup-status');
+      if(el)el.innerHTML=`<div class="sbox ssuccess">✓ 成功匯入 ${data.products.length} 個產品！</div>`;
+    }catch(err){
+      const el=document.getElementById('backup-status');
+      if(el)el.innerHTML=`<div class="sbox swarn">匯入失敗，請確認檔案格式正確</div>`;
+    }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
 async function saveSkin(){
   saveState();window._routine_morning=null;window._routine_evening=null;window._compat=null;window._device_advice=null;
   const el=document.getElementById('skin-advice');
