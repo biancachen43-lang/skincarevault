@@ -11,11 +11,15 @@ async function kvGet(key) {
 }
 
 async function kvSet(key, value) {
-  const encoded = encodeURIComponent(JSON.stringify(value));
-  await fetch(`${KV_URL}/set/${key}/${encoded}`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${KV_TOKEN}` }
+  const res = await fetch(`${KV_URL}/set/${key}`, {
+    method: 'POST',
+    headers: { 
+      Authorization: `Bearer ${KV_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(JSON.stringify(value))
   });
+  if (!res.ok) throw new Error('KV set failed');
 }
 
 module.exports = async function handler(req, res) {
@@ -30,6 +34,7 @@ module.exports = async function handler(req, res) {
       const data = await kvGet(USER_KEY);
       return res.status(200).json({ data });
     } catch (e) {
+      console.error('Load error:', e.message);
       return res.status(200).json({ data: null });
     }
   }
@@ -39,7 +44,8 @@ module.exports = async function handler(req, res) {
       await kvSet(USER_KEY, req.body.data);
       return res.status(200).json({ ok: true });
     } catch (e) {
-      return res.status(500).json({ error: 'Save failed' });
+      console.error('Save error:', e.message);
+      return res.status(500).json({ error: e.message });
     }
   }
 
