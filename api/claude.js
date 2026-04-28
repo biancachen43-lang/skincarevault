@@ -11,12 +11,23 @@ async function kvGet(key) {
 }
 
 async function kvSet(key, value) {
-  const res = await fetch(`${KV_URL}/set/${key}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(JSON.stringify(value))
+  // 移除照片，壓縮資料大小
+  const clean = {
+    ...value,
+    products: (value.products || []).map(p => {
+      const { imgData, ...rest } = p;
+      return rest;
+    })
+  };
+  const json = JSON.stringify(clean);
+  const encoded = encodeURIComponent(json);
+  const res = await fetch(`${KV_URL}/set/${key}/${encoded}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${KV_TOKEN}` }
   });
-  if (!res.ok) throw new Error('KV set failed: ' + res.status);
+  const result = await res.json();
+  console.log('KV set result:', JSON.stringify(result));
+  if (result.error) throw new Error(result.error);
 }
 
 module.exports = async function handler(req, res) {
@@ -25,27 +36,27 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
   if (req.body && req.body.action === 'load') {
     try {
       const data = await kvGet(USER_KEY);
       return res.status(200).json({ data });
     } catch (e) {
+      console.error('Load error:', e.message);
       return res.status(200).json({ data: null });
     }
   }
+
   if (req.body && req.body.action === 'save') {
     try {
-      const dataToSave = {
-        ...req.body.data,
-        products: (req.body.data.products || []).map(p => ({ ...p, imgData: null }))
-      };
-      await kvSet(USER_KEY, dataToSave);
+      await kvSet(USER_KEY, req.body.data);
       return res.status(200).json({ ok: true });
     } catch (e) {
       console.error('Save error:', e.message);
       return res.status(500).json({ error: e.message });
     }
   }
+
   try {
     const body = { ...req.body, model: 'claude-sonnet-4-5' };
     const response = await fetch('https://api.anthropic.com/v1/messages', {
