@@ -260,8 +260,23 @@ state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
 let addMode='search',currentImgData=null,searchResults=[],selectedResult=null,isSearching=false;
 let currentAdviceTab='morning',currentConditionResult=null,editingId=null,productFilter='all';
 
-// 啟動時從雲端載入，覆蓋本地資料
+// 啟動時從雲端載入
 async function initFromCloud(){
+  try{
+    const cloudData=await loadFromCloud();
+    if(cloudData&&cloudData.products){
+      state={...DEFAULT,...cloudData};
+      if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
+      state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
+      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
+      render();
+    }
+  }catch(e){console.log('Cloud load failed:',e);}
+}
+
+async function manualLoadFromCloud(){
+  const btn=document.getElementById('cloud-load-btn');
+  if(btn){btn.textContent='載入中...';btn.disabled=true;}
   try{
     const cloudData=await loadFromCloud();
     if(cloudData&&cloudData.products&&cloudData.products.length>0){
@@ -270,8 +285,16 @@ async function initFromCloud(){
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
       try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
       render();
+      const el=document.getElementById('backup-status');
+      if(el)el.innerHTML='<div class="sbox ssuccess">✓ 已從雲端載入 '+state.products.length+' 個產品！</div>';
+    } else {
+      const el=document.getElementById('backup-status');
+      if(el)el.innerHTML='<div class="sbox swarn">雲端沒有找到資料</div>';
     }
-  }catch(e){console.log('Cloud load failed, using local data');}
+  }catch(e){
+    const el=document.getElementById('backup-status');
+    if(el)el.innerHTML='<div class="sbox swarn">載入失敗，請確認網路連線</div>';
+  }
 }
 
 function computeExpiry(p){
@@ -855,6 +878,7 @@ function renderSkin(){
         <button class="ghost-btn" style="flex:1;margin-top:0;" onclick="document.getElementById('import-input').click()">⬆ 匯入備份</button>
       </div>
       <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importBackup(event)">
+      <button id="cloud-load-btn" class="ghost-btn" style="margin-top:8px;" onclick="manualLoadFromCloud()">☁️ 從雲端重新載入資料</button>
       <div id="backup-status" style="margin-top:8px;"></div>
     </div>`;
 }
