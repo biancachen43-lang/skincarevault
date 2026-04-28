@@ -19,7 +19,7 @@ async function kvSet(key, value) {
     },
     body: JSON.stringify(JSON.stringify(value))
   });
-  if (!res.ok) throw new Error('KV set failed');
+  if (!res.ok) throw new Error('KV set failed: ' + res.status);
 }
 
 module.exports = async function handler(req, res) {
@@ -41,7 +41,15 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'POST' && req.body && req.body.action === 'save') {
     try {
-      await kvSet(USER_KEY, req.body.data);
+      // 移除照片資料再存，避免超過大小限制
+      const dataToSave = {
+        ...req.body.data,
+        products: (req.body.data.products || []).map(p => ({
+          ...p,
+          imgData: null
+        }))
+      };
+      await kvSet(USER_KEY, dataToSave);
       return res.status(200).json({ ok: true });
     } catch (e) {
       console.error('Save error:', e.message);
