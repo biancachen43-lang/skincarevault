@@ -927,7 +927,11 @@ function importBackup(e){
       // 強制存到雲端，不管有沒有真實資料
       const el=document.getElementById('backup-status');
       if(el)el.innerHTML=`<div class="sbox sloading">正在儲存到雲端... <span class="dot-anim">●</span></div>`;
-      saveToCloud(state).then(()=>{
+      const stateToSave = {
+  ...state,
+  products: state.products.map(p => { const {imgData, ...rest} = p; return rest; })
+};
+saveToCloud(stateToSave).then(()=>{
         if(el)el.innerHTML=`<div class="sbox ssuccess">✓ 成功匯入 ${data.products.length} 個產品並已存到雲端！</div>`;
       }).catch(()=>{
         if(el)el.innerHTML=`<div class="sbox ssuccess">✓ 成功匯入 ${data.products.length} 個產品！（雲端同步失敗，請重試）</div>`;
