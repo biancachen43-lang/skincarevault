@@ -18,7 +18,7 @@ async function kvSet(key, value) {
   });
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -28,4 +28,39 @@ export default async function handler(req, res) {
   if (req.method === 'GET' && req.query.action === 'load') {
     try {
       const data = await kvGet(USER_KEY);
-      return res.status(200).json({ data }
+      return res.status(200).json({ data });
+    } catch (e) {
+      return res.status(200).json({ data: null });
+    }
+  }
+
+  if (req.method === 'POST' && req.body && req.body.action === 'save') {
+    try {
+      await kvSet(USER_KEY, req.body.data);
+      return res.status(200).json({ ok: true });
+    } catch (e) {
+      return res.status(500).json({ error: 'Save failed' });
+    }
+  }
+
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  try {
+    const body = { ...req.body, model: 'claude-sonnet-4-5' };
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(body),
+    });
+    const data = await response.json();
+    if (!response.ok) console.error('Anthropic error:', JSON.stringify(data));
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Handler error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
