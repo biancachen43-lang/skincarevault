@@ -24,12 +24,14 @@ async function kvSet(key, value) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (req.method === 'GET' && req.query.action === 'load') {
+  // 讀取雲端資料
+  if (req.body && req.body.action === 'load') {
     try {
       const data = await kvGet(USER_KEY);
       return res.status(200).json({ data });
@@ -39,15 +41,12 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  if (req.method === 'POST' && req.body && req.body.action === 'save') {
+  // 儲存雲端資料
+  if (req.body && req.body.action === 'save') {
     try {
-      // 移除照片資料再存，避免超過大小限制
       const dataToSave = {
         ...req.body.data,
-        products: (req.body.data.products || []).map(p => ({
-          ...p,
-          imgData: null
-        }))
+        products: (req.body.data.products || []).map(p => ({...p, imgData: null}))
       };
       await kvSet(USER_KEY, dataToSave);
       return res.status(200).json({ ok: true });
@@ -57,24 +56,6 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
+  // 呼叫 Claude AI
   try {
-    const body = { ...req.body, model: 'claude-sonnet-4-5' };
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify(body),
-    });
-    const data = await response.json();
-    if (!response.ok) console.error('Anthropic error:', JSON.stringify(data));
-    res.status(response.status).json(data);
-  } catch (error) {
-    console.error('Handler error:', error.message);
-    res.status(500).json({ error: error.message });
-  }
-};
+    const body = { ...req.body
