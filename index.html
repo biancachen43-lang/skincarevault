@@ -200,13 +200,13 @@ const STORAGE_KEY='skincarevault_v2';
 
 // 雲端儲存
 async function saveToCloud(data) {
-  try {
-    await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'save', data })
-    });
-  } catch(e) { console.log('Cloud save failed, using local only'); }
+  const res = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'save', data })
+  });
+  if(!res.ok) throw new Error('Save failed');
+  return true;
 }
 
 async function loadFromCloud() {
@@ -917,9 +917,17 @@ function importBackup(e){
       state={...DEFAULT,...data};
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
-      saveState();render();
+      // 先存本地
+      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
+      render();
+      // 強制存到雲端，不管有沒有真實資料
       const el=document.getElementById('backup-status');
-      if(el)el.innerHTML=`<div class="sbox ssuccess">✓ 成功匯入 ${data.products.length} 個產品！</div>`;
+      if(el)el.innerHTML=`<div class="sbox sloading">正在儲存到雲端... <span class="dot-anim">●</span></div>`;
+      saveToCloud(state).then(()=>{
+        if(el)el.innerHTML=`<div class="sbox ssuccess">✓ 成功匯入 ${data.products.length} 個產品並已存到雲端！</div>`;
+      }).catch(()=>{
+        if(el)el.innerHTML=`<div class="sbox ssuccess">✓ 成功匯入 ${data.products.length} 個產品！（雲端同步失敗，請重試）</div>`;
+      });
     }catch(err){
       const el=document.getElementById('backup-status');
       if(el)el.innerHTML=`<div class="sbox swarn">匯入失敗，請確認檔案格式正確</div>`;
