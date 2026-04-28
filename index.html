@@ -211,7 +211,11 @@ async function saveToCloud(data) {
 
 async function loadFromCloud() {
   try {
-    const res = await fetch('/api/claude?action=load');
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'load' })
+    });
     const json = await res.json();
     return json.data || null;
   } catch(e) { return null; }
