@@ -894,7 +894,11 @@ function toggleConcern(c){const i=state.skin.concerns.indexOf(c);if(i>=0)state.s
 
 function exportBackup(){
   try{
-    const data=JSON.stringify(state,null,2);
+    const exportData={
+      ...state,
+      products:state.products.map(p=>{const{imgData,...rest}=p;return rest;})
+    };
+    const data=JSON.stringify(exportData,null,2);
     const blob=new Blob([data],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -903,7 +907,7 @@ function exportBackup(){
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     URL.revokeObjectURL(url);
     const el=document.getElementById('backup-status');
-    if(el)el.innerHTML=`<div class="sbox ssuccess">✓ 備份已下載！請存到安全的地方</div>`;
+    if(el)el.innerHTML=`<div class="sbox ssuccess">✓ 備份已下載！（不含照片，檔案較小）</div>`;
   }catch(e){
     const el=document.getElementById('backup-status');
     if(el)el.innerHTML=`<div class="sbox swarn">匯出失敗，請再試一次</div>`;
