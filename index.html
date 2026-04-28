@@ -237,8 +237,11 @@ function loadState(){
 
 function saveState(){
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
-  // 同步到雲端（非同步，不阻擋 UI）
-  saveToCloud(state);
+  // 只有使用者有真實資料時才存到雲端（id > 3 代表是使用者自己新增的）
+  const hasRealData = state.products.some(p=>p.id>3);
+  if(hasRealData){
+    saveToCloud(state);
+  }
 }
 
 const DEFAULT={
