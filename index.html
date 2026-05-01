@@ -328,10 +328,28 @@ async function callClaude(prompt,maxTokens=4096){
 }
 function parseJSON(raw){
   const c=raw.replace(/```json|```/g,'').trim();
-  const s=c.indexOf('['),e=c.lastIndexOf(']');
-  if(s>=0&&e>=0)return JSON.parse(c.slice(s,e+1));
-  const s2=c.indexOf('{'),e2=c.lastIndexOf('}');
-  return JSON.parse(c.slice(s2,e2+1));
+  function extractFirst(str,open,close){
+    const s=str.indexOf(open);
+    if(s<0)return null;
+    let depth=0,inStr=false,esc=false;
+    for(let i=s;i<str.length;i++){
+      const ch=str[i];
+      if(esc){esc=false;continue;}
+      if(ch==='\\'&&inStr){esc=true;continue;}
+      if(ch==='"'){inStr=!inStr;continue;}
+      if(inStr)continue;
+      if(ch===open)depth++;
+      else if(ch===close){depth--;if(depth===0)return str.slice(s,i+1);}
+    }
+    return null;
+  }
+  const arr=extractFirst(c,'[',']');
+  const obj=extractFirst(c,'{','}');
+  const arrIdx=arr?c.indexOf(arr[0]):Infinity;
+  const objIdx=obj?c.indexOf(obj[0]):Infinity;
+  const chosen=arrIdx<=objIdx?arr:obj;
+  if(!chosen)throw new Error('No JSON found in response');
+  return JSON.parse(chosen);
 }
 
 function gotoTab(t){
