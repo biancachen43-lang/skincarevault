@@ -398,12 +398,13 @@ function renderProducts(){
     ${showList.length?`<div class="product-list">${showList.map(renderPcard).join('')}</div>`:`<div class="empty"><div class="empty-icon">${productFilter==='美容儀器'?'💡':'🧴'}</div>還沒有${productFilter==='all'?'':productFilter}，點擊新增吧！</div>`}`;
 }
 function setFilter(f){productFilter=f;render();}
+function imgSrc(p){if(p.imgUrl)return'/api/photo?url='+encodeURIComponent(p.imgUrl);return p.imgData||null;}
 
 function renderPcard(p){
   const d=daysLeft(p),s=expStatus(d),pct=expPct(p);
   const isDevice=p.category==='美容儀器';
   return `<div class="pcard" onclick="openDetail(${p.id})">
-    <div class="pcard-emoji">${(p.imgUrl||p.imgData)?`<img src="${p.imgUrl||p.imgData}">`:(p.emoji||'🧴')}</div>
+    <div class="pcard-emoji">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(p.emoji||'🧴')}</div>
     <div class="pcard-body">
       <div class="pcard-brand">${p.brand} · ${p.category}</div>
       <div class="pcard-name">${p.name}</div>
@@ -649,7 +650,7 @@ function openDetail(id){
   showModal(`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-hd"><span class="modal-title">產品詳情</span><button class="modal-close" onclick="closeModal()">✕</button></div>
-    <div class="det-hero">${(p.imgUrl||p.imgData)?`<img src="${p.imgUrl||p.imgData}">`:(p.emoji||'🧴')}</div>
+    <div class="det-hero">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(p.emoji||'🧴')}</div>
     <div class="det-brand">${p.brand}</div>
     <div class="det-name">${p.name}</div>
     <div class="det-row"><span class="det-k">類別</span><span class="det-v">${p.category}</span></div>
@@ -700,7 +701,7 @@ function findProduct(name){
 function prodThumb(name){
   const p=findProduct(name);
   if(!p)return`<div style="width:36px;height:36px;border-radius:8px;background:var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${'🧴'}</div>`;
-  return`<div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">${(p.imgUrl||p.imgData)?`<img src="${p.imgUrl||p.imgData}" style="width:100%;height:100%;object-fit:cover;">`:(p.emoji||'🧴')}</div>`;
+  return`<div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">${imgSrc(p)?`<img src="${imgSrc(p)}" style="width:100%;height:100%;object-fit:cover;">`:(p.emoji||'🧴')}</div>`;
 }
 
 function renderRoutine(tod){

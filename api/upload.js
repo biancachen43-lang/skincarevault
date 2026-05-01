@@ -14,11 +14,11 @@ module.exports = async function handler(req, res) {
     const ext = mimeType === 'image/png' ? 'png' : mimeType === 'image/webp' ? 'webp' : 'jpg';
     const buffer = Buffer.from(imageData, 'base64');
     const blob = await put(`photos/${Date.now()}.${ext}`, buffer, {
-      access: 'public',
+      access: 'private',
       contentType: mimeType || 'image/jpeg',
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
-    console.log('Blob upload ok:', blob.url);
+    console.log('Blob upload ok (private):', blob.url);
     return res.status(200).json({ url: blob.url });
   } catch (e) {
     console.error('Upload error:', e.message);
