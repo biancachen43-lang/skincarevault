@@ -712,8 +712,20 @@ function renderAdviceContent(){
 // 找到產品物件（支援模糊比對名稱）
 function findProduct(name){
   if(!name)return null;
+  const n=name.trim().toLowerCase();
   const prods=state.products.filter(p=>p.category!=='美容儀器');
-  return prods.find(p=>name.includes(p.name)||p.name.includes(name)||name.includes(p.brand))||null;
+  let best=null,bestScore=-1;
+  for(const p of prods){
+    const pn=p.name.trim().toLowerCase();
+    const full=(p.brand.trim()+' '+p.name.trim()).toLowerCase();
+    let score=0;
+    if(n===pn||n===full) score=100;
+    else if(n.includes(full)&&full.length>3) score=80+full.length;
+    else if(n.includes(pn)&&pn.length>3) score=60+pn.length;
+    else if(pn.includes(n)&&n.length>4) score=40+n.length;
+    if(score>bestScore){bestScore=score;best=p;}
+  }
+  return bestScore>0?best:null;
 }
 
 // 產品縮圖 HTML
