@@ -1,4 +1,3 @@
-const { put } = require('@vercel/blob');
 const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
 const USER_KEY = 'skincarevault_user_data';
@@ -54,22 +53,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true });
     } catch (e) {
       console.error('Save error:', e.message);
-      return res.status(500).json({ error: e.message });
-    }
-  }
-
-  if (req.body && req.body.action === 'upload-image') {
-    try {
-      const { imageData, mimeType } = req.body;
-      const ext = mimeType === 'image/png' ? 'png' : mimeType === 'image/webp' ? 'webp' : 'jpg';
-      const buffer = Buffer.from(imageData, 'base64');
-      const blob = await put(`photos/${Date.now()}.${ext}`, buffer, {
-        access: 'public',
-        contentType: mimeType,
-      });
-      return res.status(200).json({ url: blob.url });
-    } catch (e) {
-      console.error('Upload error:', e.message);
       return res.status(500).json({ error: e.message });
     }
   }

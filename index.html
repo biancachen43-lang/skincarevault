@@ -580,7 +580,7 @@ function handlePhoto(e){
     if(ps)ps.innerHTML=`<div class="sbox sloading">AI 辨識中 <span class="dot-anim">●</span></div>`;
     try{
       const [uploadResult,claudeResult]=await Promise.allSettled([
-        fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upload-image',imageData:base64,mimeType:mime})}).then(r=>r.json()),
+        fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageData:base64,mimeType:mime})}).then(r=>r.json()),
         fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器，只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":""}'}]}]})}).then(r=>r.json())
       ]);
       if(uploadResult.status==='fulfilled'&&uploadResult.value.url)window._photoUrl=uploadResult.value.url;
