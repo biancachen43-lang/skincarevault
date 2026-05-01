@@ -2,7 +2,6 @@
   "rewrites": [
     { "source": "/api/claude", "destination": "/api/claude" },
     { "source": "/api/upload", "destination": "/api/upload" },
-    { "source": "/api/photo", "destination": "/api/photo" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

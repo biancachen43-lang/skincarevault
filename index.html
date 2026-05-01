@@ -398,7 +398,7 @@ function renderProducts(){
     ${showList.length?`<div class="product-list">${showList.map(renderPcard).join('')}</div>`:`<div class="empty"><div class="empty-icon">${productFilter==='美容儀器'?'💡':'🧴'}</div>還沒有${productFilter==='all'?'':productFilter}，點擊新增吧！</div>`}`;
 }
 function setFilter(f){productFilter=f;render();}
-function imgSrc(p){if(p.imgUrl)return'/api/photo?url='+encodeURIComponent(p.imgUrl);return p.imgData||null;}
+function imgSrc(p){return p.imgUrl||p.imgData||null;}
 
 function renderPcard(p){
   const d=daysLeft(p),s=expStatus(d),pct=expPct(p);
