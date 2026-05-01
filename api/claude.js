@@ -58,7 +58,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const body = { ...req.body, model: 'claude-sonnet-4-6' };
+    const body = { ...req.body, model: 'claude-sonnet-4-6', max_tokens: req.body.max_tokens || 4000 };
     console.log('Calling Anthropic, model:', body.model, 'max_tokens:', body.max_tokens, 'messages_len:', JSON.stringify(body.messages||[]).length);
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
