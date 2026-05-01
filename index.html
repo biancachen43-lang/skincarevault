@@ -752,11 +752,15 @@ function renderRoutineResult(data,tod){
 }
 
 async function genRoutine(tod){
+  console.log('[genRoutine] start, tod='+tod);
   const el=document.getElementById('routine-result-'+tod);
+  console.log('[genRoutine] el=',el);
   if(el)el.innerHTML=`<div class="sbox sloading">AI 規劃所有產品的使用計畫 <span class="dot-anim">●</span></div>`;
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   const lbl=tod==='morning'?'早':'晚';
+  console.log('[genRoutine] prods='+prods.substring(0,100));
   try{
+    console.log('[genRoutine] calling Claude...');
     const raw=await callClaude(`你是專業保養師。使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
 她的所有保養品：${prods}。
 請規劃完整的${lbl}間保養計畫，必須把所有保養品都安排進去，不能遺漏任何一個。
@@ -764,10 +768,16 @@ async function genRoutine(tod){
 只回純JSON格式：
 {"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"產品名稱，多個用逗號分隔"}],"rotate":[{"days":"哪幾天，例如：週一、三、五","products":"產品名稱，多個用逗號分隔","reason":"輪替原因1句"}]}
 rotate放需要輪替的產品，若所有產品都適合每天用則rotate為空陣列。`);
+    console.log('[genRoutine] raw response:',raw);
     const data=parseJSON(raw);
+    console.log('[genRoutine] parsed data:',data);
     window['_routine_'+tod]={...data,skin:state.skin.type};
-    document.getElementById('advice-content').innerHTML=renderRoutineResult(window['_routine_'+tod],tod);
-  }catch(e){console.error('[genRoutine]',e);if(el)el.innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
+    const adviceEl=document.getElementById('advice-content');
+    console.log('[genRoutine] advice-content el=',adviceEl);
+    if(!adviceEl)throw new Error('advice-content element not found');
+    adviceEl.innerHTML=renderRoutineResult(window['_routine_'+tod],tod);
+    console.log('[genRoutine] done, rendered successfully');
+  }catch(e){console.error('[genRoutine] ERROR:',e);if(el)el.innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
 }
 function clearRoutine(tod){window['_routine_'+tod]=null;document.getElementById('advice-content').innerHTML=renderAdviceContent();}
 
