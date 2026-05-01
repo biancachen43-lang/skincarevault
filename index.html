@@ -553,7 +553,7 @@ function pickResult(i){
 }
 
 function compressImage(dataUrl,maxSize,quality){
-  return new Promise(resolve=>{
+  return new Promise((resolve,reject)=>{
     const img=new Image();
     img.onload=()=>{
       const canvas=document.createElement('canvas');
@@ -563,35 +563,53 @@ function compressImage(dataUrl,maxSize,quality){
       canvas.getContext('2d').drawImage(img,0,0,w,h);
       resolve(canvas.toDataURL('image/jpeg',quality));
     };
+    img.onerror=()=>reject(new Error('Image load failed'));
     img.src=dataUrl;
   });
 }
 
 function handlePhoto(e){
   const file=e.target.files[0];if(!file)return;
+  console.log('[handlePhoto] file selected:',file.name,file.type,file.size);
   const reader=new FileReader();
   reader.onload=async ev=>{
-    const compressed=await compressImage(ev.target.result,800,0.75);
+    console.log('[handlePhoto] FileReader loaded, compressing...');
+    let compressed;
+    try{
+      compressed=await compressImage(ev.target.result,800,0.75);
+      console.log('[handlePhoto] compressed size:',compressed.length);
+    }catch(compErr){
+      console.error('[handlePhoto] compressImage failed, using original:',compErr);
+      compressed=ev.target.result;
+    }
     currentImgData=compressed;
     const base64=compressed.split(',')[1],mime='image/jpeg';
+    console.log('[handlePhoto] base64 length:',base64.length);
     const ua=document.querySelector('.upload-area');
     if(ua)ua.innerHTML=`<input type="file" accept="image/*" onchange="handlePhoto(event)"><img src="${compressed}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px;">`;
     const ps=document.getElementById('photo-status');
     if(ps)ps.innerHTML=`<div class="sbox sloading">AI 辨識中 <span class="dot-anim">●</span></div>`;
+    console.log('[handlePhoto] firing /api/upload + /api/claude in parallel...');
     try{
       const [uploadResult,claudeResult]=await Promise.allSettled([
-        fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageData:base64,mimeType:mime})}).then(r=>r.json()),
-        fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器，只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":""}'}]}]})}).then(r=>r.json())
+        fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageData:base64,mimeType:mime})}).then(r=>{console.log('[upload] HTTP status:',r.status);return r.json();}),
+        fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器，只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":""}'}]}]})}).then(r=>{console.log('[claude] HTTP status:',r.status);return r.json();})
       ]);
-      if(uploadResult.status==='fulfilled'&&uploadResult.value.url)window._photoUrl=uploadResult.value.url;
-      if(claudeResult.status!=='fulfilled')throw new Error('AI error');
+      console.log('[handlePhoto] uploadResult:',uploadResult.status, uploadResult.status==='fulfilled'?uploadResult.value:uploadResult.reason);
+      console.log('[handlePhoto] claudeResult:',claudeResult.status);
+      if(uploadResult.status==='fulfilled'&&uploadResult.value.url){window._photoUrl=uploadResult.value.url;console.log('[handlePhoto] photoUrl set:',window._photoUrl);}
+      else{console.warn('[handlePhoto] upload failed or no url, imgUrl will be null');}
+      if(claudeResult.status!=='fulfilled')throw new Error('AI error: '+claudeResult.reason);
       const info=JSON.parse((claudeResult.value.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('').replace(/```json|```/g,'').trim());
       window._photoInfo=info;
       const formBody2=document.getElementById('add-form-body');
       if(formBody2){formBody2.innerHTML=buildProductForm(info);}
-      if(ps)ps.innerHTML=`<div class="sbox ssuccess">✓ 辨識完成，照片已上傳</div>`;
+      if(ps)ps.innerHTML=`<div class="sbox ssuccess">✓ 辨識完成${window._photoUrl?'，照片已上傳':'（照片上傳失敗，僅保存辨識結果）'}</div>`;
       checkAddBtn();onCatChange();
-    }catch{if(ps)ps.innerHTML=`<div class="sbox swarn">辨識失敗，請手動填寫</div>`;}
+    }catch(err){
+      console.error('[handlePhoto] error:',err);
+      if(ps)ps.innerHTML=`<div class="sbox swarn">辨識失敗，請手動填寫</div>`;
+    }
   };
   reader.readAsDataURL(file);
 }
