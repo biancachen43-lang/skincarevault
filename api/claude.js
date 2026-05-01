@@ -58,7 +58,8 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const body = { ...req.body, model: 'claude-sonnet-4-5' };
+    const body = { ...req.body, model: 'claude-sonnet-4-6' };
+    console.log('Calling Anthropic, model:', body.model, 'max_tokens:', body.max_tokens, 'messages_len:', JSON.stringify(body.messages||[]).length);
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -69,6 +70,7 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify(body),
     });
     const data = await response.json();
+    console.log('Anthropic response status:', response.status, 'stop_reason:', data.stop_reason);
     if (!response.ok) console.error('Anthropic error:', JSON.stringify(data));
     res.status(response.status).json(data);
   } catch (error) {
