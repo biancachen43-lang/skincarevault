@@ -320,7 +320,7 @@ const today=()=>new Date().toISOString().split('T')[0];
 const fmt=s=>s?s.replace(/-/g,'/'):'—';
 
 async function callClaude(prompt,maxTokens=4096){
-  const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})});
+  const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,system:'請使用台灣繁體中文回答，不要使用簡體中文。',messages:[{role:'user',content:prompt}]})});
   if(!res.ok)throw new Error('API '+res.status);
   const data=await res.json();
   if(data.stop_reason&&data.stop_reason!=='end_turn')console.warn('[callClaude] stop_reason:',data.stop_reason);
@@ -647,7 +647,7 @@ function handlePhoto(e){
     try{
       const [uploadResult,claudeResult]=await Promise.allSettled([
         fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageData:base64,mimeType:mime})}).then(r=>{console.log('[upload] HTTP status:',r.status);return r.json();}),
-        fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器，只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":""}'}]}]})}).then(r=>{console.log('[claude] HTTP status:',r.status);return r.json();})
+        fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,system:'請使用台灣繁體中文回答，不要使用簡體中文。',messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器，只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":""}'}]}]})}).then(r=>{console.log('[claude] HTTP status:',r.status);return r.json();})
       ]);
       console.log('[handlePhoto] uploadResult:',uploadResult.status, uploadResult.status==='fulfilled'?uploadResult.value:uploadResult.reason);
       console.log('[handlePhoto] claudeResult:',claudeResult.status);
