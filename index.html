@@ -391,7 +391,7 @@ function updateTopbar(){
 function renderTodayRoutine(){
   const hasMorn=window._routine_morning&&window._routine_morning.skin===state.skin.type;
   const hasEve=window._routine_evening&&window._routine_evening.skin===state.skin.type;
-  if(!hasMorn&&!hasEve)return`<div class="card" style="cursor:pointer;" onclick="gotoTab('advice')"><div class="card-title">今日保養行程</div><div style="color:var(--text2);line-height:1.7;">尚未生成保養行程，點此前往「保養建議」生成今日行程 →</div></div>`;
+  if(!hasMorn&&!hasEve)return`<div class="card"><div class="card-title">今日保養行程</div><div style="color:var(--text2);line-height:1.7;margin-bottom:10px;">尚未生成保養行程。請前往「保養建議」頁面，生成早間或晚間保養行程後，此處會自動顯示今日應使用的產品。</div><button class="ghost-btn" style="margin-top:0;" onclick="gotoTab('advice')">前往保養建議生成行程 →</button></div>`;
   const exProds=r=>r&&r.daily?[...new Set(r.daily.flatMap(s=>(s.product||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean)))]:[];
   const mProds=hasMorn?exProds(window._routine_morning):[];
   const eProds=hasEve?exProds(window._routine_evening):[];
@@ -409,6 +409,7 @@ function renderHome(){
   if(soon.length>0)alerts+=`<div class="alert-banner alert-warn"><span class="alert-icon">⏰</span><div><div class="alert-title">${soon.map(p=>p.name).join('、')} 即將到期</div>建議優先使用以免浪費</div></div>`;
   const sorted=[...state.products].sort((a,b)=>{const da=daysLeft(a),db=daysLeft(b);if(da===null&&db===null)return 0;if(da===null)return 1;if(db===null)return -1;return da-db;}).slice(0,4);
   return `
+    ${renderTodayRoutine()}
     <div class="skin-banner" onclick="gotoTab('skin')">
       <div><div class="skin-val">${state.skin.type}</div><div class="skin-sub">困擾：${state.skin.concerns.join('、')} · 點擊更新</div></div>
       <button class="skin-btn">設定 →</button>
@@ -421,8 +422,7 @@ function renderHome(){
     </div>
     ${alerts}
     <div class="section-hd"><span class="section-label">效期最緊迫</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
-    <div class="product-list">${sorted.map(renderPcard).join('')}</div>
-    <div style="margin-top:14px;">${renderTodayRoutine()}</div>`;
+    <div class="product-list">${sorted.map(renderPcard).join('')}</div>`;
 }
 
 // PRODUCTS
