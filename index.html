@@ -278,6 +278,30 @@ function clearAdviceCache(){
   state.skinAdvice=null;
   ['sv_cache_morning','sv_cache_evening','sv_cache_week','sv_cache_compat','sv_cache_compat_text','sv_cache_device','sv_cache_skin_advice','skincarevault_advice_cache'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
 }
+// Confirmed plan helpers
+function _planFingerprint(){return state.products.map(p=>p.id+'|'+p.category).sort().join(',');}
+function saveConfirmedPlanLocal(plan){try{localStorage.setItem('sv_confirmed_plan',JSON.stringify(plan));}catch(e){}}
+function loadConfirmedPlanLocal(){try{return JSON.parse(localStorage.getItem('sv_confirmed_plan')||'null');}catch(e){return null;}}
+async function saveConfirmedPlanCloud(plan){try{await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save_plan',data:plan})});}catch(e){console.warn('[plan] cloud save failed:',e);}}
+async function loadConfirmedPlanCloud(){try{const r=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'load_plan'})});const j=await r.json();return j.data||null;}catch(e){return null;}}
+async function confirmPlan(){
+  if(!window._routine_morning||!window._routine_evening||!window._weekplan)return;
+  const plan={confirmedAt:new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}),productFingerprint:_planFingerprint(),morning:window._routine_morning,evening:window._routine_evening,weekplan:window._weekplan};
+  window._confirmedPlan=plan;
+  saveConfirmedPlanLocal(plan);
+  await saveConfirmedPlanCloud(plan);
+  const adviceEl=document.getElementById('advice-content');
+  if(adviceEl)adviceEl.innerHTML=renderAdviceContent();
+}
+function keepExistingPlan(){
+  if(!window._confirmedPlan)return;
+  window._confirmedPlan.productFingerprint=_planFingerprint();
+  saveConfirmedPlanLocal(window._confirmedPlan);
+  saveConfirmedPlanCloud(window._confirmedPlan);
+  render();
+}
+function regenPlan(startTab){window._confirmedPlan=null;clearAllRoutines();generateAll(startTab||'morning');}
+
 function saveSkinAdviceCache(advices){try{localStorage.setItem('sv_cache_skin_advice',JSON.stringify({k:_adviceCacheKey(),v:advices}));}catch(e){}}
 function loadSkinAdviceCache(){try{const c=JSON.parse(localStorage.getItem('sv_cache_skin_advice')||'null');return(c&&c.k===_adviceCacheKey())?c.v:null;}catch(e){return null;}}
 function renderSkinAdviceHtml(advices){return advices.map(a=>`<div class="advice-card"><div class="ac-hd"><span class="ac-icon">${SVG_TIP}</span><span class="ac-title">${se(a.title)}</span></div><div class="ac-body">${se(a.body)}</div></div>`).join('');}
@@ -305,6 +329,12 @@ if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders)
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
 state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
 loadAdviceCache();
+window._confirmedPlan=loadConfirmedPlanLocal();
+if(window._confirmedPlan){
+  if(!window._routine_morning)window._routine_morning=window._confirmedPlan.morning;
+  if(!window._routine_evening)window._routine_evening=window._confirmedPlan.evening;
+  if(!window._weekplan)window._weekplan=window._confirmedPlan.weekplan;
+}
 
 let addMode='search',currentImgData=null,searchResults=[],selectedResult=null,isSearching=false;
 let currentAdviceTab='morning',currentConditionResult=null,editingId=null,productFilter='all';
@@ -320,6 +350,18 @@ if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle)
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
       try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
       render();
+    }
+    // load confirmed plan from cloud if not already in localStorage
+    if(!window._confirmedPlan){
+      const cloudPlan=await loadConfirmedPlanCloud();
+      if(cloudPlan){
+        window._confirmedPlan=cloudPlan;
+        saveConfirmedPlanLocal(cloudPlan);
+        if(!window._routine_morning)window._routine_morning=cloudPlan.morning;
+        if(!window._routine_evening)window._routine_evening=cloudPlan.evening;
+        if(!window._weekplan)window._weekplan=cloudPlan.weekplan;
+        render();
+      }
     }
   }catch(e){console.log('Cloud load failed:',e);}
 }
@@ -781,6 +823,13 @@ function openDetail(id){
 function deleteProduct(id){if(!confirm('確定要刪除？'))return;state.products=state.products.filter(p=>p.id!==id);saveState();clearAdviceCache();closeModal();render();}
 
 // ADVICE
+function renderPlanBanner(){
+  if(!window._confirmedPlan)return'';
+  if(_planFingerprint()!==window._confirmedPlan.productFingerprint){
+    return`<div class="sbox swarn" style="margin-bottom:12px;line-height:1.6;">你的產品庫已更新，目前保養計畫可能需要調整<div style="display:flex;gap:8px;margin-top:10px;"><button class="submit-btn" style="flex:1;font-size:13px;padding:9px 8px;" onclick="regenPlan('morning')">重新生成</button><button class="ghost-btn" style="flex:1;font-size:13px;padding:9px 8px;" onclick="keepExistingPlan()">維持現有計畫</button></div></div>`;
+  }
+  return'';
+}
 function renderAdvice(){
   const svgSun=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
   const svgMoon=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`;
@@ -790,6 +839,7 @@ function renderAdvice(){
   const svgFlask=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M8 3v8l-4 6a1 1 0 001 1h14a1 1 0 001-1l-4-6V3"/><line x1="6.5" y1="14" x2="17.5" y2="14"/></svg>`;
   const tabs=[['morning',svgSun,'早上'],['evening',svgMoon,'晚上'],['week',svgCal,'週計畫'],['condition',svgDrop,'狀況'],['device',svgWand,'儀器'],['compat',svgFlask,'成分']];
   return `
+    ${renderPlanBanner()}
     <div class="advice-seg">${tabs.map(([id,icon,lbl])=>`<button class="aseg-btn ${currentAdviceTab===id?'active':''}" onclick="setAdviceTab('${id}')">${icon}${lbl}</button>`).join('')}</div>
     <div id="advice-content">${renderAdviceContent()}</div>`;
 }
@@ -842,13 +892,14 @@ function prodThumb(name){
 
 function renderRoutine(tod){
   const lbl=tod==='morning'?'早':'晚';
+  const planKey=tod==='morning'?'morning':'evening';
+  if(window._confirmedPlan&&window._confirmedPlan[planKey])return renderRoutineResult(window._confirmedPlan[planKey],tod,true);
   const key='_routine_'+tod;
-  if(window[key]&&window[key].skin===state.skin.type)return renderRoutineResult(window[key],tod);
-  const prodCount=state.products.filter(p=>p.category!=='美容儀器').length;
-  return `<div class="card"><div class="card-title">${lbl}間保養流程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">根據你的 <b style="color:var(--accent)">${state.skin.type}</b> 和 <b style="color:var(--accent)">${prodCount} 個保養品</b>，AI 將依序分析成分、規劃早晚行程，再生成完整週計畫。</div><button class="submit-btn" onclick="generateAll('${tod}')">生成完整保養方案</button></div>`;
+  if(window[key]&&window[key].skin===state.skin.type)return renderRoutineResult(window[key],tod,false);
+  return `<div class="card"><div class="card-title">${lbl}間保養流程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">尚未生成保養計畫。</div><button class="submit-btn" onclick="generateAll('${tod}')">開始生成</button></div>`;
 }
 
-function renderRoutineResult(data,tod){
+function renderRoutineResult(data,tod,isConfirmed){
   const lbl=tod==='morning'?'早':'晚';
   const dailyHtml=data.daily.map((s,i)=>{
     const names=(s.product||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
@@ -883,7 +934,9 @@ function renderRoutineResult(data,tod){
       }).join('')}
     </div>`:
     `<div style="margin-top:10px;font-size:14px;color:var(--text2);">✓ 所有保養品都已安排在每日步驟中</div>`;
-  return`<div class="card"><div class="card-title">${lbl}間保養流程</div>${dailyHtml}${rotateHtml}<button class="ghost-btn" onclick="regenAll('${tod}')">重新生成</button></div>`;
+  const confirmedBadge=isConfirmed?`<div style="font-size:12px;color:#4caf50;margin-bottom:12px;font-weight:500;">已確認 · 上次確認：${window._confirmedPlan?.confirmedAt||''}</div>`:'';
+  const confirmBtn=!isConfirmed&&window._routine_morning&&window._routine_evening&&window._weekplan?`<button class="submit-btn" style="margin-top:8px;" onclick="confirmPlan()">確認並儲存這份保養計畫</button>`:'';
+  return`<div class="card"><div class="card-title">${lbl}間保養流程</div>${confirmedBadge}${dailyHtml}${rotateHtml}${confirmBtn}<button class="ghost-btn" style="margin-top:8px;" onclick="regenPlan('${tod}')">重新生成</button></div>`;
 }
 
 // Runs text-format compat analysis for use inside generation prompts.
@@ -997,12 +1050,12 @@ ${prods}
 
 // 週計畫
 function renderWeekPlan(){
-  if(window._weekplan&&window._weekplan.skin===state.skin.type)return renderWeekPlanResult(window._weekplan);
-  const prodCount=state.products.filter(p=>p.category!=='美容儀器').length;
-  return`<div class="card"><div class="card-title">一週保養排程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 將依序分析成分、規劃早晚行程，再把你的 <b style="color:var(--accent)">${prodCount} 個保養品</b> 安排成完整的一週排程。</div><button class="submit-btn" onclick="generateAll('week')">生成完整保養方案</button></div>`;
+  if(window._confirmedPlan&&window._confirmedPlan.weekplan)return renderWeekPlanResult(window._confirmedPlan.weekplan,true);
+  if(window._weekplan&&window._weekplan.skin===state.skin.type)return renderWeekPlanResult(window._weekplan,false);
+  return`<div class="card"><div class="card-title">一週保養排程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">尚未生成保養計畫。</div><button class="submit-btn" onclick="generateAll('week')">開始生成</button></div>`;
 }
 
-function renderWeekPlanResult(data){
+function renderWeekPlanResult(data,isConfirmed){
   const days=data.week||[];
   const todayIdx=new Date().getDay();
   const dayMap={'週一':1,'週二':2,'週三':3,'週四':4,'週五':5,'週六':6,'週日':0};
@@ -1035,7 +1088,9 @@ function renderWeekPlanResult(data){
       </div>
     </div>`;
   }).join('');
-  return`<div class="card"><div class="card-title">一週保養排程</div>${html}<button class="ghost-btn" onclick="regenAll('week')">重新生成</button></div>`;
+  const confirmedBadgeW=isConfirmed?`<div style="font-size:12px;color:#4caf50;margin-bottom:12px;font-weight:500;">已確認 · 上次確認：${window._confirmedPlan?.confirmedAt||''}</div>`:'';
+  const confirmBtnW=!isConfirmed&&window._routine_morning&&window._routine_evening&&window._weekplan?`<button class="submit-btn" style="margin-top:8px;" onclick="confirmPlan()">確認並儲存這份保養計畫</button>`:'';
+  return`<div class="card"><div class="card-title">一週保養排程</div>${confirmedBadgeW}${html}${confirmBtnW}<button class="ghost-btn" style="margin-top:8px;" onclick="regenPlan('week')">重新生成</button></div>`;
 }
 
 function renderCondition(){

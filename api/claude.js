@@ -1,6 +1,7 @@
 const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
 const USER_KEY = 'skincarevault_user_data';
+const PLAN_KEY = 'sv_confirmed_plan';
 
 async function kvGet(key) {
   const res = await fetch(`${KV_URL}/get/${key}`, {
@@ -57,8 +58,35 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  if (req.body && req.body.action === 'load_plan') {
+    try {
+      const res2 = await fetch(`${KV_URL}/get/${PLAN_KEY}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      const d = await res2.json();
+      const data = d.result ? JSON.parse(d.result) : null;
+      return res.status(200).json({ data });
+    } catch (e) {
+      return res.status(200).json({ data: null });
+    }
+  }
+
+  if (req.body && req.body.action === 'save_plan') {
+    try {
+      const encoded = encodeURIComponent(JSON.stringify(req.body.data));
+      await fetch(`${KV_URL}/set/${PLAN_KEY}/${encoded}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      return res.status(200).json({ ok: true });
+    } catch (e) {
+      console.error('Save plan error:', e.message);
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
   try {
-    const body = { ...req.body, model: 'claude-sonnet-4-6', max_tokens: 4000 };
+    const body = { ...req.body, model: 'claude-sonnet-4-6', max_tokens: 4000, temperature: 0.3 };
     console.log('Calling Anthropic, model:', body.model, 'max_tokens:', body.max_tokens, 'messages_len:', JSON.stringify(body.messages||[]).length);
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
