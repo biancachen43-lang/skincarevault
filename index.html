@@ -176,6 +176,10 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 .empty-icon{font-size:28px;margin-bottom:12px;opacity:0.4;}
 .dot-anim{animation:blink 1s infinite;display:inline-block;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.dots-seq span{display:inline-block;animation:dot-seq 1.2s infinite both;}
+.dots-seq span:nth-child(2){animation-delay:.2s;}
+.dots-seq span:nth-child(3){animation-delay:.4s;}
+@keyframes dot-seq{0%,60%,100%{opacity:.15}30%{opacity:1}}
 </style>
 </head>
 <body>
@@ -919,19 +923,18 @@ async function generateAll(startTab){
   currentAdviceTab=startTab;
   document.querySelectorAll('.aseg-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes("'"+startTab+"'")));
   const adviceEl=document.getElementById('advice-content');
-  const showStep=(msg)=>{if(adviceEl)adviceEl.innerHTML=`<div class="card"><div class="card-title">生成保養方案</div><div class="sbox sloading">${msg} <span class="dot-anim">●</span></div></div>`;};
+  const loadingHtml=`<div class="card" style="text-align:center;padding:32px 16px;"><div style="font-size:14px;color:var(--text2);font-weight:300;letter-spacing:0.05em;">保養建議生成中，請稍候<span class="dots-seq"><span>．</span><span>．</span><span>．</span></span></div></div>`;
+  if(adviceEl)adviceEl.innerHTML=loadingHtml;
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   const base=`【用戶資訊】\n膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}\n生活樣貌：${lifestyleContext()}\n`;
   try{
     // Step 1: compat
-    showStep('步驟 1/4：分析成分相容性');
     let compat=[];
     try{compat=await ensureCompat();}catch(e){console.warn('[generateAll] compat failed:',e);}
     const ctx=compatContext(compat);
     const extra=`${ctx||'【成分分析結論】無特別衝突'}\n${skinAdviceContext()||''}`;
 
     // Step 2: morning routine
-    showStep('步驟 2/4：規劃早間保養流程');
     const morningRaw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的早間保養行程。請自行根據成分特性、膚質需求和生活作息判斷，以用戶的肌膚健康和生活品質為優先考量。
 
 ${base}
@@ -947,7 +950,7 @@ ${extra}
     const morningProdList=extractRoutineProducts(morningData).join('、')||'無';
 
     // Step 3: evening routine (aware of morning products)
-    showStep('步驟 3/4：規劃晚間保養流程');
+    // Step 3: evening routine
     const eveningRaw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的晚間保養行程。請自行根據成分特性、膚質需求和生活作息判斷，以用戶的肌膚健康和生活品質為優先考量。
 
 ${base}
@@ -967,7 +970,7 @@ ${extra}
     window._routine_evening={...eveningData,skin:state.skin.type};
 
     // Step 4: week plan (built directly from morning + evening routine JSON)
-    showStep('步驟 4/4：生成一週排程');
+    // Step 4: week plan
     const weekRaw=await callClaude(`以下是用戶的早間和晚間保養行程 JSON 結果。請直接依照這兩個行程生成一週七天的早晚排程，不要自行調整產品的使用時段或頻率。
 
 【早間行程 JSON】
