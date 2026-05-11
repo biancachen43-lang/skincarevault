@@ -245,25 +245,26 @@ function saveState(){
   }
 }
 
-const ADVICE_CACHE_KEY='skincarevault_advice_cache';
 function _adviceCacheKey(){return state.skin.type+'|'+state.skin.concerns.join(',')+'|'+state.products.map(p=>p.id).sort().join(',');}
+function _saveOne(lsKey,val){try{localStorage.setItem(lsKey,JSON.stringify({k:_adviceCacheKey(),v:val}));}catch(e){}}
+function _loadOne(lsKey){try{const c=JSON.parse(localStorage.getItem(lsKey)||'null');return(c&&c.k===_adviceCacheKey())?c.v:null;}catch(e){return null;}}
 function saveAdviceCache(){
-  try{localStorage.setItem(ADVICE_CACHE_KEY,JSON.stringify({key:_adviceCacheKey(),rm:window._routine_morning||null,re:window._routine_evening||null,wp:window._weekplan||null,cp:window._compat||null,da:window._device_advice||null}));}catch(e){}
+  _saveOne('sv_cache_morning',window._routine_morning||null);
+  _saveOne('sv_cache_evening',window._routine_evening||null);
+  _saveOne('sv_cache_week',window._weekplan||null);
+  _saveOne('sv_cache_compat',window._compat||null);
+  _saveOne('sv_cache_device',window._device_advice||null);
 }
 function loadAdviceCache(){
-  try{
-    const c=JSON.parse(localStorage.getItem(ADVICE_CACHE_KEY)||'null');
-    if(!c||c.key!==_adviceCacheKey())return;
-    if(c.rm)window._routine_morning=c.rm;
-    if(c.re)window._routine_evening=c.re;
-    if(c.wp)window._weekplan=c.wp;
-    if(c.cp)window._compat=c.cp;
-    if(c.da)window._device_advice=c.da;
-  }catch(e){}
+  const rm=_loadOne('sv_cache_morning');if(rm)window._routine_morning=rm;
+  const re=_loadOne('sv_cache_evening');if(re)window._routine_evening=re;
+  const wp=_loadOne('sv_cache_week');if(wp)window._weekplan=wp;
+  const cp=_loadOne('sv_cache_compat');if(cp)window._compat=cp;
+  const da=_loadOne('sv_cache_device');if(da)window._device_advice=da;
 }
 function clearAdviceCache(){
   window._routine_morning=null;window._routine_evening=null;window._weekplan=null;window._compat=null;window._device_advice=null;
-  try{localStorage.removeItem(ADVICE_CACHE_KEY);}catch(e){}
+  ['sv_cache_morning','sv_cache_evening','sv_cache_week','sv_cache_compat','sv_cache_device','skincarevault_advice_cache'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
 }
 
 const DEFAULT={
@@ -389,14 +390,16 @@ function updateTopbar(){
 
 // HOME
 function renderTodayRoutine(){
-  const hasMorn=window._routine_morning&&window._routine_morning.skin===state.skin.type;
-  const hasEve=window._routine_evening&&window._routine_evening.skin===state.skin.type;
-  if(!hasMorn&&!hasEve)return`<div class="card"><div class="card-title">今日保養行程</div><div style="color:var(--text2);line-height:1.7;margin-bottom:10px;">尚未生成保養行程。請前往「保養建議」頁面，生成早間或晚間保養行程後，此處會自動顯示今日應使用的產品。</div><button class="ghost-btn" style="margin-top:0;" onclick="gotoTab('advice')">前往保養建議生成行程 →</button></div>`;
-  const exProds=r=>r&&r.daily?[...new Set(r.daily.flatMap(s=>(s.product||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean)))]:[];
-  const mProds=hasMorn?exProds(window._routine_morning):[];
-  const eProds=hasEve?exProds(window._routine_evening):[];
+  const wp=window._weekplan;
+  if(!wp||wp.skin!==state.skin.type)return`<div class="card"><div class="card-title">今日保養行程</div><div style="color:var(--text2);line-height:1.7;margin-bottom:10px;">尚未生成週計畫。請前往「保養建議」頁面，生成一週保養排程後，此處會自動顯示今日應使用的產品。</div><button class="ghost-btn" style="margin-top:0;" onclick="gotoTab('advice')">前往保養建議生成週計畫 →</button></div>`;
+  const dayMap={'週一':1,'週二':2,'週三':3,'週四':4,'週五':5,'週六':6,'週日':0};
+  const todayIdx=new Date().getDay();
+  const today=(wp.week||[]).find(d=>dayMap[d.day]===todayIdx);
+  const dayLabel=Object.keys(dayMap).find(k=>dayMap[k]===todayIdx)||'';
+  const mProds=(today?today.morning||[]:[]).filter(Boolean);
+  const eProds=(today?today.evening||[]:[]).filter(Boolean);
   const pRow=n=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">${prodThumb(n)}<span style="font-size:11px;color:var(--text);">${n}</span></div>`;
-  return`<div class="card"><div class="card-title">今日保養行程</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">${hasMorn?`<div><div style="font-size:11px;font-weight:400;color:var(--amber);margin-bottom:8px;">早間</div>${mProds.map(pRow).join('')||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}</div>`:''}${hasEve?`<div><div style="font-size:11px;font-weight:400;color:var(--accent);margin-bottom:8px;">晚間</div>${eProds.map(pRow).join('')||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}</div>`:''}</div><button class="ghost-btn" style="margin-top:8px;" onclick="gotoTab('advice')">查看完整保養流程 →</button></div>`;}
+  return`<div class="card"><div class="card-title">今日保養行程 · ${dayLabel}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div><div style="font-size:11px;font-weight:400;color:var(--amber);margin-bottom:8px;">早間</div>${mProds.map(pRow).join('')||'<div style="font-size:11px;color:var(--text3);">今日無早間產品</div>'}</div><div><div style="font-size:11px;font-weight:400;color:var(--accent);margin-bottom:8px;">晚間</div>${eProds.map(pRow).join('')||'<div style="font-size:11px;color:var(--text3);">今日無晚間產品</div>'}</div></div><button class="ghost-btn" style="margin-top:8px;" onclick="gotoTab('advice')">查看完整週計畫 →</button></div>`;}
 
 function renderHome(){
   const total=state.products.length;
