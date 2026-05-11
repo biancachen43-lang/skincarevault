@@ -422,7 +422,8 @@ function imgSrc(p){return p.imgUrl||p.imgData||null;}
 function renderPcard(p){
   const d=daysLeft(p),s=expStatus(d),pct=expPct(p);
   const isDevice=p.category==='美容儀器';
-  return `<div class="pcard" onclick="openDetail(${p.id})">
+  return `<div class="pcard" onclick="openDetail(${p.id})" style="position:relative;">
+    <button onclick="event.stopPropagation();quickDelete(${p.id},${JSON.stringify(p.name)})" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;line-height:1;padding:4px;cursor:pointer;opacity:0.45;z-index:1;" title="刪除">🗑️</button>
     <div class="pcard-emoji">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(p.emoji||'🧴')}</div>
     <div class="pcard-body">
       <div class="pcard-brand">${p.brand} · ${p.category}</div>
@@ -434,6 +435,11 @@ function renderPcard(p){
       </div>`}
     </div>
   </div>`;
+}
+function quickDelete(id,name){
+  if(!confirm(`確定要刪除「${name}」嗎？`))return;
+  state.products=state.products.filter(p=>p.id!==id);
+  saveState();render();
 }
 
 // PRODUCT FORM
