@@ -935,54 +935,65 @@ async function generateAll(startTab){
     const extra=`${ctx||'【成分分析結論】無特別衝突'}\n${skinAdviceContext()||''}`;
 
     // Step 2: morning routine
-    const morningRaw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的早間保養行程。請自行根據成分特性、膚質需求和生活作息判斷，以用戶的肌膚健康和生活品質為優先考量。
+    const morningRaw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃早間保養行程。
 
 ${base}
-【保養品清單】（product 欄位必須使用以下完整名稱，一字不差）
+【成分分析結論】
+${ctx||'無特別衝突'}
+${skinAdviceContext()||''}
+【所有保養品清單】（product 欄位必須使用以下完整名稱，一字不差）
 ${prods}
-${extra}
-請判斷哪些產品適合早間使用、使用順序、以及是否需要輪替安排。不適合早間的產品可省略，留給晚間使用。
+
+任務：
+1. 依據成分特性和用戶生活作息，判斷每個產品是否適合早間
+2. 把適合早間的產品按使用順序排入 daily（由輕薄到厚重）
+3. 若有成分衝突須輪替的產品，放入 rotate，每組必須在 days 欄位明確標注使用日（例如「週一、三、五」或「週二、四、六」），同組不同天交替，絕不同天疊加
+4. 不適合早間的產品省略，留給晚間
 
 只回純JSON，不加任何說明文字：
-{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"週幾使用，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]}`);
+{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]}`);
     const morningData=parseJSON(morningRaw);
     window._routine_morning={...morningData,skin:state.skin.type};
     const morningProdList=extractRoutineProducts(morningData).join('、')||'無';
 
-    // Step 3: evening routine (aware of morning products)
-    // Step 3: evening routine
-    const eveningRaw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的晚間保養行程。請自行根據成分特性、膚質需求和生活作息判斷，以用戶的肌膚健康和生活品質為優先考量。
+    // Step 3: evening routine (has morning product list to avoid duplication)
+    const eveningRaw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃晚間保養行程。
 
 ${base}
-【保養品清單】（product 欄位必須使用以下完整名稱，一字不差）
+【成分分析結論】
+${ctx||'無特別衝突'}
+${skinAdviceContext()||''}
+【所有保養品清單】（product 欄位必須使用以下完整名稱，一字不差）
 ${prods}
 
-【早間已安排的產品】
+【早間已安排的產品】（請避免重複，除非晚間也特別適合）
 ${morningProdList}
-（以上產品早間已使用，晚間行程中請避免重複安排，除非該產品晚間也有特別適合使用的理由）
 
-${extra}
-請從所有保養品中，選出適合晚間使用的產品，排出晚間行程及輪替計畫。
+任務：
+1. 從所有保養品中，選出適合晚間使用的產品
+2. 確保所有保養品在早間或晚間行程中至少出現一次（早間未安排的產品必須安排在晚間）
+3. 按使用順序排入 daily（由輕薄到厚重）
+4. 若有輪替需求，在 rotate 中明確標注使用日（同組不同天交替）
 
 只回純JSON，不加任何說明文字：
-{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"週幾使用，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]}`);
+{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]}`);
     const eveningData=parseJSON(eveningRaw);
     window._routine_evening={...eveningData,skin:state.skin.type};
 
-    // Step 4: week plan (built directly from morning + evening routine JSON)
-    // Step 4: week plan
+    // Step 4: week plan — built directly from morning + evening JSON, no re-reasoning
     const weekRaw=await callClaude(`以下是用戶的早間和晚間保養行程 JSON 結果。請直接依照這兩個行程生成一週七天的早晚排程，不要自行調整產品的使用時段或頻率。
 
+${base}
 【早間行程 JSON】
 ${JSON.stringify(morningData)}
 
 【晚間行程 JSON】
 ${JSON.stringify(eveningData)}
 
-生成規則（必須嚴格遵守）：
-1. daily（每日步驟）中的產品：每天都出現在對應時段（早間或晚間）
-2. rotate（輪替計畫）中的每一組，依照 days 欄位的描述交替分配到不同天，同一組輪替產品絕對不可在同一天同時出現
-3. 不添加行程以外的產品，不改變產品的早晚時段，不重新推理
+生成規則（嚴格遵守，不可更改）：
+1. daily 中的產品：每天都出現在對應時段（早或晚）
+2. rotate 中每一組：依照 days 欄位交替分配到不同天，同組產品絕對不可在同一天同時出現
+3. 不添加行程以外的產品，不改變早晚時段，不重新推理
 
 只回純JSON，不加任何說明文字：
 {"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
