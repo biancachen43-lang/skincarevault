@@ -167,6 +167,11 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 .toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;}
 .toggle.on::after{left:19px;}
 .time-input{border:0.5px solid var(--border);border-radius:var(--radius);padding:6px 10px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg2);font-weight:300;}
+.lifestyle-section-title{font-size:13px;font-weight:500;color:var(--accent);margin:14px 0 8px;letter-spacing:0.05em;}
+.lifestyle-row{display:flex;flex-direction:column;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);}
+.lifestyle-row:last-child{border-bottom:none;padding-bottom:0;}
+.lifestyle-label{font-size:14px;color:var(--text);font-weight:300;}
+.lifestyle-select{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:7px 10px;font-size:13px;color:var(--text);font-family:inherit;font-weight:300;cursor:pointer;}
 .empty{text-align:center;padding:40px 16px;color:var(--text2);font-size:14px;font-weight:300;letter-spacing:0.08em;}
 .empty-icon{font-size:28px;margin-bottom:12px;opacity:0.4;}
 .dot-anim{animation:blink 1s infinite;display:inline-block;}
@@ -276,11 +281,13 @@ const DEFAULT={
   ],
   skin:{type:'混合肌',concerns:['毛孔','暗沉']},
   nextId:4,
-  reminders:{morningEnabled:false,morningTime:'07:30',eveningEnabled:false,eveningTime:'21:00',expiryEnabled:true}
+  reminders:{morningEnabled:false,morningTime:'07:30',eveningEnabled:false,eveningTime:'21:00',expiryEnabled:true},
+  lifestyle:{wakeTime:'7:00',sleepTime:'23:00',makeup:true,environment:'室內冷氣房',exercise:false,sensitivity:'偶爾敏感',morningTime:'5-10分鐘',eveningTime:'10-20分鐘'}
 };
 
 let state=loadState()||JSON.parse(JSON.stringify(DEFAULT));
 if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
+if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
 state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
 loadAdviceCache();
 
@@ -294,6 +301,7 @@ async function initFromCloud(){
     if(cloudData&&cloudData.products){
       state={...DEFAULT,...cloudData};
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
+if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
       try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
       render();
@@ -309,6 +317,7 @@ async function manualLoadFromCloud(){
     if(cloudData&&cloudData.products&&cloudData.products.length>0){
       state={...DEFAULT,...cloudData};
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
+if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
       try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
       render();
@@ -898,7 +907,7 @@ async function genRoutine(tod){
 
 【用戶資訊】
 膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}
-生活作息：${tod==='morning'?'早上需出門上班，時間有限，保養後需上妝':'晚上時間較充裕，可做較完整的保養'}
+生活樣貌：${lifestyleContext()}
 
 【保養品清單】（product 欄位必須使用以下完整名稱，一字不差）
 ${prods}
@@ -943,7 +952,7 @@ async function genWeekPlan(){
 
 【用戶資訊】
 膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}
-生活作息：早上需出門上班，時間有限，保養後需上妝；晚上時間較充裕，可做較完整的保養
+生活樣貌：${lifestyleContext()}
 
 【保養品清單】（陣列中必須使用以下完整名稱，一字不差）
 ${prods}
@@ -1056,9 +1065,47 @@ function renderSkin(){
   const types=['油性肌','乾性肌','混合肌','敏感肌','中性肌'];
   const concerns=['暗沉','毛孔','細紋','痘痘','黑眼圈','乾燥','泛紅','斑點'];
   const r=state.reminders;
+  const l=state.lifestyle||{};
+  const wakeOpts=['5:00','5:30','6:00','6:30','7:00','7:30','8:00','8:30','9:00 以後'];
+  const sleepOpts=['21:00','21:30','22:00','22:30','23:00','23:30','00:00','00:30','1:00 以後'];
   return `
     <div class="card"><div class="card-title">我的膚質</div><div class="opt-grid">${types.map(t=>`<button class="opt-btn ${state.skin.type===t?'sel':''}" onclick="setSkinType('${t}')">${t}</button>`).join('')}</div></div>
     <div class="card"><div class="card-title">膚況困擾（可複選）</div><div class="opt-grid3">${concerns.map(c=>`<button class="opt-btn ${state.skin.concerns.includes(c)?'sel':''}" onclick="toggleConcern('${c}')">${c}</button>`).join('')}</div></div>
+    <div class="card" style="margin-top:12px;">
+      <div class="card-title">生活樣貌</div>
+      <div class="lifestyle-section-title">生活作息</div>
+      <div class="lifestyle-row">
+        <div class="lifestyle-label">幾點起床</div>
+        <select class="lifestyle-select" onchange="setLifestyle('wakeTime',this.value)">${wakeOpts.map(t=>`<option${l.wakeTime===t?' selected':''}>${t}</option>`).join('')}</select>
+      </div>
+      <div class="lifestyle-row">
+        <div class="lifestyle-label">幾點睡覺</div>
+        <select class="lifestyle-select" onchange="setLifestyle('sleepTime',this.value)">${sleepOpts.map(t=>`<option${l.sleepTime===t?' selected':''}>${t}</option>`).join('')}</select>
+      </div>
+      <div class="lifestyle-row">
+        <div class="lifestyle-label">早上保養後是否需要上妝</div>
+        <div class="opt-grid"><button class="opt-btn ${l.makeup===true?'sel':''}" onclick="setLifestyle('makeup',true)">是</button><button class="opt-btn ${l.makeup===false?'sel':''}" onclick="setLifestyle('makeup',false)">否</button></div>
+      </div>
+      <div class="lifestyle-row">
+        <div class="lifestyle-label">工作環境</div>
+        <div class="opt-grid3">${['室內冷氣房','戶外日曬','混合'].map(e=>`<button class="opt-btn ${l.environment===e?'sel':''}" onclick="setLifestyle('environment','${e}')">${e}</button>`).join('')}</div>
+      </div>
+      <div class="lifestyle-row">
+        <div class="lifestyle-label">是否有規律運動習慣</div>
+        <div class="opt-grid"><button class="opt-btn ${l.exercise===true?'sel':''}" onclick="setLifestyle('exercise',true)">是</button><button class="opt-btn ${l.exercise===false?'sel':''}" onclick="setLifestyle('exercise',false)">否</button></div>
+      </div>
+      <div class="lifestyle-section-title">肌膚敏感程度</div>
+      <div class="opt-grid3">${['不敏感','偶爾敏感','容易敏感'].map(s=>`<button class="opt-btn ${l.sensitivity===s?'sel':''}" onclick="setLifestyle('sensitivity','${s}')">${s}</button>`).join('')}</div>
+      <div class="lifestyle-section-title">保養時間</div>
+      <div class="lifestyle-row">
+        <div class="lifestyle-label">早上可花多少時間</div>
+        <div class="opt-grid3">${['5分鐘以內','5-10分鐘','10分鐘以上'].map(m=>`<button class="opt-btn ${l.morningTime===m?'sel':''}" onclick="setLifestyle('morningTime','${m}')">${m}</button>`).join('')}</div>
+      </div>
+      <div class="lifestyle-row">
+        <div class="lifestyle-label">晚上可花多少時間</div>
+        <div class="opt-grid3">${['10分鐘以內','10-20分鐘','20分鐘以上'].map(m=>`<button class="opt-btn ${l.eveningTime===m?'sel':''}" onclick="setLifestyle('eveningTime','${m}')">${m}</button>`).join('')}</div>
+      </div>
+    </div>
     <button class="save-btn" onclick="saveSkin()">✓ 儲存並更新建議</button>
     <div id="skin-advice" style="margin-top:12px;"></div>
     <div class="card" style="margin-top:16px;">
@@ -1097,6 +1144,21 @@ function renderSkin(){
 }
 function setSkinType(t){state.skin.type=t;saveState();render();}
 function toggleConcern(c){const i=state.skin.concerns.indexOf(c);if(i>=0)state.skin.concerns.splice(i,1);else state.skin.concerns.push(c);saveState();render();}
+function setLifestyle(field,val){if(!state.lifestyle)state.lifestyle={};state.lifestyle[field]=val;saveState();render();}
+function lifestyleContext(){
+  const l=state.lifestyle;
+  if(!l)return '生活作息資訊未設定';
+  return [
+    `起床時間：${l.wakeTime||'未設定'}`,
+    `睡覺時間：${l.sleepTime||'未設定'}`,
+    `早上保養後${l.makeup?'需要':'不需要'}上妝`,
+    `工作環境：${l.environment||'未設定'}`,
+    l.exercise?'有規律運動習慣':'無規律運動習慣',
+    `肌膚敏感程度：${l.sensitivity||'未設定'}`,
+    `早上可花保養時間：${l.morningTime||'未設定'}`,
+    `晚上可花保養時間：${l.eveningTime||'未設定'}`
+  ].join('，');
+}
 
 function exportBackup(){
   try{
@@ -1130,6 +1192,7 @@ function importBackup(e){
       if(!confirm(`確定要匯入備份嗎？\n這將覆蓋現有的 ${state.products.length} 個產品資料，匯入後將有 ${data.products.length} 個產品。`))return;
       state={...DEFAULT,...data};
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
+if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
       // 先存本地
       try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
@@ -1155,7 +1218,7 @@ saveToCloud(stateToSave).then(()=>{
   e.target.value='';
 }
 async function saveSkin(){
-  saveState();clearAdviceCache();
+  saveState();clearAdviceCache();saveToCloud(state);
   const el=document.getElementById('skin-advice');
   el.innerHTML=`<div class="sbox sloading">AI 生成個人化建議 <span class="dot-anim">●</span></div>`;
   const prods=state.products.map(p=>`${p.brand} ${p.name}（${p.category}）`).join('、');
