@@ -262,6 +262,7 @@ function saveAdviceCache(){
   _saveOne('sv_cache_evening',window._routine_evening||null);
   _saveOne('sv_cache_week',window._weekplan||null);
   _saveOne('sv_cache_compat',window._compat||null);
+  _saveOne('sv_cache_compat_text',window._compatText||null);
   _saveOne('sv_cache_device',window._device_advice||null);
 }
 function loadAdviceCache(){
@@ -269,12 +270,13 @@ function loadAdviceCache(){
   const re=_loadOne('sv_cache_evening');if(re)window._routine_evening=re;
   const wp=_loadOne('sv_cache_week');if(wp)window._weekplan=wp;
   const cp=_loadOne('sv_cache_compat');if(cp)window._compat=cp;
+  const ct=_loadOne('sv_cache_compat_text');if(ct)window._compatText=ct;
   const da=_loadOne('sv_cache_device');if(da)window._device_advice=da;
 }
 function clearAdviceCache(){
-  window._routine_morning=null;window._routine_evening=null;window._weekplan=null;window._compat=null;window._device_advice=null;
+  window._routine_morning=null;window._routine_evening=null;window._weekplan=null;window._compat=null;window._compatText=null;window._device_advice=null;
   state.skinAdvice=null;
-  ['sv_cache_morning','sv_cache_evening','sv_cache_week','sv_cache_compat','sv_cache_device','sv_cache_skin_advice','skincarevault_advice_cache'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+  ['sv_cache_morning','sv_cache_evening','sv_cache_week','sv_cache_compat','sv_cache_compat_text','sv_cache_device','sv_cache_skin_advice','skincarevault_advice_cache'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
 }
 function saveSkinAdviceCache(advices){try{localStorage.setItem('sv_cache_skin_advice',JSON.stringify({k:_adviceCacheKey(),v:advices}));}catch(e){}}
 function loadSkinAdviceCache(){try{const c=JSON.parse(localStorage.getItem('sv_cache_skin_advice')||'null');return(c&&c.k===_adviceCacheKey())?c.v:null;}catch(e){return null;}}
@@ -883,6 +885,29 @@ function renderRoutineResult(data,tod){
   return`<div class="card"><div class="card-title">${lbl}間保養流程</div>${dailyHtml}${rotateHtml}<button class="ghost-btn" onclick="regenAll('${tod}')">重新生成</button></div>`;
 }
 
+// Runs text-format compat analysis for use inside generation prompts.
+async function ensureCompatText(){
+  if(window._compatText)return window._compatText;
+  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
+  const raw=await callClaude(`你是保養品成分分析師。請分析以下保養品，輸出結構化文字結論，供保養師規劃保養行程使用。
+
+保養品清單：${prods}
+
+請輸出以下三個部分（繁體中文純文字，不要輸出 JSON，不得含任何 emoji）：
+
+【產品時段建議】
+逐一說明每個產品的成分特性，並明確標注建議使用時段（早間 / 晚間 / 早晚皆可）
+
+【成分衝突提醒】
+列出哪些產品組合不相容，以及原因（如無衝突請說明無明顯衝突）
+
+【使用頻率限制】
+列出哪些產品有使用頻率建議（如無限制請說明皆可每日使用）`);
+  window._compatText=raw.trim();
+  saveAdviceCache();
+  return window._compatText;
+}
+
 // Runs compat analysis for the 成分 tab (standalone, user-triggered).
 async function ensureCompat(){
   if(window._compat)return window._compat;
@@ -909,25 +934,35 @@ async function generateAll(startTab){
   const prods=skinProds.map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   const prodNames=skinProds.map(p=>`${p.brand} ${p.name}`).join('、');
   try{
-    const raw=await callClaude(`你是一位專業保養師。請根據以下資訊，為用戶規劃一套完整的保養計畫。
+    // Step 1: get text-format compat analysis (cached after first run)
+    let compatText='（尚未分析）';
+    try{compatText=await ensureCompatText();}catch(e){console.warn('[generateAll] compatText failed:',e);}
 
-【用戶資訊】
-膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}
-生活樣貌：${lifestyleContext()}
+    // Step 2: single call with all three dimensions
+    const raw=await callClaude(`你是專業保養師。請根據以下三個維度，為用戶規劃最適合的保養行程：
+
+【成分分析結論】
+${compatText}
+
+【用戶膚質與困擾】
+膚質：${state.skin.type}
+困擾：${state.skin.concerns.join('、')}
 ${skinAdviceContext()||''}
-【產品庫（含成分）】
-${prods}
+【用戶生活樣貌】
+${lifestyleContext()}
 
-請你自行分析每個產品的成分特性、判斷最適合的使用時段、考慮產品間的相容性，然後同時規劃出：
+請綜合以上三個維度，同時規劃出：
 1. 早間保養行程（每日固定步驟 + 需輪替的產品）
 2. 晚間保養行程（每日固定步驟 + 需輪替的產品）
 3. 一週保養計畫（依照早晚行程的輪替安排，把輪替產品分配到七天）
 
+以下是完整產品清單，product 欄位必須使用以下完整名稱（一字不差）：
+${prods}
+
 要求：
 - 所有產品在一週內都要使用到
-- 輪替產品（如成分衝突的精華）交替分配在不同天，days 欄位必須明確標注使用日（例如「週一、三、五」），同組輪替產品絕對不可在同一天同時出現
+- 輪替產品交替分配在不同天，days 欄位必須明確標注使用日（例如「週一、三、五」），同組輪替產品絕對不可在同一天同時出現
 - 早晚行程不重複安排同一個產品（除非有特別理由）
-- product 欄位必須使用以下完整名稱（一字不差）：${prodNames}
 
 只回純JSON，不加任何說明文字：
 {"morning":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"evening":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
@@ -1139,7 +1174,7 @@ function lifestyleContext(){
     `肌膚敏感程度：${l.sensitivity||'未設定'}`,
     `早上可花保養時間：${l.morningTime||'未設定'}`,
     `晚上可花保養時間：${l.eveningTime||'未設定'}`
-  ].join('，');
+  ].join('\n');
 }
 
 function exportBackup(){
