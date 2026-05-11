@@ -435,7 +435,8 @@ function renderHome(){
   let alerts='';
   if(expired>0)alerts+=`<div class="alert-banner alert-danger"><span class="alert-icon">${SVG_WARN}</span><div><div class="alert-title">${expired} 個產品已過期</div>請儘快更換，以免刺激肌膚</div></div>`;
   if(soon.length>0)alerts+=`<div class="alert-banner alert-warn"><span class="alert-icon">⏰</span><div><div class="alert-title">${soon.map(p=>p.name).join('、')} 即將到期</div>建議優先使用以免浪費</div></div>`;
-  const sorted=[...state.products].sort((a,b)=>{const da=daysLeft(a),db=daysLeft(b);if(da===null&&db===null)return 0;if(da===null)return 1;if(db===null)return -1;return da-db;}).slice(0,4);
+  const urgentProds=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d<=30;}).sort((a,b)=>(daysLeft(a)||0)-(daysLeft(b)||0));
+  const urgentHtml=urgentProds.length>0?urgentProds.map(renderPcard).join(''):`<div style="padding:16px 0;font-size:14px;color:var(--text2);text-align:center;">目前沒有即將到期的產品</div>`;
   return `
     ${renderTodayRoutine()}
     <div class="skin-banner" onclick="gotoTab('skin')">
@@ -449,8 +450,8 @@ function renderHome(){
       <div class="stat"><div class="stat-n" style="color:var(--purple)">${ok}</div><div class="stat-l">狀態良好</div></div>
     </div>
     ${alerts}
-    <div class="section-hd"><span class="section-label">下方產品已接近效期，建議盡快使用</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
-    <div class="product-list">${sorted.map(renderPcard).join('')}</div>
+    <div class="section-hd"><span class="section-label">效期警示</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
+    <div class="product-list">${urgentHtml}</div>
     <div style="margin-top:10px;font-size:12px;color:#6B5F58;line-height:1.6;">效期以開封後可用月數（PAO）為主要計算依據。即使產品仍在製造效期內，超過 PAO 建議停止使用，以避免氧化變質產品對肌膚造成刺激。若未填寫 PAO，則以產品標示之到期日計算。</div>`;
 }
 
@@ -938,31 +939,47 @@ async function generateAll(startTab){
     let compatText='（尚未分析）';
     try{compatText=await ensureCompatText();}catch(e){console.warn('[generateAll] compatText failed:',e);}
 
-    // Step 2: single call with all three dimensions
-    const raw=await callClaude(`你是專業保養師。請根據以下三個維度，為用戶規劃最適合的保養行程：
+    // Step 2: build expiry dimension
+    const expiringProds=skinProds.filter(p=>{const d=daysLeft(p);return d!==null&&d<=30;}).map(p=>{const d=daysLeft(p);return d<0?`${p.brand} ${p.name}（已過期）`:`${p.brand} ${p.name}（還有 ${d} 天到期）`;});
+    const expiryDim=expiringProds.length>0?expiringProds.join('\n'):'無即將到期產品';
 
-【成分分析結論】
+    // Step 3: single call with all four dimensions
+    const raw=await callClaude(`你是一位有 10 年以上經驗的專業保養師。你的目標是幫助用戶用現有產品庫達到最佳的保養效果。
+
+請根據以下四個維度進行完整的專業判斷：
+
+【維度一：產品成分分析】
 ${compatText}
 
-【用戶膚質與困擾】
+【維度二：用戶肌膚狀況】
 膚質：${state.skin.type}
 困擾：${state.skin.concerns.join('、')}
 ${skinAdviceContext()||''}
-【用戶生活樣貌】
-${lifestyleContext()}
+【維度三：用戶生活樣貌】
+起床時間：${state.lifestyle?.wakeTime||'未設定'}
+就寢時間：${state.lifestyle?.sleepTime||'未設定'}
+早上是否上妝：${state.lifestyle?.makeup?'是':'否'}
+工作環境：${state.lifestyle?.environment||'未設定'}
+運動習慣：${state.lifestyle?.exercise?'有':'無'}
+早間保養可用時間：${state.lifestyle?.morningTime||'未設定'}
+晚間保養可用時間：${state.lifestyle?.eveningTime||'未設定'}
 
-請綜合以上三個維度，同時規劃出：
-1. 早間保養行程（每日固定步驟 + 需輪替的產品）
-2. 晚間保養行程（每日固定步驟 + 需輪替的產品）
-3. 一週保養計畫（依照早晚行程的輪替安排，把輪替產品分配到七天）
+【維度四：產品效期狀況】
+以下產品即將到期（30天內），請在保養行程中優先安排這些產品的使用頻率：
+${expiryDim}
 
 以下是完整產品清單，product 欄位必須使用以下完整名稱（一字不差）：
 ${prods}
 
-要求：
-- 所有產品在一週內都要使用到
-- 輪替產品交替分配在不同天，days 欄位必須明確標注使用日（例如「週一、三、五」），同組輪替產品絕對不可在同一天同時出現
-- 早晚行程不重複安排同一個產品（除非有特別理由）
+請以一位真正關心用戶肌膚健康的保養師角色，規劃出早間保養行程、晚間保養行程、和一週保養計畫。
+
+你的建議應該：
+- 真正有效，而不是把所有產品都用上
+- 符合用戶的生活作息和時間限制
+- 考慮每個產品的成分相容性和使用時機
+- 讓所有產品在一週內都能合理使用到
+- 即將到期的產品優先安排更高的使用頻率
+- 以用戶肌膚健康為最優先，而不是產品使用數量
 
 只回純JSON，不加任何說明文字：
 {"morning":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"evening":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
