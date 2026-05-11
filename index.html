@@ -838,7 +838,7 @@ function renderRoutine(tod){
   const key='_routine_'+tod;
   if(window[key]&&window[key].skin===state.skin.type)return renderRoutineResult(window[key],tod);
   const prodCount=state.products.filter(p=>p.category!=='美容儀器').length;
-  return `<div class="card"><div class="card-title">${lbl}間保養流程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">根據你的 <b style="color:var(--accent)">${state.skin.type}</b> 和 <b style="color:var(--accent)">${prodCount} 個保養品</b>，AI 將規劃每日必用步驟及輪替計畫，讓所有產品都用得到。</div><button class="submit-btn" onclick="genRoutine('${tod}')">生成${lbl}間保養流程</button></div><div id="routine-result-${tod}"></div>`;
+  return `<div class="card"><div class="card-title">${lbl}間保養流程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">根據你的 <b style="color:var(--accent)">${state.skin.type}</b> 和 <b style="color:var(--accent)">${prodCount} 個保養品</b>，AI 將依序分析成分、規劃早晚行程，再生成完整週計畫。</div><button class="submit-btn" onclick="generateAll('${tod}')">生成完整保養方案</button></div>`;
 }
 
 function renderRoutineResult(data,tod){
@@ -876,7 +876,7 @@ function renderRoutineResult(data,tod){
       }).join('')}
     </div>`:
     `<div style="margin-top:10px;font-size:14px;color:var(--text2);">✓ 所有保養品都已安排在每日步驟中</div>`;
-  return`<div class="card"><div class="card-title">${lbl}間保養流程</div>${dailyHtml}${rotateHtml}<button class="ghost-btn" onclick="clearRoutine('${tod}')">重新生成</button></div>`;
+  return`<div class="card"><div class="card-title">${lbl}間保養流程</div>${dailyHtml}${rotateHtml}<button class="ghost-btn" onclick="regenAll('${tod}')">重新生成</button></div>`;
 }
 
 // Runs compat analysis silently if not yet cached; returns the compat array.
@@ -897,87 +897,109 @@ function compatContext(compat){
   return '\n【成分分析結論，供參考】\n'+warns.map(w=>`- ${se(w.title)}：${se(w.desc)}`).join('\n')+'\n';
 }
 
-async function genRoutine(tod){
-  console.log('[genRoutine] start, tod='+tod);
-  const el=document.getElementById('routine-result-'+tod);
-  console.log('[genRoutine] el=',el);
+function extractRoutineProducts(data){
+  const daily=(data.daily||[]).flatMap(s=>(s.product||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean));
+  const rotate=(data.rotate||[]).flatMap(r=>(r.products||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean));
+  return [...new Set([...daily,...rotate])];
+}
+function formatRoutineForWeek(data){
+  if(!data)return'尚未生成';
+  const daily=(data.daily||[]).map(s=>`  - ${s.step}：${s.product||'（無指定產品）'}`).join('\n');
+  const rotate=(data.rotate||[]).length?(data.rotate||[]).map(r=>`  - ${r.days}：${r.products}（${r.reason}）`).join('\n'):'  （無輪替）';
+  return `每日步驟：\n${daily}\n輪替計畫：\n${rotate}`;
+}
+function clearAllRoutines(){
+  window._routine_morning=null;window._routine_evening=null;window._weekplan=null;
+  ['sv_cache_morning','sv_cache_evening','sv_cache_week'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+}
+function regenAll(startTab){clearAllRoutines();generateAll(startTab);}
+
+async function generateAll(startTab){
+  startTab=startTab||'morning';
+  currentAdviceTab=startTab;
+  document.querySelectorAll('.aseg-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes("'"+startTab+"'")));
+  const adviceEl=document.getElementById('advice-content');
+  const showStep=(msg)=>{if(adviceEl)adviceEl.innerHTML=`<div class="card"><div class="card-title">生成保養方案</div><div class="sbox sloading">${msg} <span class="dot-anim">●</span></div></div>`;};
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
-  const lbl=tod==='morning'?'早':'晚';
-  console.log('[genRoutine] prods='+prods.substring(0,100));
+  const base=`【用戶資訊】\n膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}\n生活樣貌：${lifestyleContext()}\n`;
   try{
-    // Step 1: ensure compat analysis exists (runs silently if missing)
-    if(el)el.innerHTML=`<div class="sbox sloading">AI 分析成分相容性 <span class="dot-anim">●</span></div>`;
+    // Step 1: compat
+    showStep('步驟 1/4：分析成分相容性');
     let compat=[];
-    try{compat=await ensureCompat();}catch(e){console.warn('[genRoutine] compat failed, continuing:',e);}
+    try{compat=await ensureCompat();}catch(e){console.warn('[generateAll] compat failed:',e);}
     const ctx=compatContext(compat);
-    // Step 2: generate routine with compat context injected
-    if(el)el.innerHTML=`<div class="sbox sloading">AI 規劃${lbl}間保養流程 <span class="dot-anim">●</span></div>`;
-    console.log('[genRoutine] calling Claude...');
-    const raw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的${lbl}間保養行程。請自行根據成分特性、膚質需求和生活作息來判斷每個產品最適合的使用時段，以用戶的肌膚健康和生活品質為優先考量。
+    const extra=`${ctx||'【成分分析結論】無特別衝突'}\n${skinAdviceContext()||''}`;
 
-【用戶資訊】
-膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}
-生活樣貌：${lifestyleContext()}
+    // Step 2: morning routine
+    showStep('步驟 2/4：規劃早間保養流程');
+    const morningRaw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的早間保養行程。請自行根據成分特性、膚質需求和生活作息判斷，以用戶的肌膚健康和生活品質為優先考量。
 
+${base}
 【保養品清單】（product 欄位必須使用以下完整名稱，一字不差）
 ${prods}
-${ctx||'【成分分析結論】無特別衝突'}
-${skinAdviceContext()||''}
-請根據以上資訊，判斷哪些產品適合${lbl}間使用、使用順序、以及是否需要輪替安排。不適合${lbl}間的產品可省略，留給另一時段。
+${extra}
+請判斷哪些產品適合早間使用、使用順序、以及是否需要輪替安排。不適合早間的產品可省略，留給晚間使用。
 
 只回純JSON，不加任何說明文字：
 {"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"週幾使用，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]}`);
-    console.log('[genRoutine] raw response:',raw);
-    const data=parseJSON(raw);
-    console.log('[genRoutine] parsed data:',data);
-    window['_routine_'+tod]={...data,skin:state.skin.type};
+    const morningData=parseJSON(morningRaw);
+    window._routine_morning={...morningData,skin:state.skin.type};
+    const morningProdList=extractRoutineProducts(morningData).join('、')||'無';
+
+    // Step 3: evening routine (aware of morning products)
+    showStep('步驟 3/4：規劃晚間保養流程');
+    const eveningRaw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的晚間保養行程。請自行根據成分特性、膚質需求和生活作息判斷，以用戶的肌膚健康和生活品質為優先考量。
+
+${base}
+【保養品清單】（product 欄位必須使用以下完整名稱，一字不差）
+${prods}
+
+【早間已安排的產品】
+${morningProdList}
+（以上產品早間已使用，晚間行程中請避免重複安排，除非該產品晚間也有特別適合使用的理由）
+
+${extra}
+請從所有保養品中，選出適合晚間使用的產品，排出晚間行程及輪替計畫。
+
+只回純JSON，不加任何說明文字：
+{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"週幾使用，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]}`);
+    const eveningData=parseJSON(eveningRaw);
+    window._routine_evening={...eveningData,skin:state.skin.type};
+
+    // Step 4: week plan (built from morning + evening routines)
+    showStep('步驟 4/4：生成一週排程');
+    const weekRaw=await callClaude(`你是專業保養師，請依據以下早晚行程，規劃一週七天的早晚保養排程。
+
+${base}
+【早間行程】
+${formatRoutineForWeek(morningData)}
+
+【晚間行程】
+${formatRoutineForWeek(eveningData)}
+
+請把早晚行程中的輪替產品合理分配到七天，確保：
+- 每個輪替產品都在一週內用到
+- 同一天的早晚不安排成分衝突的產品
+- 非輪替產品每天都出現在對應時段
+
+只回純JSON，不加任何說明文字：
+{"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
+    const weekData=parseJSON(weekRaw);
+    window._weekplan={...weekData,skin:state.skin.type};
+
     saveAdviceCache();
-    const adviceEl=document.getElementById('advice-content');
-    console.log('[genRoutine] advice-content el=',adviceEl);
-    if(!adviceEl)throw new Error('advice-content element not found');
-    adviceEl.innerHTML=renderRoutineResult(window['_routine_'+tod],tod);
-    console.log('[genRoutine] done, rendered successfully');
-  }catch(e){console.error('[genRoutine] ERROR:',e);if(el)el.innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
+    if(adviceEl)adviceEl.innerHTML=renderAdviceContent();
+  }catch(e){
+    console.error('[generateAll]',e);
+    if(adviceEl)adviceEl.innerHTML=`<div class="card"><div class="sbox swarn">生成失敗：${e.message}</div><button class="ghost-btn" style="margin-top:8px;" onclick="generateAll('${startTab}')">重試</button></div>`;
+  }
 }
-function clearRoutine(tod){window['_routine_'+tod]=null;document.getElementById('advice-content').innerHTML=renderAdviceContent();}
 
 // 週計畫
 function renderWeekPlan(){
   if(window._weekplan&&window._weekplan.skin===state.skin.type)return renderWeekPlanResult(window._weekplan);
   const prodCount=state.products.filter(p=>p.category!=='美容儀器').length;
-  return`<div class="card"><div class="card-title">一週保養排程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 將把你的 <b style="color:var(--accent)">${prodCount} 個保養品</b> 安排成完整的一週早晚排程，讓每個產品都能在最適合的時間發揮效果。</div><button class="submit-btn" onclick="genWeekPlan()">生成一週排程</button></div><div id="week-result"></div>`;
-}
-
-async function genWeekPlan(){
-  const weekEl=document.getElementById('week-result');
-  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
-  try{
-    // Step 1: ensure compat analysis exists (runs silently if missing)
-    if(weekEl)weekEl.innerHTML=`<div class="sbox sloading">AI 分析成分相容性 <span class="dot-anim">●</span></div>`;
-    let compat=[];
-    try{compat=await ensureCompat();}catch(e){console.warn('[genWeekPlan] compat failed, continuing:',e);}
-    const ctx=compatContext(compat);
-    // Step 2: generate week plan with compat context injected
-    if(weekEl)weekEl.innerHTML=`<div class="sbox sloading">AI 規劃一週排程中 <span class="dot-anim">●</span></div>`;
-    const raw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的一週早晚保養排程。請自行根據成分特性、膚質需求和生活作息來判斷每個產品最適合的使用時段和頻率，以用戶的肌膚健康和生活品質為優先考量。
-
-【用戶資訊】
-膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}
-生活樣貌：${lifestyleContext()}
-
-【保養品清單】（陣列中必須使用以下完整名稱，一字不差）
-${prods}
-${ctx||'【成分分析結論】無特別衝突'}
-${skinAdviceContext()||''}
-請根據以上資訊，合理安排每個產品在一週內最適合的使用時段和天數，讓所有產品都能發揮效果，同時配合用戶的生活節奏。
-
-只回純JSON，不加任何說明文字：
-{"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
-    const data=parseJSON(raw);
-    window._weekplan={...data,skin:state.skin.type};
-    saveAdviceCache();
-    document.getElementById('advice-content').innerHTML=renderWeekPlanResult(window._weekplan);
-  }catch(e){console.error('[genWeekPlan]',e);document.getElementById('week-result').innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
+  return`<div class="card"><div class="card-title">一週保養排程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 將依序分析成分、規劃早晚行程，再把你的 <b style="color:var(--accent)">${prodCount} 個保養品</b> 安排成完整的一週排程。</div><button class="submit-btn" onclick="generateAll('week')">生成完整保養方案</button></div>`;
 }
 
 function renderWeekPlanResult(data){
@@ -1013,7 +1035,7 @@ function renderWeekPlanResult(data){
       </div>
     </div>`;
   }).join('');
-  return`<div class="card"><div class="card-title">一週保養排程</div>${html}<button class="ghost-btn" onclick="window._weekplan=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
+  return`<div class="card"><div class="card-title">一週保養排程</div>${html}<button class="ghost-btn" onclick="regenAll('week')">重新生成</button></div>`;
 }
 
 function renderCondition(){
