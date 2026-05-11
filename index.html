@@ -858,21 +858,45 @@ function renderRoutineResult(data,tod){
   return`<div class="card"><div class="card-title">${lbl}間保養流程</div>${dailyHtml}${rotateHtml}<button class="ghost-btn" onclick="clearRoutine('${tod}')">重新生成</button></div>`;
 }
 
+// Runs compat analysis silently if not yet cached; returns the compat array.
+async function ensureCompat(){
+  if(window._compat)return window._compat;
+  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（成分：${p.ingredients||'一般成分'}）`).join('；');
+  const raw=await callClaude(`分析以下保養品成分相容性：${prods}。找出衝突搭配和建議組合。只回純JSON，不得含任何 emoji：[{"title":"標題","desc":"說明","type":"warning或tip"}]`);
+  window._compat=parseJSON(raw);
+  saveAdviceCache();
+  return window._compat;
+}
+
+// Formats compat warnings as a prompt block; returns '' if none.
+function compatContext(compat){
+  if(!compat||!compat.length)return'';
+  const warns=compat.filter(i=>i.type==='warning');
+  if(!warns.length)return'';
+  return '\n【成分分析衝突（必須嚴格遵守，不可違反）】\n'+warns.map(w=>`× ${se(w.title)}：${se(w.desc)}`).join('\n')+'\n';
+}
+
 async function genRoutine(tod){
   console.log('[genRoutine] start, tod='+tod);
   const el=document.getElementById('routine-result-'+tod);
   console.log('[genRoutine] el=',el);
-  if(el)el.innerHTML=`<div class="sbox sloading">AI 規劃所有產品的使用計畫 <span class="dot-anim">●</span></div>`;
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   const lbl=tod==='morning'?'早':'晚';
   console.log('[genRoutine] prods='+prods.substring(0,100));
   try{
+    // Step 1: ensure compat analysis exists (runs silently if missing)
+    if(el)el.innerHTML=`<div class="sbox sloading">AI 分析成分相容性 <span class="dot-anim">●</span></div>`;
+    let compat=[];
+    try{compat=await ensureCompat();}catch(e){console.warn('[genRoutine] compat failed, continuing:',e);}
+    const ctx=compatContext(compat);
+    // Step 2: generate routine with compat context injected
+    if(el)el.innerHTML=`<div class="sbox sloading">AI 規劃${lbl}間保養流程 <span class="dot-anim">●</span></div>`;
     console.log('[genRoutine] calling Claude...');
     const raw=await callClaude(`你是專業保養師。使用者：${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
 
 保養品清單（product欄位必須使用以下完整名稱，一字不差）：
 ${prods}
-
+${ctx}
 成分時段規則：
 【${lbl}上優先】${tod==='morning'?'抗氧化成分（維他命C、白藜蘆醇）、防曬、輕薄精華、保濕基底':'修復成分（A醇/視黃醇、胜肽、PDRN）、酸類（AHA/BHA/果酸/水楊酸）、滋潤乳霜、面膜'}
 【${tod==='morning'?'晚':'早'}上才用】${tod==='morning'?'A醇/視黃醇、酸類（AHA/BHA/果酸）、PDRN修復精華':'高濃度維他命C、防曬'}
@@ -908,14 +932,21 @@ function renderWeekPlan(){
 }
 
 async function genWeekPlan(){
-  document.getElementById('week-result').innerHTML=`<div class="sbox sloading">AI 規劃一週排程中 <span class="dot-anim">●</span></div>`;
-  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}）`).join('；');
+  const weekEl=document.getElementById('week-result');
+  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   try{
+    // Step 1: ensure compat analysis exists (runs silently if missing)
+    if(weekEl)weekEl.innerHTML=`<div class="sbox sloading">AI 分析成分相容性 <span class="dot-anim">●</span></div>`;
+    let compat=[];
+    try{compat=await ensureCompat();}catch(e){console.warn('[genWeekPlan] compat failed, continuing:',e);}
+    const ctx=compatContext(compat);
+    // Step 2: generate week plan with compat context injected
+    if(weekEl)weekEl.innerHTML=`<div class="sbox sloading">AI 規劃一週排程中 <span class="dot-anim">●</span></div>`;
     const raw=await callClaude(`你是專業保養師。使用者：${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
 
 保養品清單（陣列中必須使用以下完整名稱，一字不差）：
 ${prods}
-
+${ctx}
 成分排程規則：
 【早上】抗氧化（維他命C、白藜蘆醇）、防曬、輕薄精華、日常保濕
 【晚上】修復成分（A醇/視黃醇、胜肽、PDRN）、酸類（AHA/BHA/果酸/水楊酸）、滋潤乳霜、面膜
