@@ -875,7 +875,7 @@ function compatContext(compat){
   if(!compat||!compat.length)return'';
   const warns=compat.filter(i=>i.type==='warning');
   if(!warns.length)return'';
-  return '\n【成分分析衝突（必須嚴格遵守，不可違反）】\n'+warns.map(w=>`× ${se(w.title)}：${se(w.desc)}`).join('\n')+'\n';
+  return '\n【成分分析結論，供參考】\n'+warns.map(w=>`- ${se(w.title)}：${se(w.desc)}`).join('\n')+'\n';
 }
 
 async function genRoutine(tod){
@@ -894,31 +894,16 @@ async function genRoutine(tod){
     // Step 2: generate routine with compat context injected
     if(el)el.innerHTML=`<div class="sbox sloading">AI 規劃${lbl}間保養流程 <span class="dot-anim">●</span></div>`;
     console.log('[genRoutine] calling Claude...');
-    const raw=await callClaude(`你是專業保養師。使用者：${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
+    const raw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的${lbl}間保養行程。請自行根據成分特性、膚質需求和生活作息來判斷每個產品最適合的使用時段，以用戶的肌膚健康和生活品質為優先考量。
 
-保養品清單（product欄位必須使用以下完整名稱，一字不差）：
+【用戶資訊】
+膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}
+生活作息：${tod==='morning'?'早上需出門上班，時間有限，保養後需上妝':'晚上時間較充裕，可做較完整的保養'}
+
+【保養品清單】（product 欄位必須使用以下完整名稱，一字不差）
 ${prods}
-${ctx}
-${tod==='morning'?`早間生活作息：
-【時間有限】步驟控制在 4-5 步以內，保養後需上妝，不能太多層（避免悶痘或妝容浮粉）
-【早間重點】潔面（可省略或最簡單）→ 抗氧化精華（擇一最重要）→ 輕薄保濕 → 防曬
-【早間嚴禁】多種精華疊加、厚重滋潤乳霜、面膜、去角質、修護類安瓶 — 一律留到晚間`:
-`晚間生活作息：
-【時間充裕】可做完整保養，步驟最多 6 步
-【晚間重點】深層清潔 → 修護精華（A醇/酸類/胜肽）→ 滋潤乳霜 → 面膜（輪替）
-【晚間優先安排】白天沒用到的修護型、厚重型產品全部排晚上`}
-
-成分時段規則：
-【${lbl}上優先】${tod==='morning'?'抗氧化成分（維他命C、白藜蘆醇）、防曬、輕薄精華、保濕基底':'修復成分（A醇/視黃醇、胜肽、PDRN）、酸類（AHA/BHA/果酸/水楊酸）、滋潤乳霜、面膜'}
-【${tod==='morning'?'晚':'早'}上才用】${tod==='morning'?'A醇/視黃醇、酸類（AHA/BHA/果酸）、PDRN修復精華、面膜、去角質':'高濃度維他命C、防曬'}
-【成分衝突，不可同時使用】A醇+任何酸類、高濃度維他命C+酸類
-
-任務：規劃${lbl}間保養流程。
-第一步：逐一分析每個產品，判斷是否符合${lbl}間的時間與上妝需求。
-第二步：把適合${lbl}間的產品按使用順序排入daily（由薄到厚，精華→乳液→乳霜）。
-第三步：若有衝突成分（如A醇與酸類），安排輪替（週一三五/週二四六）避免同日使用。
-第四步：不適合${lbl}間的產品一律省略（留給另一時段），絕不強行塞入。
-第五步：每個產品只出現在最適合的時段，不要早晚重複放。
+${ctx||'【成分分析結論】無特別衝突'}
+請根據以上資訊，判斷哪些產品適合${lbl}間使用、使用順序、以及是否需要輪替安排。不適合${lbl}間的產品可省略，留給另一時段。
 
 只回純JSON，不加任何說明文字：
 {"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"週幾使用，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]}`);
@@ -954,28 +939,16 @@ async function genWeekPlan(){
     const ctx=compatContext(compat);
     // Step 2: generate week plan with compat context injected
     if(weekEl)weekEl.innerHTML=`<div class="sbox sloading">AI 規劃一週排程中 <span class="dot-anim">●</span></div>`;
-    const raw=await callClaude(`你是專業保養師。使用者：${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
+    const raw=await callClaude(`你是專業保養師，請根據以下資訊，為用戶規劃最適合的一週早晚保養排程。請自行根據成分特性、膚質需求和生活作息來判斷每個產品最適合的使用時段和頻率，以用戶的肌膚健康和生活品質為優先考量。
 
-保養品清單（陣列中必須使用以下完整名稱，一字不差）：
+【用戶資訊】
+膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}
+生活作息：早上需出門上班，時間有限，保養後需上妝；晚上時間較充裕，可做較完整的保養
+
+【保養品清單】（陣列中必須使用以下完整名稱，一字不差）
 ${prods}
-${ctx}
-生活作息原則：
-【早上時間有限】早間最多 4-5 步；重點是抗氧化精華（擇一）+ 輕薄保濕 + 防曬；不排面膜、去角質、厚重乳霜
-【晚上時間充裕】晚間最多 6 步；深層清潔、修護精華、滋潤乳霜、面膜都安排在晚上
-【每個產品只出現在最適合的時段】不要早晚重複放同一個產品
-
-成分排程規則：
-【早上】抗氧化（維他命C、白藜蘆醇）、防曬、輕薄精華、日常保濕
-【晚上】修復成分（A醇/視黃醇、胜肽、PDRN）、酸類（AHA/BHA/果酸/水楊酸）、滋潤乳霜、面膜、去角質
-【同天嚴禁】A醇+任何酸類、高濃度維他命C+酸類、多種高濃度活性成分同時出現
-
-任務：規劃週一到週日的早晚保養排程，必須遵守：
-1. 每個產品依成分特性固定排早上或晚上，不要早晚都放同一產品
-2. 含A醇或高濃度酸類的產品：每週最多使用3次，且不與其他強效活性成分排同天晚上
-3. 面膜、去角質：每週1-2次即可，不每天，安排在晚上
-4. 防曬：每天早上必排
-5. 確保同天morning和evening沒有衝突成分組合
-6. 所有產品都要排進週計畫，合理分配到對應時段和天數
+${ctx||'【成分分析結論】無特別衝突'}
+請根據以上資訊，合理安排每個產品在一週內最適合的使用時段和天數，讓所有產品都能發揮效果，同時配合用戶的生活節奏。
 
 只回純JSON，不加任何說明文字：
 {"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
