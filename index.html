@@ -256,9 +256,9 @@ function saveState(){
 const DEFAULT={
   tab:'home',
   products:[
-    {id:1,brand:'Laneige',name:'水凝保濕乳霜',category:'乳霜',mfgDate:'',openedDate:'2024-10-01',pao:12,expiryDate:'',emoji:'🫙',advice:'適合乾肌晚間使用，塗抹於精華後鎖住水分。',ingredients:'甘油、神經醯胺、玻尿酸',imgData:null},
-    {id:2,brand:'SK-II',name:'神仙水（青春露）',category:'化妝水',mfgDate:'',openedDate:'2024-11-15',pao:6,expiryDate:'',emoji:'💧',advice:'含豐富 Pitera，洗臉後第一步使用，改善膚質。',ingredients:'Pitera、菸鹼醯胺',imgData:null},
-    {id:3,brand:'Sulwhasoo',name:'人蔘精華',category:'精華',mfgDate:'',openedDate:'2024-12-01',pao:12,expiryDate:'',emoji:'🌿',advice:'富含紅蔘，適合熟齡肌使用。',ingredients:'紅蔘萃取、甘草萃取',imgData:null},
+    {id:1,brand:'Laneige',name:'水凝保濕乳霜',category:'乳霜',mfgDate:'',openedDate:'2024-10-01',pao:12,expiryDate:'',emoji:'',advice:'適合乾肌晚間使用，塗抹於精華後鎖住水分。',ingredients:'甘油、神經醯胺、玻尿酸',imgData:null},
+    {id:2,brand:'SK-II',name:'神仙水（青春露）',category:'化妝水',mfgDate:'',openedDate:'2024-11-15',pao:6,expiryDate:'',emoji:'',advice:'含豐富 Pitera，洗臉後第一步使用，改善膚質。',ingredients:'Pitera、菸鹼醯胺',imgData:null},
+    {id:3,brand:'Sulwhasoo',name:'人蔘精華',category:'精華',mfgDate:'',openedDate:'2024-12-01',pao:12,expiryDate:'',emoji:'',advice:'富含紅蔘，適合熟齡肌使用。',ingredients:'紅蔘萃取、甘草萃取',imgData:null},
   ],
   skin:{type:'混合肌',concerns:['毛孔','暗沉']},
   nextId:4,
@@ -386,7 +386,7 @@ function renderHome(){
   const ok=state.products.filter(p=>{const d=daysLeft(p);return d===null||d>60;}).length;
   const soon=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d>=0&&d<=14;});
   let alerts='';
-  if(expired>0)alerts+=`<div class="alert-banner alert-danger"><span class="alert-icon">⚠</span><div><div class="alert-title">${expired} 個產品已過期</div>請儘快更換，以免刺激肌膚</div></div>`;
+  if(expired>0)alerts+=`<div class="alert-banner alert-danger"><span class="alert-icon">${SVG_WARN}</span><div><div class="alert-title">${expired} 個產品已過期</div>請儘快更換，以免刺激肌膚</div></div>`;
   if(soon.length>0)alerts+=`<div class="alert-banner alert-warn"><span class="alert-icon">⏰</span><div><div class="alert-title">${soon.map(p=>p.name).join('、')} 即將到期</div>建議優先使用以免浪費</div></div>`;
   const sorted=[...state.products].sort((a,b)=>{const da=daysLeft(a),db=daysLeft(b);if(da===null&&db===null)return 0;if(da===null)return 1;if(db===null)return -1;return da-db;}).slice(0,4);
   return `
@@ -423,13 +423,19 @@ function renderProducts(){
 }
 function setFilter(f){productFilter=f;render();}
 function imgSrc(p){return p.imgUrl||p.imgData||null;}
+// Returns SVG placeholder icon based on product category. NO EMOJI — SVG only.
+const SVG_BOTTLE=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M8 3v4l-3 3v11a1 1 0 001 1h12a1 1 0 001-1V10l-3-3V3"/><line x1="5" y1="13" x2="19" y2="13"/></svg>`;
+const SVG_WAND=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4l5 5L8 21H3v-5L15 4z"/><line x1="12" y1="7" x2="17" y2="12"/></svg>`;
+const SVG_WARN=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const SVG_CHECK=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+function prodIcon(p){return(p&&p.category==='美容儀器')?SVG_WAND:SVG_BOTTLE;}
 
 function renderPcard(p){
   const d=daysLeft(p),s=expStatus(d),pct=expPct(p);
   const isDevice=p.category==='美容儀器';
   return `<div class="pcard" data-pid="${p.id}" style="position:relative;">
     <button data-del-id="${p.id}" data-del-name=${JSON.stringify(p.name)} style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;line-height:1;padding:4px;cursor:pointer;opacity:0.45;" title="刪除"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
-    <div class="pcard-emoji">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(p.emoji||'🧴')}</div>
+    <div class="pcard-emoji">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(prodIcon(p))}</div>
     <div class="pcard-body">
       <div class="pcard-brand">${p.brand} · ${p.category}</div>
       <div class="pcard-name">${p.name}</div>
@@ -676,7 +682,7 @@ function handlePhoto(e){
 function confirmAdd(){
   const v=getFormValues();if(!v.brand||!v.name)return;
   const src=selectedResult!=null?searchResults[selectedResult]:(window._photoInfo||{});
-  state.products.push({id:state.nextId++,...v,emoji:src.emoji||window._pendingEmoji||'🧴',advice:src.advice||window._pendingAdvice||'',imgUrl:window._photoUrl||null});
+  state.products.push({id:state.nextId++,...v,emoji:src.emoji||window._pendingEmoji||'',advice:src.advice||window._pendingAdvice||'',imgUrl:window._photoUrl||null});
   saveState();window._photoInfo=null;window._pendingAdvice=null;window._pendingEmoji=null;currentImgData=null;window._photoUrl=null;searchResults=[];selectedResult=null;
   closeModal();render();
 }
@@ -708,7 +714,7 @@ function openDetail(id){
   showModal(`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-hd"><span class="modal-title">產品詳情</span><button class="modal-close" onclick="closeModal()">✕</button></div>
-    <div class="det-hero">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(p.emoji||'🧴')}</div>
+    <div class="det-hero">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(prodIcon(p))}</div>
     <div class="det-brand">${p.brand}</div>
     <div class="det-name">${p.name}</div>
     <div class="det-row"><span class="det-k">類別</span><span class="det-v">${p.category}</span></div>
@@ -781,9 +787,9 @@ function findProduct(name){
 // 產品縮圖 HTML
 function prodThumb(name){
   const p=findProduct(name);
-  if(!p)return`<div style="width:36px;height:36px;border-radius:8px;background:var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${'🧴'}</div>`;
+  if(!p)return`<div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text2);">${prodIcon(null)}</div>`;
   console.log('[prodThumb] name='+name+' → matched='+p.brand+' '+p.name+' img='+(imgSrc(p)?'yes':'no'));
-  return`<div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">${imgSrc(p)?`<img src="${imgSrc(p)}" style="width:100%;height:100%;object-fit:cover;">`:(p.emoji||'🧴')}</div>`;
+  return`<div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;color:var(--text2);">${imgSrc(p)?`<img src="${imgSrc(p)}" style="width:100%;height:100%;object-fit:cover;">`:(prodIcon(p))}</div>`;
 }
 
 function renderRoutine(tod){
@@ -946,7 +952,7 @@ function renderWeekPlanResult(data){
 }
 
 function renderCondition(){
-  if(currentConditionResult)return `<div class="card"><div class="card-title">${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
+  if(currentConditionResult)return `<div class="card"><div class="card-title">${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
   const conds=[['breakout','突然冒痘'],['dry','乾燥緊繃'],['sensitive','泛紅敏感'],['oily','油光滿面'],['dull','暗沉疲倦'],['pores','毛孔粗大']];
   return `<div class="card"><div class="card-title">今天肌膚狀況</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">選擇今天的狀況，AI 給出調整建議</div><div class="condition-grid">${conds.map(([id,lbl])=>`<button class="cond-btn" onclick="handleCondition('${id}','${lbl}')">${lbl}</button>`).join('')}</div></div><div id="condition-result"></div>`;
 }
@@ -954,7 +960,7 @@ async function handleCondition(id,label){
   document.getElementById('condition-result').innerHTML=`<div class="sbox sloading">AI 分析中 <span class="dot-anim">●</span></div>`;
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}，成分：${p.ingredients||'未知'}）`).join('；');
   try{
-    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}，保養品：${prods}。今天狀況：${label}。給4-5點應對建議。只回純JSON：[{"icon":"emoji","title":"建議標題","desc":"具體說明1-2句"}]`);
+    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}，保養品：${prods}。今天狀況：${label}。給4-5點應對建議。只回純JSON：[{"title":"建議標題","desc":"具體說明1-2句"}]`);
     currentConditionResult={label,tips:parseJSON(raw)};
     document.getElementById('advice-content').innerHTML=renderAdviceContent();
   }catch(e){console.error('[handleCondition]',e);document.getElementById('condition-result').innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
@@ -972,13 +978,13 @@ async function genDeviceAdvice(){
   const devices=state.products.filter(p=>p.category==='美容儀器').map(p=>`${p.brand} ${p.name}`).join('、');
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}）`).join('、');
   try{
-    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。美容儀器：${devices}。保養品：${prods}。請給儀器搭配使用建議，包括使用前後搭配哪些保養品、使用頻率、注意事項。只回純JSON：[{"icon":"emoji","title":"建議標題","desc":"具體說明2-3句"}]，最多5點。`);
+    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。美容儀器：${devices}。保養品：${prods}。請給儀器搭配使用建議，包括使用前後搭配哪些保養品、使用頻率、注意事項。只回純JSON：[{"title":"建議標題","desc":"具體說明2-3句"}]，最多5點。`);
     window._device_advice=parseJSON(raw);
     document.getElementById('advice-content').innerHTML=renderDeviceResult(window._device_advice);
   }catch(e){console.error('[genDeviceAdvice]',e);document.getElementById('device-result').innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
 }
 function renderDeviceResult(items){
-  return `<div class="card"><div class="card-title">儀器搭配建議</div>${items.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._device_advice=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
+  return `<div class="card"><div class="card-title">儀器搭配建議</div>${items.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._device_advice=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
 }
 
 function renderCompat(){
@@ -989,14 +995,14 @@ async function runCompat(){
   document.getElementById('compat-result').innerHTML=`<div class="sbox sloading">AI 分析成分中 <span class="dot-anim">●</span></div>`;
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（成分：${p.ingredients||'一般成分'}）`).join('；');
   try{
-    const raw=await callClaude(`分析以下保養品成分相容性：${prods}。找出衝突搭配和建議組合。只回純JSON：[{"icon":"emoji","title":"標題","desc":"說明","type":"warning或tip"}]`);
+    const raw=await callClaude(`分析以下保養品成分相容性：${prods}。找出衝突搭配和建議組合。只回純JSON：[{"title":"標題","desc":"說明","type":"warning或tip"}]`);
     window._compat=parseJSON(raw);
     document.getElementById('advice-content').innerHTML=renderCompatResult(window._compat);
   }catch(e){console.error('[runCompat]',e);document.getElementById('compat-result').innerHTML=`<div class="sbox swarn">分析失敗：${e.message}，請再試一次</div>`;}
 }
 function renderCompatResult(items){
   const warns=items.filter(i=>i.type==='warning'),tips=items.filter(i=>i.type!=='warning');
-  return `<div class="card"><div class="card-title">成分分析結果</div>${warns.length?`<div class="infobox infobox-coral" style="margin-bottom:10px;"><div class="infobox-title">⚠ 注意事項</div>${warns.map(w=>`<div class="compat-item"><span class="compat-icon">${w.icon}</span><div><div class="compat-title">${w.title}</div><div class="compat-desc">${w.desc}</div></div></div>`).join('')}</div>`:''}${tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._compat=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新分析</button></div>`;
+  return `<div class="card"><div class="card-title">成分分析結果</div>${warns.length?`<div class="infobox infobox-coral" style="margin-bottom:10px;"><div class="infobox-title">${SVG_WARN} 注意事項</div>${warns.map(w=>`<div class="compat-item"><span class="compat-icon">${SVG_WARN}</span><div><div class="compat-title">${w.title}</div><div class="compat-desc">${w.desc}</div></div></div>`).join('')}</div>`:''}${tips.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._compat=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新分析</button></div>`;
 }
 
 // SKIN + REMINDERS
