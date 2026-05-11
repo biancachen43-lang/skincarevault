@@ -27,12 +27,8 @@
 body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;width:100%;margin:0;padding:0;font-weight:300;}
 .app{min-height:100vh;min-height:-webkit-fill-available;display:flex;flex-direction:column;background:var(--bg);width:100%;}
 .topbar{background:var(--bg2);border-bottom:0.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;width:100%;}
-.topbar-title{font-size:13px;font-weight:300;color:var(--text);letter-spacing:0.16em;}
-.topbar-sub{font-size:10px;color:var(--text2);margin-top:1px;letter-spacing:0.06em;}
-.notif-wrap{display:flex;align-items:center;gap:5px;}
-.notif-dot{width:6px;height:6px;background:var(--red);border-radius:50%;display:none;}
-.notif-dot.show{display:block;}
-.notif-lbl{font-size:10px;color:var(--text2);}
+.topbar-title{font-size:15px;font-weight:300;color:var(--text);letter-spacing:0.16em;}
+.topbar-sub{font-size:12px;color:var(--text2);margin-top:1px;letter-spacing:0.06em;}
 .nav{display:flex;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:53px;z-index:10;width:100%;}
 .nav-btn{flex:1;min-width:0;padding:10px 2px 8px;font-size:11px;color:var(--text2);background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;font-weight:400;letter-spacing:0.06em;}
 .nav-btn.active{color:var(--text);}
@@ -42,20 +38,20 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
 .card-title{font-size:11px;font-weight:300;color:var(--text);margin-bottom:10px;letter-spacing:0.12em;}
 .section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.section-label{font-size:10px;font-weight:300;color:var(--text2);letter-spacing:0.12em;}
-.add-btn{background:var(--btn);color:white;border:none;border-radius:var(--radius);padding:7px 14px;font-size:10px;cursor:pointer;font-family:inherit;font-weight:300;letter-spacing:0.1em;}
+.section-label{font-size:12px;font-weight:300;color:var(--text2);letter-spacing:0.12em;}
+.add-btn{background:var(--btn);color:white;border:none;border-radius:var(--radius);padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:300;letter-spacing:0.1em;}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
 .stat{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 8px;}
 .stat-n{font-size:20px;font-weight:300;color:var(--text);}
 .stat-l{font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:0.08em;}
 .skin-banner{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
-.skin-val{font-size:13px;font-weight:300;color:var(--text);}
-.skin-sub{font-size:10px;color:var(--text2);margin-top:2px;}
-.skin-btn{font-size:10px;color:var(--text);background:var(--bg2);border:0.5px solid var(--border);border-radius:2px;padding:4px 10px;cursor:pointer;letter-spacing:0.08em;font-weight:300;}
+.skin-val{font-size:15px;font-weight:300;color:var(--text);}
+.skin-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.skin-btn{font-size:12px;color:var(--text);background:var(--bg2);border:0.5px solid var(--border);border-radius:2px;padding:4px 10px;cursor:pointer;letter-spacing:0.08em;font-weight:300;}
 .alert-banner{border-radius:var(--radius);padding:10px 12px;margin-bottom:10px;font-size:11px;display:flex;align-items:flex-start;gap:8px;font-weight:300;}
 .alert-warn{background:var(--amber-light);border:0.5px solid var(--amber);color:#6B5010;}
 .alert-danger{background:var(--red-light);border:0.5px solid var(--red);color:#6B2020;}
-.alert-icon{font-size:12px;flex-shrink:0;margin-top:1px;}
+.alert-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
 .alert-title{font-weight:400;margin-bottom:2px;letter-spacing:0.06em;}
 .product-list{display:flex;flex-direction:column;gap:8px;}
 .pcard{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;gap:12px;padding:11px 13px;cursor:pointer;}
@@ -63,7 +59,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 .pcard-emoji img{width:100%;height:100%;object-fit:cover;}
 .pcard-body{flex:1;min-width:0;}
 .pcard-brand{font-size:9px;color:var(--text2);letter-spacing:0.08em;font-weight:300;}
-.pcard-name{font-size:13px;font-weight:300;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pcard-name{font-size:15px;font-weight:300;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pcard-bar-wrap{display:flex;align-items:center;gap:6px;margin-top:6px;}
 .pbar{flex:1;height:1px;background:var(--border);overflow:hidden;}
 .pbar-fill{height:100%;}
@@ -76,14 +72,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 .modal{background:var(--bg2);border-radius:10px 10px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:20px 16px 36px;}
 .modal-handle{width:32px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
 .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.modal-title{font-size:13px;font-weight:300;color:var(--text);letter-spacing:0.12em;}
+.modal-title{font-size:15px;font-weight:300;color:var(--text);letter-spacing:0.12em;}
 .modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text2);line-height:1;padding:0;}
-.fl{font-size:10px;color:var(--text2);margin-bottom:5px;display:block;font-weight:300;letter-spacing:0.08em;}
-.fi{width:100%;border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg2);margin-bottom:12px;-webkit-appearance:none;font-weight:300;}
+.fl{font-size:12px;color:var(--text2);margin-bottom:5px;display:block;font-weight:300;letter-spacing:0.08em;}
+.fi{width:100%;border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:15px;font-family:inherit;color:var(--text);background:var(--bg2);margin-bottom:12px;-webkit-appearance:none;font-weight:300;}
 .fi:focus{outline:none;border-color:var(--accent);}
 .fi-opt{border-style:dashed;opacity:0.8;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.expiry-hint{font-size:10px;color:var(--text2);background:var(--bg3);border-radius:var(--radius);padding:8px 10px;margin-bottom:12px;line-height:1.5;font-weight:300;}
+.expiry-hint{font-size:12px;color:var(--text2);background:var(--bg3);border-radius:var(--radius);padding:8px 10px;margin-bottom:12px;line-height:1.5;font-weight:300;}
 .tabs{display:flex;border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px;}
 .tab-btn{flex:1;padding:9px 4px;font-size:11px;background:none;border:none;cursor:pointer;font-family:inherit;color:var(--text2);font-weight:300;letter-spacing:0.06em;}
 .tab-btn.active{background:var(--btn);color:white;}
@@ -97,37 +93,37 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 .swarn{background:var(--amber-light);border:0.5px solid var(--amber);color:#6B5010;}
 .sinfo{background:var(--bg3);border:0.5px solid var(--border);color:var(--text2);}
 .search-wrap{display:flex;gap:8px;margin-bottom:10px;}
-.search-input{flex:1;border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg2);font-weight:300;}
+.search-input{flex:1;border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:15px;font-family:inherit;color:var(--text);background:var(--bg2);font-weight:300;}
 .search-btn{background:var(--btn);color:white;border:none;border-radius:var(--radius);padding:10px 16px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:300;letter-spacing:0.08em;}
 .search-btn:disabled{opacity:.5;}
 .rcard{border:0.5px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-bottom:8px;cursor:pointer;background:var(--bg2);}
 .rcard.sel{border-color:var(--accent);background:var(--accent-light);}
-.rcard-name{font-size:13px;font-weight:300;color:var(--text);margin-bottom:2px;}
-.rcard-brand{font-size:10px;color:var(--text2);margin-bottom:4px;letter-spacing:0.06em;}
+.rcard-name{font-size:15px;font-weight:300;color:var(--text);margin-bottom:2px;}
+.rcard-brand{font-size:12px;color:var(--text2);margin-bottom:4px;letter-spacing:0.06em;}
 .rcard-desc{font-size:11px;color:var(--text2);line-height:1.5;font-weight:300;}
 .rcard-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
 .rtag{font-size:9px;padding:2px 6px;background:var(--bg3);color:var(--text2);border-radius:2px;}
-.submit-btn{width:100%;background:var(--btn);color:white;border:none;border-radius:var(--radius);padding:13px;font-size:13px;font-weight:300;cursor:pointer;font-family:inherit;margin-top:4px;letter-spacing:0.1em;}
+.submit-btn{width:100%;background:var(--btn);color:white;border:none;border-radius:var(--radius);padding:13px;font-size:15px;font-weight:300;cursor:pointer;font-family:inherit;margin-top:4px;letter-spacing:0.1em;}
 .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
-.ghost-btn{width:100%;background:none;border:0.5px solid var(--border);border-radius:var(--radius);padding:10px;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;margin-top:8px;font-weight:300;letter-spacing:0.06em;}
-.edit-btn{width:100%;background:var(--bg3);border:0.5px solid var(--border);color:var(--text);border-radius:var(--radius);padding:10px;font-size:12px;cursor:pointer;margin-top:8px;font-family:inherit;font-weight:300;letter-spacing:0.06em;}
-.danger-btn{width:100%;background:none;border:0.5px solid #D4A0A0;color:#8B4040;border-radius:var(--radius);padding:10px;font-size:12px;cursor:pointer;margin-top:8px;font-family:inherit;font-weight:300;}
+.ghost-btn{width:100%;background:none;border:0.5px solid var(--border);border-radius:var(--radius);padding:10px;font-size:14px;cursor:pointer;color:var(--text2);font-family:inherit;margin-top:8px;font-weight:300;letter-spacing:0.06em;}
+.edit-btn{width:100%;background:var(--bg3);border:0.5px solid var(--border);color:var(--text);border-radius:var(--radius);padding:10px;font-size:14px;cursor:pointer;margin-top:8px;font-family:inherit;font-weight:300;letter-spacing:0.06em;}
+.danger-btn{width:100%;background:none;border:0.5px solid #D4A0A0;color:#8B4040;border-radius:var(--radius);padding:10px;font-size:14px;cursor:pointer;margin-top:8px;font-family:inherit;font-weight:300;}
 .divider{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
 .seg-row{display:flex;gap:8px;margin-bottom:12px;}
 .seg-tag{padding:6px 14px;border:0.5px solid var(--border);border-radius:2px;font-size:11px;cursor:pointer;color:var(--text2);background:var(--bg2);font-family:inherit;font-weight:300;letter-spacing:0.06em;}
 .seg-tag.active{background:var(--btn);color:white;border-color:var(--btn);}
 .det-hero{width:100%;height:150px;background:var(--bg3);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:14px;overflow:hidden;}
 .det-hero img{width:100%;height:100%;object-fit:cover;}
-.det-brand{font-size:10px;color:var(--text2);letter-spacing:0.1em;font-weight:300;}
+.det-brand{font-size:12px;color:var(--text2);letter-spacing:0.1em;font-weight:300;}
 .det-name{font-size:17px;font-weight:300;color:var(--text);margin-bottom:12px;}
-.det-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
+.det-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:14px;}
 .det-k{color:var(--text2);font-weight:300;}
 .det-v{color:var(--text);font-weight:300;}
 .infobox{border-radius:var(--radius);padding:12px 14px;margin-top:10px;}
 .infobox-purple{background:var(--accent-light);border:0.5px solid var(--accent-mid);}
 .infobox-coral{background:var(--coral-light);border:0.5px solid var(--coral);}
 .infobox-teal{background:var(--teal-light);border:0.5px solid var(--teal);}
-.infobox-title{font-size:10px;font-weight:300;margin-bottom:5px;letter-spacing:0.08em;}
+.infobox-title{font-size:12px;font-weight:300;margin-bottom:5px;letter-spacing:0.08em;}
 .infobox-purple .infobox-title{color:var(--accent);}
 .infobox-coral .infobox-title{color:var(--coral);}
 .infobox-teal .infobox-title{color:var(--teal);}
@@ -140,38 +136,38 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 .aseg-btn.active{background:var(--btn);color:white;}
 .aseg-btn.active svg{stroke:white;}
 .routine-step{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;}
-.step-num{width:20px;height:20px;border-radius:50%;background:none;border:0.5px solid var(--border);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:300;flex-shrink:0;margin-top:2px;}
+.step-num{width:20px;height:20px;border-radius:50%;background:none;border:0.5px solid var(--border);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:300;flex-shrink:0;margin-top:2px;}
 .step-body{flex:1;}
 .step-title{font-size:15px;font-weight:400;color:var(--text);margin-bottom:3px;letter-spacing:0.04em;}
-.step-desc{font-size:13px;color:#5C5248;line-height:1.6;font-weight:300;}
-.step-product{font-size:10px;color:var(--accent);margin-top:4px;font-weight:300;letter-spacing:0.04em;}
+.step-desc{font-size:14px;color:#5C5248;line-height:1.6;font-weight:300;}
+.step-product{font-size:12px;color:var(--accent);margin-top:4px;font-weight:300;letter-spacing:0.04em;}
 .condition-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
-.cond-btn{padding:11px 8px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:12px;cursor:pointer;text-align:center;background:var(--bg2);color:var(--text);font-family:inherit;font-weight:300;}
+.cond-btn{padding:11px 8px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:14px;cursor:pointer;text-align:center;background:var(--bg2);color:var(--text);font-family:inherit;font-weight:300;}
 .compat-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);}
 .compat-item:last-child{border:none;}
-.compat-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
-.compat-title{font-size:12px;font-weight:300;color:var(--text);margin-bottom:3px;}
+.compat-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.compat-title{font-size:14px;font-weight:300;color:var(--text);margin-bottom:3px;}
 .compat-desc{font-size:11px;color:var(--text2);line-height:1.5;font-weight:300;}
 .opt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 .opt-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.opt-btn{padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:12px;cursor:pointer;text-align:center;background:var(--bg2);color:var(--text);font-family:inherit;font-weight:300;}
+.opt-btn{padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:14px;cursor:pointer;text-align:center;background:var(--bg2);color:var(--text);font-family:inherit;font-weight:300;}
 .opt-btn.sel{background:var(--btn);color:white;border-color:var(--btn);}
-.save-btn{width:100%;background:var(--btn);color:white;border:none;border-radius:var(--radius);padding:12px;font-size:13px;font-weight:300;cursor:pointer;font-family:inherit;margin-top:4px;letter-spacing:0.1em;}
+.save-btn{width:100%;background:var(--btn);color:white;border:none;border-radius:var(--radius);padding:12px;font-size:15px;font-weight:300;cursor:pointer;font-family:inherit;margin-top:4px;letter-spacing:0.1em;}
 .advice-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:13px 15px;margin-bottom:8px;}
 .ac-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
 .ac-emoji{font-size:14px;}
-.ac-title{font-size:12px;font-weight:300;color:var(--text);letter-spacing:0.06em;}
+.ac-title{font-size:14px;font-weight:300;color:var(--text);letter-spacing:0.06em;}
 .ac-body{font-size:11px;color:var(--text2);line-height:1.7;font-weight:300;}
 .reminder-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);}
 .reminder-row:last-of-type{border:none;}
-.reminder-label{font-size:12px;font-weight:300;color:var(--text);}
-.reminder-sub{font-size:10px;color:var(--text2);margin-top:2px;}
+.reminder-label{font-size:14px;font-weight:300;color:var(--text);}
+.reminder-sub{font-size:12px;color:var(--text2);margin-top:2px;}
 .toggle{width:40px;height:24px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none;outline:none;}
 .toggle.on{background:var(--accent);}
 .toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;}
 .toggle.on::after{left:19px;}
-.time-input{border:0.5px solid var(--border);border-radius:var(--radius);padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text);background:var(--bg2);font-weight:300;}
-.empty{text-align:center;padding:40px 16px;color:var(--text2);font-size:12px;font-weight:300;letter-spacing:0.08em;}
+.time-input{border:0.5px solid var(--border);border-radius:var(--radius);padding:6px 10px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg2);font-weight:300;}
+.empty{text-align:center;padding:40px 16px;color:var(--text2);font-size:14px;font-weight:300;letter-spacing:0.08em;}
 .empty-icon{font-size:28px;margin-bottom:12px;opacity:0.4;}
 .dot-anim{animation:blink 1s infinite;display:inline-block;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
@@ -183,10 +179,6 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
     <div>
       <div class="topbar-title">SKINCARE VAULT</div>
       <div class="topbar-sub" id="topbar-date"></div>
-    </div>
-    <div class="notif-wrap">
-      <div class="notif-dot" id="notif-dot"></div>
-      <span class="notif-lbl" id="notif-lbl"></span>
     </div>
   </div>
   <div class="nav">
@@ -253,6 +245,27 @@ function saveState(){
   }
 }
 
+const ADVICE_CACHE_KEY='skincarevault_advice_cache';
+function _adviceCacheKey(){return state.skin.type+'|'+state.skin.concerns.join(',')+'|'+state.products.map(p=>p.id).sort().join(',');}
+function saveAdviceCache(){
+  try{localStorage.setItem(ADVICE_CACHE_KEY,JSON.stringify({key:_adviceCacheKey(),rm:window._routine_morning||null,re:window._routine_evening||null,wp:window._weekplan||null,cp:window._compat||null,da:window._device_advice||null}));}catch(e){}
+}
+function loadAdviceCache(){
+  try{
+    const c=JSON.parse(localStorage.getItem(ADVICE_CACHE_KEY)||'null');
+    if(!c||c.key!==_adviceCacheKey())return;
+    if(c.rm)window._routine_morning=c.rm;
+    if(c.re)window._routine_evening=c.re;
+    if(c.wp)window._weekplan=c.wp;
+    if(c.cp)window._compat=c.cp;
+    if(c.da)window._device_advice=c.da;
+  }catch(e){}
+}
+function clearAdviceCache(){
+  window._routine_morning=null;window._routine_evening=null;window._weekplan=null;window._compat=null;window._device_advice=null;
+  try{localStorage.removeItem(ADVICE_CACHE_KEY);}catch(e){}
+}
+
 const DEFAULT={
   tab:'home',
   products:[
@@ -268,6 +281,7 @@ const DEFAULT={
 let state=loadState()||JSON.parse(JSON.stringify(DEFAULT));
 if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
+loadAdviceCache();
 
 let addMode='search',currentImgData=null,searchResults=[],selectedResult=null,isSearching=false;
 let currentAdviceTab='morning',currentConditionResult=null,editingId=null,productFilter='all';
@@ -371,14 +385,19 @@ function render(){
 }
 function updateTopbar(){
   document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
-  const urgent=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d>=0&&d<=14;});
-  const expired=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d<0;});
-  const n=urgent.length+expired.length;
-  document.getElementById('notif-dot').classList.toggle('show',n>0);
-  document.getElementById('notif-lbl').textContent=n>0?`${n} 項需注意`:'';
 }
 
 // HOME
+function renderTodayRoutine(){
+  const hasMorn=window._routine_morning&&window._routine_morning.skin===state.skin.type;
+  const hasEve=window._routine_evening&&window._routine_evening.skin===state.skin.type;
+  if(!hasMorn&&!hasEve)return`<div class="card" style="cursor:pointer;" onclick="gotoTab('advice')"><div class="card-title">今日保養行程</div><div style="color:var(--text2);line-height:1.7;">尚未生成保養行程，點此前往「保養建議」生成今日行程 →</div></div>`;
+  const exProds=r=>r&&r.daily?[...new Set(r.daily.flatMap(s=>(s.product||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean)))]:[];
+  const mProds=hasMorn?exProds(window._routine_morning):[];
+  const eProds=hasEve?exProds(window._routine_evening):[];
+  const pRow=n=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">${prodThumb(n)}<span style="font-size:11px;color:var(--text);">${n}</span></div>`;
+  return`<div class="card"><div class="card-title">今日保養行程</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">${hasMorn?`<div><div style="font-size:11px;font-weight:400;color:var(--amber);margin-bottom:8px;">早間</div>${mProds.map(pRow).join('')||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}</div>`:''}${hasEve?`<div><div style="font-size:11px;font-weight:400;color:var(--accent);margin-bottom:8px;">晚間</div>${eProds.map(pRow).join('')||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}</div>`:''}</div><button class="ghost-btn" style="margin-top:8px;" onclick="gotoTab('advice')">查看完整保養流程 →</button></div>`;}
+
 function renderHome(){
   const total=state.products.length;
   const expiring=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d>=0&&d<=30;}).length;
@@ -403,12 +422,7 @@ function renderHome(){
     ${alerts}
     <div class="section-hd"><span class="section-label">效期最緊迫</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
     <div class="product-list">${sorted.map(renderPcard).join('')}</div>
-    <div style="margin-top:14px;">
-      <div class="section-hd"><span class="section-label">今日保養建議</span><span style="font-size:11px;color:var(--purple);cursor:pointer;" onclick="gotoTab('advice')">查看完整 →</span></div>
-      <div class="card" style="cursor:pointer;" onclick="gotoTab('advice')">
-        <div style="font-size:12px;color:var(--text2);line-height:1.7;">根據你的 <b style="color:var(--purple)">${state.skin.type}</b>，前往「保養建議」查看早晚護膚流程，以及碰到肌膚狀況時的應對方式。</div>
-      </div>
-    </div>`;
+    <div style="margin-top:14px;">${renderTodayRoutine()}</div>`;
 }
 
 // PRODUCTS
@@ -546,7 +560,7 @@ function setAddMode(m){addMode=m;searchResults=[];selectedResult=null;showModal(
 
 function buildOptionalPhotoSection(){
   const preview=window._photoUrl?`<div style="position:relative;display:inline-block;"><img src="${window._photoUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);"><label style="position:absolute;inset:0;cursor:pointer;border-radius:8px;"><input type="file" accept="image/*" style="display:none" onchange="handleOptionalPhoto(event)"></label></div>`:
-    `<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px dashed var(--border);border-radius:20px;font-size:12px;color:var(--purple);cursor:pointer;background:var(--bg2);">上傳照片<input type="file" accept="image/*" style="display:none" onchange="handleOptionalPhoto(event)"></label>`;
+    `<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px dashed var(--border);border-radius:20px;font-size:14px;color:var(--purple);cursor:pointer;background:var(--bg2);">上傳照片<input type="file" accept="image/*" style="display:none" onchange="handleOptionalPhoto(event)"></label>`;
   return `<div style="margin-top:12px;border-top:0.5px solid var(--border);padding-top:12px;"><div style="font-size:11px;color:var(--text2);margin-bottom:8px;">產品照片（選填）</div><div id="opt-photo-area">${preview}</div><div id="opt-photo-status" style="margin-top:6px;"></div></div>`;
 }
 
@@ -599,7 +613,7 @@ async function doSearch(){
   if(btn)btn.disabled=true;
   if(ss)ss.innerHTML=`<div class="sbox sloading">查詢中 <span class="dot-anim">●</span></div>`;
   try{
-    const raw=await callClaude(`你是保養品與美容儀器專家資料庫。搜尋：「${q}」。回傳最多3個符合的真實產品，只回純JSON：[{"brand":"","name":"","category":"化妝水或精華或乳液或乳霜或防曬或潔顏或面膜或美容儀器或其他","pao":月數或0,"emoji":"","desc":"功效1句","tags":["標籤"],"advice":"使用建議1-2句","ingredients":"主要成分或空字串"}]`);
+    const raw=await callClaude(`你是保養品與美容儀器專家資料庫。搜尋：「${q}」。回傳最多3個符合的真實產品。如果該產品有官方中文品名，name欄位請優先使用中文品名；若無中文品名再使用英文。只回純JSON：[{"brand":"","name":"","category":"化妝水或精華或乳液或乳霜或防曬或潔顏或面膜或美容儀器或其他","pao":月數或0,"emoji":"","desc":"功效1句","tags":["標籤"],"advice":"使用建議1-2句","ingredients":"主要成分或空字串"}]`);
     searchResults=parseJSON(raw);selectedResult=null;
     if(ss)ss.innerHTML=`<div class="sbox ssuccess">✓ 找到 ${searchResults.length} 個結果，點選後自動填入</div>`;
     const sr=document.getElementById('sr');
@@ -661,7 +675,7 @@ function handlePhoto(e){
     try{
       const [uploadResult,claudeResult]=await Promise.allSettled([
         fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageData:base64,mimeType:mime})}).then(r=>{console.log('[upload] HTTP status:',r.status);return r.json();}),
-        fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,system:'請使用台灣繁體中文回答，不要使用簡體中文。',messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器，只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":""}'}]}]})}).then(r=>{console.log('[claude] HTTP status:',r.status);return r.json();})
+        fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,system:'請使用台灣繁體中文回答，不要使用簡體中文。',messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器。如果有官方中文品名，name請優先使用中文。只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":""}'}]}]})}).then(r=>{console.log('[claude] HTTP status:',r.status);return r.json();})
       ]);
       console.log('[handlePhoto] uploadResult:',uploadResult.status, uploadResult.status==='fulfilled'?uploadResult.value:uploadResult.reason);
       console.log('[handlePhoto] claudeResult:',claudeResult.status);
@@ -686,7 +700,7 @@ function confirmAdd(){
   const v=getFormValues();if(!v.brand||!v.name)return;
   const src=selectedResult!=null?searchResults[selectedResult]:(window._photoInfo||{});
   state.products.push({id:state.nextId++,...v,emoji:src.emoji||window._pendingEmoji||'',advice:src.advice||window._pendingAdvice||'',imgUrl:window._photoUrl||null});
-  saveState();window._photoInfo=null;window._pendingAdvice=null;window._pendingEmoji=null;currentImgData=null;window._photoUrl=null;searchResults=[];selectedResult=null;
+  saveState();clearAdviceCache();window._photoInfo=null;window._pendingAdvice=null;window._pendingEmoji=null;currentImgData=null;window._photoUrl=null;searchResults=[];selectedResult=null;
   closeModal();render();
 }
 
@@ -733,7 +747,7 @@ function openDetail(id){
     <button class="danger-btn" onclick="deleteProduct(${p.id})">刪除此產品</button>
   </div></div>`);
 }
-function deleteProduct(id){if(!confirm('確定要刪除？'))return;state.products=state.products.filter(p=>p.id!==id);saveState();closeModal();render();}
+function deleteProduct(id){if(!confirm('確定要刪除？'))return;state.products=state.products.filter(p=>p.id!==id);saveState();clearAdviceCache();closeModal();render();}
 
 // ADVICE
 function renderAdvice(){
@@ -800,7 +814,7 @@ function renderRoutine(tod){
   const key='_routine_'+tod;
   if(window[key]&&window[key].skin===state.skin.type)return renderRoutineResult(window[key],tod);
   const prodCount=state.products.filter(p=>p.category!=='美容儀器').length;
-  return `<div class="card"><div class="card-title">${lbl}間保養流程</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">根據你的 <b style="color:var(--accent)">${state.skin.type}</b> 和 <b style="color:var(--accent)">${prodCount} 個保養品</b>，AI 將規劃每日必用步驟及輪替計畫，讓所有產品都用得到。</div><button class="submit-btn" onclick="genRoutine('${tod}')">生成${lbl}間保養流程</button></div><div id="routine-result-${tod}"></div>`;
+  return `<div class="card"><div class="card-title">${lbl}間保養流程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">根據你的 <b style="color:var(--accent)">${state.skin.type}</b> 和 <b style="color:var(--accent)">${prodCount} 個保養品</b>，AI 將規劃每日必用步驟及輪替計畫，讓所有產品都用得到。</div><button class="submit-btn" onclick="genRoutine('${tod}')">生成${lbl}間保養流程</button></div><div id="routine-result-${tod}"></div>`;
 }
 
 function renderRoutineResult(data,tod){
@@ -813,17 +827,17 @@ function renderRoutineResult(data,tod){
         <span style="font-size:11px;color:var(--text);font-weight:500;">${n}</span>
       </div>`).join('')}</div>`:'';
     return`<div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start;">
-      <div style="width:26px;height:26px;border-radius:50%;background:var(--purple);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:2px;">${i+1}</div>
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--purple);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;margin-top:2px;">${i+1}</div>
       <div style="flex:1;">
-        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;">${s.step}</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.6;">${s.how}</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:2px;">${s.step}</div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.6;">${s.how}</div>
         ${thumbsHtml}
       </div>
     </div>`;
   }).join('');
   const rotateHtml=data.rotate&&data.rotate.length?`
     <div style="margin-top:14px;border-top:0.5px solid var(--border);padding-top:14px;">
-      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">輪替使用計畫</div>
+      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;">輪替使用計畫</div>
       ${data.rotate.map(r=>{
         const names=(r.products||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
         return`<div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
@@ -837,7 +851,7 @@ function renderRoutineResult(data,tod){
         </div>`;
       }).join('')}
     </div>`:
-    `<div style="margin-top:10px;font-size:12px;color:var(--text2);">✓ 所有保養品都已安排在每日步驟中</div>`;
+    `<div style="margin-top:10px;font-size:14px;color:var(--text2);">✓ 所有保養品都已安排在每日步驟中</div>`;
   return`<div class="card"><div class="card-title">${lbl}間保養流程</div>${dailyHtml}${rotateHtml}<button class="ghost-btn" onclick="clearRoutine('${tod}')">重新生成</button></div>`;
 }
 
@@ -873,6 +887,7 @@ ${prods}
     const data=parseJSON(raw);
     console.log('[genRoutine] parsed data:',data);
     window['_routine_'+tod]={...data,skin:state.skin.type};
+    saveAdviceCache();
     const adviceEl=document.getElementById('advice-content');
     console.log('[genRoutine] advice-content el=',adviceEl);
     if(!adviceEl)throw new Error('advice-content element not found');
@@ -886,7 +901,7 @@ function clearRoutine(tod){window['_routine_'+tod]=null;document.getElementById(
 function renderWeekPlan(){
   if(window._weekplan&&window._weekplan.skin===state.skin.type)return renderWeekPlanResult(window._weekplan);
   const prodCount=state.products.filter(p=>p.category!=='美容儀器').length;
-  return`<div class="card"><div class="card-title">一週保養排程</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 將把你的 <b style="color:var(--accent)">${prodCount} 個保養品</b> 安排成完整的一週早晚排程，讓每個產品都能在最適合的時間發揮效果。</div><button class="submit-btn" onclick="genWeekPlan()">生成一週排程</button></div><div id="week-result"></div>`;
+  return`<div class="card"><div class="card-title">一週保養排程</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 將把你的 <b style="color:var(--accent)">${prodCount} 個保養品</b> 安排成完整的一週早晚排程，讓每個產品都能在最適合的時間發揮效果。</div><button class="submit-btn" onclick="genWeekPlan()">生成一週排程</button></div><div id="week-result"></div>`;
 }
 
 async function genWeekPlan(){
@@ -914,6 +929,7 @@ ${prods}
 {"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
     const data=parseJSON(raw);
     window._weekplan={...data,skin:state.skin.type};
+    saveAdviceCache();
     document.getElementById('advice-content').innerHTML=renderWeekPlanResult(window._weekplan);
   }catch(e){console.error('[genWeekPlan]',e);document.getElementById('week-result').innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
 }
@@ -936,16 +952,16 @@ function renderWeekPlanResult(data){
       </div>`).join('');
     return`<div style="background:${isToday?'var(--purple-light)':'var(--bg2)'};border:${isToday?'1.5px solid var(--purple-mid)':'0.5px solid var(--border)'};border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-        <span style="font-size:13px;font-weight:600;color:${isToday?'var(--purple)':'var(--text)'};">${d.day}</span>
-        ${isToday?`<span style="font-size:10px;background:var(--purple);color:white;padding:2px 7px;border-radius:10px;font-weight:500;">今天</span>`:''}
+        <span style="font-size:15px;font-weight:600;color:${isToday?'var(--purple)':'var(--text)'};">${d.day}</span>
+        ${isToday?`<span style="font-size:12px;background:var(--purple);color:white;padding:2px 7px;border-radius:10px;font-weight:500;">今天</span>`:''}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div>
-          <div style="font-size:10px;font-weight:600;color:var(--amber);margin-bottom:6px;">早間</div>
+          <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:6px;">早間</div>
           ${morningProds||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}
         </div>
         <div>
-          <div style="font-size:10px;font-weight:600;color:#534AB7;margin-bottom:6px;">晚間</div>
+          <div style="font-size:12px;font-weight:600;color:#534AB7;margin-bottom:6px;">晚間</div>
           ${eveningProds||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}
         </div>
       </div>
@@ -957,7 +973,7 @@ function renderWeekPlanResult(data){
 function renderCondition(){
   if(currentConditionResult)return `<div class="card"><div class="card-title">${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${se(t.title)}</div><div class="compat-desc">${se(t.desc)}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
   const conds=[['breakout','突然冒痘'],['dry','乾燥緊繃'],['sensitive','泛紅敏感'],['oily','油光滿面'],['dull','暗沉疲倦'],['pores','毛孔粗大']];
-  return `<div class="card"><div class="card-title">今天肌膚狀況</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">選擇今天的狀況，AI 給出調整建議</div><div class="condition-grid">${conds.map(([id,lbl])=>`<button class="cond-btn" onclick="handleCondition('${id}','${lbl}')">${lbl}</button>`).join('')}</div></div><div id="condition-result"></div>`;
+  return `<div class="card"><div class="card-title">今天肌膚狀況</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;">選擇今天的狀況，AI 給出調整建議</div><div class="condition-grid">${conds.map(([id,lbl])=>`<button class="cond-btn" onclick="handleCondition('${id}','${lbl}')">${lbl}</button>`).join('')}</div></div><div id="condition-result"></div>`;
 }
 async function handleCondition(id,label){
   document.getElementById('condition-result').innerHTML=`<div class="sbox sloading">AI 分析中 <span class="dot-anim">●</span></div>`;
@@ -972,9 +988,9 @@ function clearCondition(){currentConditionResult=null;document.getElementById('a
 
 function renderDevice(){
   const devices=state.products.filter(p=>p.category==='美容儀器');
-  if(!devices.length)return `<div class="card"><div class="card-title">美容儀器搭配建議</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">你還沒有加入美容儀器，請先到「產品庫」新增。</div><button class="submit-btn" onclick="gotoTab('products')">前往新增儀器</button></div>`;
+  if(!devices.length)return `<div class="card"><div class="card-title">美容儀器搭配建議</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;">你還沒有加入美容儀器，請先到「產品庫」新增。</div><button class="submit-btn" onclick="gotoTab('products')">前往新增儀器</button></div>`;
   if(window._device_advice)return renderDeviceResult(window._device_advice);
-  return `<div class="card"><div class="card-title">美容儀器搭配建議</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">你的儀器：<b style="color:var(--accent)">${devices.map(d=>d.name).join('、')}</b><br>AI 建議最佳搭配方式與保養品配合。</div><button class="submit-btn" onclick="genDeviceAdvice()">生成儀器搭配建議</button></div><div id="device-result"></div>`;
+  return `<div class="card"><div class="card-title">美容儀器搭配建議</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">你的儀器：<b style="color:var(--accent)">${devices.map(d=>d.name).join('、')}</b><br>AI 建議最佳搭配方式與保養品配合。</div><button class="submit-btn" onclick="genDeviceAdvice()">生成儀器搭配建議</button></div><div id="device-result"></div>`;
 }
 async function genDeviceAdvice(){
   document.getElementById('device-result').innerHTML=`<div class="sbox sloading">AI 分析中 <span class="dot-anim">●</span></div>`;
@@ -983,6 +999,7 @@ async function genDeviceAdvice(){
   try{
     const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。美容儀器：${devices}。保養品：${prods}。請給儀器搭配使用建議，包括使用前後搭配哪些保養品、使用頻率、注意事項。只回純JSON，不得含任何 emoji：[{"title":"建議標題","desc":"具體說明2-3句"}]，最多5點。`);
     window._device_advice=parseJSON(raw);
+    saveAdviceCache();
     document.getElementById('advice-content').innerHTML=renderDeviceResult(window._device_advice);
   }catch(e){console.error('[genDeviceAdvice]',e);document.getElementById('device-result').innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
 }
@@ -992,7 +1009,7 @@ function renderDeviceResult(items){
 
 function renderCompat(){
   if(window._compat)return renderCompatResult(window._compat);
-  return `<div class="card"><div class="card-title">成分相容性分析</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 分析你的保養品成分，找出衝突與最佳搭配。</div><button class="submit-btn" onclick="runCompat()">開始分析</button></div><div id="compat-result"></div>`;
+  return `<div class="card"><div class="card-title">成分相容性分析</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 分析你的保養品成分，找出衝突與最佳搭配。</div><button class="submit-btn" onclick="runCompat()">開始分析</button></div><div id="compat-result"></div>`;
 }
 async function runCompat(){
   document.getElementById('compat-result').innerHTML=`<div class="sbox sloading">AI 分析成分中 <span class="dot-anim">●</span></div>`;
@@ -1000,6 +1017,7 @@ async function runCompat(){
   try{
     const raw=await callClaude(`分析以下保養品成分相容性：${prods}。找出衝突搭配和建議組合。只回純JSON，不得含任何 emoji：[{"title":"標題","desc":"說明","type":"warning或tip"}]`);
     window._compat=parseJSON(raw);
+    saveAdviceCache();
     document.getElementById('advice-content').innerHTML=renderCompatResult(window._compat);
   }catch(e){console.error('[runCompat]',e);document.getElementById('compat-result').innerHTML=`<div class="sbox swarn">分析失敗：${e.message}，請再試一次</div>`;}
 }
@@ -1021,14 +1039,14 @@ function renderSkin(){
     <div class="card" style="margin-top:16px;">
       <div class="card-title">每日提醒設定</div>
       <div class="reminder-row">
-        <div><div class="reminder-label">早間保養提醒</div><div class="reminder-sub">提醒早間保養 routine</div></div>
+        <div><div class="reminder-label">早間保養提醒</div><div class="reminder-sub">提醒早間保養行程</div></div>
         <div style="display:flex;align-items:center;gap:8px;">
           <input type="time" class="time-input" id="morning-time" value="${r.morningTime}" onchange="saveReminderTime()">
           <button class="toggle ${r.morningEnabled?'on':''}" onclick="toggleReminder('morning')"></button>
         </div>
       </div>
       <div class="reminder-row">
-        <div><div class="reminder-label">晚間保養提醒</div><div class="reminder-sub">提醒晚間保養 routine</div></div>
+        <div><div class="reminder-label">晚間保養提醒</div><div class="reminder-sub">提醒晚間保養行程</div></div>
         <div style="display:flex;align-items:center;gap:8px;">
           <input type="time" class="time-input" id="evening-time" value="${r.eveningTime}" onchange="saveReminderTime()">
           <button class="toggle ${r.eveningEnabled?'on':''}" onclick="toggleReminder('evening')"></button>
@@ -1042,7 +1060,7 @@ function renderSkin(){
     </div>
     <div class="card" style="margin-top:16px;">
       <div class="card-title">資料備份</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">定期匯出備份，避免資料遺失。匯入時會覆蓋現有資料。</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">定期匯出備份，避免資料遺失。匯入時會覆蓋現有資料。</div>
       <div style="display:flex;gap:8px;">
         <button class="submit-btn" style="flex:1;" onclick="exportBackup()">匯出備份</button>
         <button class="ghost-btn" style="flex:1;margin-top:0;" onclick="document.getElementById('import-input').click()">匯入備份</button>
@@ -1112,7 +1130,7 @@ saveToCloud(stateToSave).then(()=>{
   e.target.value='';
 }
 async function saveSkin(){
-  saveState();window._routine_morning=null;window._routine_evening=null;window._compat=null;window._device_advice=null;
+  saveState();clearAdviceCache();
   const el=document.getElementById('skin-advice');
   el.innerHTML=`<div class="sbox sloading">AI 生成個人化建議 <span class="dot-anim">●</span></div>`;
   const prods=state.products.map(p=>`${p.brand} ${p.name}（${p.category}）`).join('、');
