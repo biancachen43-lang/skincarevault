@@ -429,6 +429,9 @@ const SVG_WAND=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 const SVG_WARN=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
 const SVG_CHECK=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
 function prodIcon(p){return(p&&p.category==='美容儀器')?SVG_WAND:SVG_BOTTLE;}
+// Strip emoji from AI-returned strings so no emoji ever appears in the UI.
+function se(s){return s?s.replace(/[⌀-⟿⬀-⯿︀-️]|[\u{1F000}-\u{1FFFF}]/gu,'').replace(/\s{2,}/g,' ').trim():'';}
+
 
 function renderPcard(p){
   const d=daysLeft(p),s=expStatus(d),pct=expPct(p);
@@ -952,7 +955,7 @@ function renderWeekPlanResult(data){
 }
 
 function renderCondition(){
-  if(currentConditionResult)return `<div class="card"><div class="card-title">${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
+  if(currentConditionResult)return `<div class="card"><div class="card-title">${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${se(t.title)}</div><div class="compat-desc">${se(t.desc)}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
   const conds=[['breakout','突然冒痘'],['dry','乾燥緊繃'],['sensitive','泛紅敏感'],['oily','油光滿面'],['dull','暗沉疲倦'],['pores','毛孔粗大']];
   return `<div class="card"><div class="card-title">今天肌膚狀況</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">選擇今天的狀況，AI 給出調整建議</div><div class="condition-grid">${conds.map(([id,lbl])=>`<button class="cond-btn" onclick="handleCondition('${id}','${lbl}')">${lbl}</button>`).join('')}</div></div><div id="condition-result"></div>`;
 }
@@ -960,7 +963,7 @@ async function handleCondition(id,label){
   document.getElementById('condition-result').innerHTML=`<div class="sbox sloading">AI 分析中 <span class="dot-anim">●</span></div>`;
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}，成分：${p.ingredients||'未知'}）`).join('；');
   try{
-    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}，保養品：${prods}。今天狀況：${label}。給4-5點應對建議。只回純JSON：[{"title":"建議標題","desc":"具體說明1-2句"}]`);
+    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}，保養品：${prods}。今天狀況：${label}。給4-5點應對建議。只回純JSON，不得含任何 emoji：[{"title":"建議標題","desc":"具體說明1-2句"}]`);
     currentConditionResult={label,tips:parseJSON(raw)};
     document.getElementById('advice-content').innerHTML=renderAdviceContent();
   }catch(e){console.error('[handleCondition]',e);document.getElementById('condition-result').innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
@@ -978,13 +981,13 @@ async function genDeviceAdvice(){
   const devices=state.products.filter(p=>p.category==='美容儀器').map(p=>`${p.brand} ${p.name}`).join('、');
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}）`).join('、');
   try{
-    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。美容儀器：${devices}。保養品：${prods}。請給儀器搭配使用建議，包括使用前後搭配哪些保養品、使用頻率、注意事項。只回純JSON：[{"title":"建議標題","desc":"具體說明2-3句"}]，最多5點。`);
+    const raw=await callClaude(`使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。美容儀器：${devices}。保養品：${prods}。請給儀器搭配使用建議，包括使用前後搭配哪些保養品、使用頻率、注意事項。只回純JSON，不得含任何 emoji：[{"title":"建議標題","desc":"具體說明2-3句"}]，最多5點。`);
     window._device_advice=parseJSON(raw);
     document.getElementById('advice-content').innerHTML=renderDeviceResult(window._device_advice);
   }catch(e){console.error('[genDeviceAdvice]',e);document.getElementById('device-result').innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
 }
 function renderDeviceResult(items){
-  return `<div class="card"><div class="card-title">儀器搭配建議</div>${items.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._device_advice=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
+  return `<div class="card"><div class="card-title">儀器搭配建議</div>${items.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${se(t.title)}</div><div class="compat-desc">${se(t.desc)}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._device_advice=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
 }
 
 function renderCompat(){
@@ -995,14 +998,14 @@ async function runCompat(){
   document.getElementById('compat-result').innerHTML=`<div class="sbox sloading">AI 分析成分中 <span class="dot-anim">●</span></div>`;
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（成分：${p.ingredients||'一般成分'}）`).join('；');
   try{
-    const raw=await callClaude(`分析以下保養品成分相容性：${prods}。找出衝突搭配和建議組合。只回純JSON：[{"title":"標題","desc":"說明","type":"warning或tip"}]`);
+    const raw=await callClaude(`分析以下保養品成分相容性：${prods}。找出衝突搭配和建議組合。只回純JSON，不得含任何 emoji：[{"title":"標題","desc":"說明","type":"warning或tip"}]`);
     window._compat=parseJSON(raw);
     document.getElementById('advice-content').innerHTML=renderCompatResult(window._compat);
   }catch(e){console.error('[runCompat]',e);document.getElementById('compat-result').innerHTML=`<div class="sbox swarn">分析失敗：${e.message}，請再試一次</div>`;}
 }
 function renderCompatResult(items){
   const warns=items.filter(i=>i.type==='warning'),tips=items.filter(i=>i.type!=='warning');
-  return `<div class="card"><div class="card-title">成分分析結果</div>${warns.length?`<div class="infobox infobox-coral" style="margin-bottom:10px;"><div class="infobox-title">${SVG_WARN} 注意事項</div>${warns.map(w=>`<div class="compat-item"><span class="compat-icon">${SVG_WARN}</span><div><div class="compat-title">${w.title}</div><div class="compat-desc">${w.desc}</div></div></div>`).join('')}</div>`:''}${tips.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._compat=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新分析</button></div>`;
+  return `<div class="card"><div class="card-title">成分分析結果</div>${warns.length?`<div class="infobox infobox-coral" style="margin-bottom:10px;"><div class="infobox-title">${SVG_WARN} 注意事項</div>${warns.map(w=>`<div class="compat-item"><span class="compat-icon">${SVG_WARN}</span><div><div class="compat-title">${se(w.title)}</div><div class="compat-desc">${se(w.desc)}</div></div></div>`).join('')}</div>`:''}${tips.map(t=>`<div class="compat-item"><span class="compat-icon">${SVG_CHECK}</span><div><div class="compat-title">${se(t.title)}</div><div class="compat-desc">${se(t.desc)}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._compat=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新分析</button></div>`;
 }
 
 // SKIN + REMINDERS
