@@ -966,21 +966,20 @@ ${extra}
     const eveningData=parseJSON(eveningRaw);
     window._routine_evening={...eveningData,skin:state.skin.type};
 
-    // Step 4: week plan (built from morning + evening routines)
+    // Step 4: week plan (built directly from morning + evening routine JSON)
     showStep('步驟 4/4：生成一週排程');
-    const weekRaw=await callClaude(`你是專業保養師，請依據以下早晚行程，規劃一週七天的早晚保養排程。
+    const weekRaw=await callClaude(`以下是用戶的早間和晚間保養行程 JSON 結果。請直接依照這兩個行程生成一週七天的早晚排程，不要自行調整產品的使用時段或頻率。
 
-${base}
-【早間行程】
-${formatRoutineForWeek(morningData)}
+【早間行程 JSON】
+${JSON.stringify(morningData)}
 
-【晚間行程】
-${formatRoutineForWeek(eveningData)}
+【晚間行程 JSON】
+${JSON.stringify(eveningData)}
 
-請把早晚行程中的輪替產品合理分配到七天，確保：
-- 每個輪替產品都在一週內用到
-- 同一天的早晚不安排成分衝突的產品
-- 非輪替產品每天都出現在對應時段
+生成規則（必須嚴格遵守）：
+1. daily（每日步驟）中的產品：每天都出現在對應時段（早間或晚間）
+2. rotate（輪替計畫）中的每一組，依照 days 欄位的描述交替分配到不同天，同一組輪替產品絕對不可在同一天同時出現
+3. 不添加行程以外的產品，不改變產品的早晚時段，不重新推理
 
 只回純JSON，不加任何說明文字：
 {"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
