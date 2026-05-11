@@ -325,17 +325,18 @@ async function manualLoadFromCloud(){
 }
 
 function computeExpiry(p){
-  if(p.expiryDate)return new Date(p.expiryDate);
+  // Priority: openedDate+PAO > mfgDate+PAO > explicit expiryDate > null
   if(p.openedDate&&p.pao){const d=new Date(p.openedDate);d.setMonth(d.getMonth()+parseInt(p.pao));return d;}
   if(p.mfgDate&&p.pao){const d=new Date(p.mfgDate);d.setMonth(d.getMonth()+parseInt(p.pao));return d;}
+  if(p.expiryDate)return new Date(p.expiryDate);
   return null;
 }
 function daysLeft(p){const e=computeExpiry(p);if(!e)return null;return Math.floor((e-new Date())/86400000);}
 function expStatus(d){if(d===null)return 'unknown';if(d<0)return 'expired';if(d<=30)return 'danger';if(d<=60)return 'warn';return 'ok';}
 function expColor(s){return s==='ok'?'#3A8C6E':s==='warn'?'#A07820':s==='unknown'?'#C4B8B0':'#A84848';}
 function expPct(p){const e=computeExpiry(p);if(!e)return 0;const st=p.openedDate?new Date(p.openedDate):p.mfgDate?new Date(p.mfgDate):new Date();return Math.min(100,Math.max(0,Math.round(((new Date()-st)/(e-st))*100)));}
-function tagCls(s){return s==='ok'?'tok':s==='warn'?'twarn':s==='unknown'?'tgray':'tdanger';}
-function tagTxt(d){if(d===null)return '未設效期';if(d<0)return '已過期';if(d<=60)return `剩 ${d} 天`;return '良好';}
+function tagCls(s){return s==='ok'?'tok':s==='warn'||s==='danger'?'twarn':s==='unknown'?'tgray':'tdanger';}
+function tagTxt(d){if(d===null)return '未設定效期';if(d<0)return '已過期';if(d<=60)return `距到期日還有 ${d} 天`;return '效期良好';}
 const today=()=>new Date().toISOString().split('T')[0];
 const fmt=s=>s?s.replace(/-/g,'/'):'—';
 
@@ -424,8 +425,9 @@ function renderHome(){
       <div class="stat"><div class="stat-n" style="color:var(--purple)">${ok}</div><div class="stat-l">狀態良好</div></div>
     </div>
     ${alerts}
-    <div class="section-hd"><span class="section-label">效期最緊迫</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
-    <div class="product-list">${sorted.map(renderPcard).join('')}</div>`;
+    <div class="section-hd"><span class="section-label">下方產品已接近效期，建議盡快使用</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
+    <div class="product-list">${sorted.map(renderPcard).join('')}</div>
+    <div style="margin-top:10px;font-size:12px;color:#6B5F58;line-height:1.6;">效期以開封後可用月數（PAO）為主要計算依據。即使產品仍在製造效期內，超過 PAO 建議停止使用，以避免氧化變質產品對肌膚造成刺激。若未填寫 PAO，則以產品標示之到期日計算。</div>`;
 }
 
 // PRODUCTS
