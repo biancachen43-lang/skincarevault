@@ -19,7 +19,7 @@
   --coral:#A85848;--coral-light:#F7EAE6;
   --red:#A84848;--red-light:#F7E8E8;
   --bg:#FAF8F4;--bg2:#FFFFFF;--bg3:#F0EBE3;
-  --text:#2C2824;--text2:#A89E94;--text3:#C4B8B0;
+  --text:#2C2824;--text2:#6B5F58;--text3:#C4B8B0;
   --border:#E8E2D9;--border2:#D0C8BE;
   --btn:#2C2824;
   --radius:6px;--radius-sm:4px;
@@ -200,6 +200,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 </div>
 <script>
 const API_ENDPOINT='/api/claude';
+// NO EMOJI POLICY: All icons must use SVG line icons (stroke-width:1.5, fill:none). No emoji in UI.
 const STORAGE_KEY='skincarevault_v2';
 
 // 雲端儲存
@@ -418,7 +419,7 @@ function renderProducts(){
     <div class="seg-row">
       ${['all','保養品','美容儀器'].map(f=>`<button class="seg-tag ${productFilter===f?'active':''}" onclick="setFilter('${f}')">${f==='all'?'全部':f}</button>`).join('')}
     </div>
-    ${showList.length?`<div class="product-list">${showList.map(renderPcard).join('')}</div>`:`<div class="empty"><div class="empty-icon">${productFilter==='美容儀器'?'💡':'🧴'}</div>還沒有${productFilter==='all'?'':productFilter}，點擊新增吧！</div>`}`;
+    ${showList.length?`<div class="product-list">${showList.map(renderPcard).join('')}</div>`:`<div class="empty"><div class="empty-icon">${productFilter==='美容儀器'?'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4l5 5L8 21H3v-5L15 4z"/><line x1="12" y1="7" x2="17" y2="12"/></svg>':'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M8 3v4l-3 3v11a1 1 0 001 1h12a1 1 0 001-1V10l-3-3V3"/><line x1="5" y1="13" x2="19" y2="13"/></svg>'}</div>還沒有${productFilter==='all'?'':productFilter}，點擊新增吧！</div>`}`;
 }
 function setFilter(f){productFilter=f;render();}
 function imgSrc(p){return p.imgUrl||p.imgData||null;}
@@ -427,7 +428,7 @@ function renderPcard(p){
   const d=daysLeft(p),s=expStatus(d),pct=expPct(p);
   const isDevice=p.category==='美容儀器';
   return `<div class="pcard" data-pid="${p.id}" style="position:relative;">
-    <button data-del-id="${p.id}" data-del-name=${JSON.stringify(p.name)} style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;line-height:1;padding:4px;cursor:pointer;opacity:0.45;" title="刪除">🗑️</button>
+    <button data-del-id="${p.id}" data-del-name=${JSON.stringify(p.name)} style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;line-height:1;padding:4px;cursor:pointer;opacity:0.45;" title="刪除"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
     <div class="pcard-emoji">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(p.emoji||'🧴')}</div>
     <div class="pcard-body">
       <div class="pcard-brand">${p.brand} · ${p.category}</div>
@@ -481,7 +482,7 @@ function buildProductForm(p){
       </div>
     </div>
     <div id="expiry-section" ${isDevice?'style="display:none"':''}>
-      <div class="expiry-hint">💡 效期資料不需全填，app 會依你填的資料自動推算到期日</div>
+      <div class="expiry-hint">效期資料不需全填，app 會依你填的資料自動推算到期日</div>
       <div class="form-row">
         <div><span class="fl">製造日期（選填）</span><input class="fi fi-opt" type="date" id="fmfg" value="${p.mfgDate||''}"></div>
         <div><span class="fl">開封日期（選填）</span><input class="fi fi-opt" type="date" id="fopened" value="${p.openedDate||today()}"></div>
@@ -522,9 +523,9 @@ function buildAddModal(){
     <div class="modal-handle"></div>
     <div class="modal-hd"><span class="modal-title">新增產品</span><button class="modal-close" onclick="closeModal()">✕</button></div>
     <div class="tabs">
-      <button class="tab-btn ${addMode==='search'?'active':''}" onclick="setAddMode('search')">🔍 搜尋</button>
-      <button class="tab-btn ${addMode==='photo'?'active':''}" onclick="setAddMode('photo')">📷 照片</button>
-      <button class="tab-btn ${addMode==='manual'?'active':''}" onclick="setAddMode('manual')">✏️ 手動</button>
+      <button class="tab-btn ${addMode==='search'?'active':''}" onclick="setAddMode('search')">搜尋</button>
+      <button class="tab-btn ${addMode==='photo'?'active':''}" onclick="setAddMode('photo')">照片</button>
+      <button class="tab-btn ${addMode==='manual'?'active':''}" onclick="setAddMode('manual')">手動</button>
     </div>
     <div id="add-mode-body">${buildAddModeBody()}</div>
     <hr class="divider">
@@ -536,13 +537,13 @@ function setAddMode(m){addMode=m;searchResults=[];selectedResult=null;showModal(
 
 function buildOptionalPhotoSection(){
   const preview=window._photoUrl?`<div style="position:relative;display:inline-block;"><img src="${window._photoUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);"><label style="position:absolute;inset:0;cursor:pointer;border-radius:8px;"><input type="file" accept="image/*" style="display:none" onchange="handleOptionalPhoto(event)"></label></div>`:
-    `<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px dashed var(--border);border-radius:20px;font-size:12px;color:var(--purple);cursor:pointer;background:var(--bg2);">📷 上傳照片<input type="file" accept="image/*" style="display:none" onchange="handleOptionalPhoto(event)"></label>`;
+    `<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px dashed var(--border);border-radius:20px;font-size:12px;color:var(--purple);cursor:pointer;background:var(--bg2);">上傳照片<input type="file" accept="image/*" style="display:none" onchange="handleOptionalPhoto(event)"></label>`;
   return `<div style="margin-top:12px;border-top:0.5px solid var(--border);padding-top:12px;"><div style="font-size:11px;color:var(--text2);margin-bottom:8px;">產品照片（選填）</div><div id="opt-photo-area">${preview}</div><div id="opt-photo-status" style="margin-top:6px;"></div></div>`;
 }
 
 function buildAddModeBody(){
   if(addMode==='search')return `<div class="search-wrap"><input class="search-input" id="sq" placeholder="例：SK-II 神仙水、美容儀器..." onkeydown="if(event.key==='Enter')doSearch()"><button class="search-btn" id="sbtn" onclick="doSearch()">搜尋</button></div><div id="ss"></div><div id="sr">${searchResults.map(buildRcard).join('')}</div>${buildOptionalPhotoSection()}`;
-  if(addMode==='photo')return `<div class="upload-area"><input type="file" accept="image/*" onchange="handlePhoto(event)">${currentImgData?`<img src="${currentImgData}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px;">`:`<div class="upload-icon">📷</div><div class="upload-text">點擊上傳或拍照</div>`}</div><div id="photo-status"></div>`;
+  if(addMode==='photo')return `<div class="upload-area"><input type="file" accept="image/*" onchange="handlePhoto(event)">${currentImgData?`<img src="${currentImgData}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px;">`:`<div class="upload-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="upload-text">點擊上傳或拍照</div>`}</div><div id="photo-status"></div>`;
   return `<div class="sbox sinfo">直接填寫下方資訊</div>${buildOptionalPhotoSection()}`;
 }
 
@@ -574,7 +575,7 @@ async function handleOptionalPhoto(e){
 }
 function buildRcard(r,i){
   return `<div class="rcard ${selectedResult===i?'sel':''}" id="rc${i}" onclick="pickResult(${i})">
-    <div class="rcard-name">${r.emoji||'🧴'} ${r.name}${selectedResult===i?' <span style="color:var(--purple);font-size:11px;font-weight:600;">✓ 已選</span>':''}</div>
+    <div class="rcard-name">${r.name}${selectedResult===i?' <span style="color:var(--purple);font-size:11px;font-weight:600;">✓ 已選</span>':''}</div>
     <div class="rcard-brand">${r.brand}</div>
     <div class="rcard-desc">${r.desc||''}</div>
     <div class="rcard-tags">${(r.tags||[]).map(t=>`<span class="rtag">${t}</span>`).join('')}</div>
@@ -587,7 +588,7 @@ async function doSearch(){
   isSearching=true;
   const btn=document.getElementById('sbtn'),ss=document.getElementById('ss');
   if(btn)btn.disabled=true;
-  if(ss)ss.innerHTML=`<div class="sbox sloading">🔍 查詢中 <span class="dot-anim">●</span></div>`;
+  if(ss)ss.innerHTML=`<div class="sbox sloading">查詢中 <span class="dot-anim">●</span></div>`;
   try{
     const raw=await callClaude(`你是保養品與美容儀器專家資料庫。搜尋：「${q}」。回傳最多3個符合的真實產品，只回純JSON：[{"brand":"","name":"","category":"化妝水或精華或乳液或乳霜或防曬或潔顏或面膜或美容儀器或其他","pao":月數或0,"emoji":"","desc":"功效1句","tags":["標籤"],"advice":"使用建議1-2句","ingredients":"主要成分或空字串"}]`);
     searchResults=parseJSON(raw);selectedResult=null;
@@ -600,7 +601,7 @@ async function doSearch(){
 
 function pickResult(i){
   selectedResult=i;const r=searchResults[i];
-  searchResults.forEach((_,j)=>{const el=document.getElementById('rc'+j);if(el){el.classList.toggle('sel',j===i);el.querySelector('.rcard-name').innerHTML=`${_.emoji||'🧴'} ${_.name}${j===i?' <span style="color:var(--purple);font-size:11px;font-weight:600;">✓ 已選</span>':''}`;}}); 
+  searchResults.forEach((_,j)=>{const el=document.getElementById('rc'+j);if(el){el.classList.toggle('sel',j===i);el.querySelector('.rcard-name').innerHTML=`${_.name}${j===i?' <span style="color:var(--purple);font-size:11px;font-weight:600;">✓ 已選</span>':''}`;}}); 
   const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined&&v!==null)el.value=v;};
   set('fb',r.brand);set('fn',r.name);set('fp',r.pao||'');set('fing',r.ingredients||'');
   // 重新渲染表單以確保 select 正確顯示
@@ -717,9 +718,9 @@ function openDetail(id){
     ${exp&&!isDevice?`<div class="det-row"><span class="det-k">建議用完日期</span><span class="det-v">${exp.toISOString().split('T')[0].replace(/-/g,'/')}</span></div>`:''}
     ${!isDevice?`<div class="det-row"><span class="det-k">效期狀態</span><span class="det-v"><span class="tag ${tagCls(s)}">${tagTxt(d)}</span></span></div>`:''}
     ${p.ingredients?`<div class="det-row"><span class="det-k">主要成分</span><span class="det-v" style="font-size:11px;text-align:right;max-width:60%;">${p.ingredients}</span></div>`:''}
-    ${p.advice?`<div class="infobox infobox-purple"><div class="infobox-title">✨ AI 使用建議</div><div class="infobox-body">${p.advice}</div></div>`:''}
+    ${p.advice?`<div class="infobox infobox-purple"><div class="infobox-title">AI 使用建議</div><div class="infobox-body">${p.advice}</div></div>`:''}
     ${isDevice?`<button class="ghost-btn" style="margin-top:10px;" onclick="closeModal();currentAdviceTab='device';gotoTab('advice')">查看儀器搭配建議 →</button>`:''}
-    <button class="edit-btn" onclick="closeModal();openEdit(${p.id})">✏️ 編輯產品資料</button>
+    <button class="edit-btn" onclick="closeModal();openEdit(${p.id})">編輯產品資料</button>
     <button class="danger-btn" onclick="deleteProduct(${p.id})">刪除此產品</button>
   </div></div>`);
 }
@@ -813,7 +814,7 @@ function renderRoutineResult(data,tod){
   }).join('');
   const rotateHtml=data.rotate&&data.rotate.length?`
     <div style="margin-top:14px;border-top:0.5px solid var(--border);padding-top:14px;">
-      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">🔄 輪替使用計畫</div>
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">輪替使用計畫</div>
       ${data.rotate.map(r=>{
         const names=(r.products||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
         return`<div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
@@ -876,7 +877,7 @@ function clearRoutine(tod){window['_routine_'+tod]=null;document.getElementById(
 function renderWeekPlan(){
   if(window._weekplan&&window._weekplan.skin===state.skin.type)return renderWeekPlanResult(window._weekplan);
   const prodCount=state.products.filter(p=>p.category!=='美容儀器').length;
-  return`<div class="card"><div class="card-title">📅 一週保養排程</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 將把你的 <b style="color:var(--purple)">${prodCount} 個保養品</b> 安排成完整的一週早晚排程，讓每個產品都能在最適合的時間發揮效果。</div><button class="submit-btn" onclick="genWeekPlan()">✨ 生成一週排程</button></div><div id="week-result"></div>`;
+  return`<div class="card"><div class="card-title">一週保養排程</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 將把你的 <b style="color:var(--accent)">${prodCount} 個保養品</b> 安排成完整的一週早晚排程，讓每個產品都能在最適合的時間發揮效果。</div><button class="submit-btn" onclick="genWeekPlan()">生成一週排程</button></div><div id="week-result"></div>`;
 }
 
 async function genWeekPlan(){
@@ -931,23 +932,23 @@ function renderWeekPlanResult(data){
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div>
-          <div style="font-size:10px;font-weight:600;color:var(--amber);margin-bottom:6px;">☀ 早間</div>
+          <div style="font-size:10px;font-weight:600;color:var(--amber);margin-bottom:6px;">早間</div>
           ${morningProds||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}
         </div>
         <div>
-          <div style="font-size:10px;font-weight:600;color:#534AB7;margin-bottom:6px;">🌙 晚間</div>
+          <div style="font-size:10px;font-weight:600;color:#534AB7;margin-bottom:6px;">晚間</div>
           ${eveningProds||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}
         </div>
       </div>
     </div>`;
   }).join('');
-  return`<div class="card"><div class="card-title">📅 一週保養排程</div>${html}<button class="ghost-btn" onclick="window._weekplan=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
+  return`<div class="card"><div class="card-title">一週保養排程</div>${html}<button class="ghost-btn" onclick="window._weekplan=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
 }
 
 function renderCondition(){
-  if(currentConditionResult)return `<div class="card"><div class="card-title">⚡ ${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
-  const conds=[['breakout','😣 突然冒痘'],['dry','😖 乾燥緊繃'],['sensitive','😮 泛紅敏感'],['oily','😅 油光滿面'],['dull','😑 暗沉疲倦'],['pores','😤 毛孔粗大']];
-  return `<div class="card"><div class="card-title">⚡ 今天肌膚狀況</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">選擇今天的狀況，AI 給出調整建議</div><div class="condition-grid">${conds.map(([id,lbl])=>`<button class="cond-btn" onclick="handleCondition('${id}','${lbl}')">${lbl}</button>`).join('')}</div></div><div id="condition-result"></div>`;
+  if(currentConditionResult)return `<div class="card"><div class="card-title">${currentConditionResult.label} 應對方式</div>${currentConditionResult.tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="clearCondition()">← 選其他狀況</button></div>`;
+  const conds=[['breakout','突然冒痘'],['dry','乾燥緊繃'],['sensitive','泛紅敏感'],['oily','油光滿面'],['dull','暗沉疲倦'],['pores','毛孔粗大']];
+  return `<div class="card"><div class="card-title">今天肌膚狀況</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">選擇今天的狀況，AI 給出調整建議</div><div class="condition-grid">${conds.map(([id,lbl])=>`<button class="cond-btn" onclick="handleCondition('${id}','${lbl}')">${lbl}</button>`).join('')}</div></div><div id="condition-result"></div>`;
 }
 async function handleCondition(id,label){
   document.getElementById('condition-result').innerHTML=`<div class="sbox sloading">AI 分析中 <span class="dot-anim">●</span></div>`;
@@ -962,9 +963,9 @@ function clearCondition(){currentConditionResult=null;document.getElementById('a
 
 function renderDevice(){
   const devices=state.products.filter(p=>p.category==='美容儀器');
-  if(!devices.length)return `<div class="card"><div class="card-title">💡 美容儀器搭配建議</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">你還沒有加入美容儀器，請先到「產品庫」新增。</div><button class="submit-btn" onclick="gotoTab('products')">前往新增儀器</button></div>`;
+  if(!devices.length)return `<div class="card"><div class="card-title">美容儀器搭配建議</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;">你還沒有加入美容儀器，請先到「產品庫」新增。</div><button class="submit-btn" onclick="gotoTab('products')">前往新增儀器</button></div>`;
   if(window._device_advice)return renderDeviceResult(window._device_advice);
-  return `<div class="card"><div class="card-title">💡 美容儀器搭配建議</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">你的儀器：<b style="color:var(--purple)">${devices.map(d=>d.name).join('、')}</b><br>AI 建議最佳搭配方式與保養品配合。</div><button class="submit-btn" onclick="genDeviceAdvice()">✨ 生成儀器搭配建議</button></div><div id="device-result"></div>`;
+  return `<div class="card"><div class="card-title">美容儀器搭配建議</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">你的儀器：<b style="color:var(--accent)">${devices.map(d=>d.name).join('、')}</b><br>AI 建議最佳搭配方式與保養品配合。</div><button class="submit-btn" onclick="genDeviceAdvice()">生成儀器搭配建議</button></div><div id="device-result"></div>`;
 }
 async function genDeviceAdvice(){
   document.getElementById('device-result').innerHTML=`<div class="sbox sloading">AI 分析中 <span class="dot-anim">●</span></div>`;
@@ -977,12 +978,12 @@ async function genDeviceAdvice(){
   }catch(e){console.error('[genDeviceAdvice]',e);document.getElementById('device-result').innerHTML=`<div class="sbox swarn">生成失敗：${e.message}，請再試一次</div>`;}
 }
 function renderDeviceResult(items){
-  return `<div class="card"><div class="card-title">💡 儀器搭配建議</div>${items.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._device_advice=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
+  return `<div class="card"><div class="card-title">儀器搭配建議</div>${items.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._device_advice=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新生成</button></div>`;
 }
 
 function renderCompat(){
   if(window._compat)return renderCompatResult(window._compat);
-  return `<div class="card"><div class="card-title">🔬 成分相容性分析</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 分析你的保養品成分，找出衝突與最佳搭配。</div><button class="submit-btn" onclick="runCompat()">🔍 開始分析</button></div><div id="compat-result"></div>`;
+  return `<div class="card"><div class="card-title">成分相容性分析</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">AI 分析你的保養品成分，找出衝突與最佳搭配。</div><button class="submit-btn" onclick="runCompat()">開始分析</button></div><div id="compat-result"></div>`;
 }
 async function runCompat(){
   document.getElementById('compat-result').innerHTML=`<div class="sbox sloading">AI 分析成分中 <span class="dot-anim">●</span></div>`;
@@ -995,7 +996,7 @@ async function runCompat(){
 }
 function renderCompatResult(items){
   const warns=items.filter(i=>i.type==='warning'),tips=items.filter(i=>i.type!=='warning');
-  return `<div class="card"><div class="card-title">🔬 成分分析結果</div>${warns.length?`<div class="infobox infobox-coral" style="margin-bottom:10px;"><div class="infobox-title">⚠ 注意事項</div>${warns.map(w=>`<div class="compat-item"><span class="compat-icon">${w.icon}</span><div><div class="compat-title">${w.title}</div><div class="compat-desc">${w.desc}</div></div></div>`).join('')}</div>`:''}${tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._compat=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新分析</button></div>`;
+  return `<div class="card"><div class="card-title">成分分析結果</div>${warns.length?`<div class="infobox infobox-coral" style="margin-bottom:10px;"><div class="infobox-title">⚠ 注意事項</div>${warns.map(w=>`<div class="compat-item"><span class="compat-icon">${w.icon}</span><div><div class="compat-title">${w.title}</div><div class="compat-desc">${w.desc}</div></div></div>`).join('')}</div>`:''}${tips.map(t=>`<div class="compat-item"><span class="compat-icon">${t.icon}</span><div><div class="compat-title">${t.title}</div><div class="compat-desc">${t.desc}</div></div></div>`).join('')}<button class="ghost-btn" onclick="window._compat=null;document.getElementById('advice-content').innerHTML=renderAdviceContent()">重新分析</button></div>`;
 }
 
 // SKIN + REMINDERS
@@ -1004,12 +1005,12 @@ function renderSkin(){
   const concerns=['暗沉','毛孔','細紋','痘痘','黑眼圈','乾燥','泛紅','斑點'];
   const r=state.reminders;
   return `
-    <div class="card"><div class="card-title">👤 我的膚質</div><div class="opt-grid">${types.map(t=>`<button class="opt-btn ${state.skin.type===t?'sel':''}" onclick="setSkinType('${t}')">${t}</button>`).join('')}</div></div>
-    <div class="card"><div class="card-title">😟 膚況困擾（可複選）</div><div class="opt-grid3">${concerns.map(c=>`<button class="opt-btn ${state.skin.concerns.includes(c)?'sel':''}" onclick="toggleConcern('${c}')">${c}</button>`).join('')}</div></div>
+    <div class="card"><div class="card-title">我的膚質</div><div class="opt-grid">${types.map(t=>`<button class="opt-btn ${state.skin.type===t?'sel':''}" onclick="setSkinType('${t}')">${t}</button>`).join('')}</div></div>
+    <div class="card"><div class="card-title">膚況困擾（可複選）</div><div class="opt-grid3">${concerns.map(c=>`<button class="opt-btn ${state.skin.concerns.includes(c)?'sel':''}" onclick="toggleConcern('${c}')">${c}</button>`).join('')}</div></div>
     <button class="save-btn" onclick="saveSkin()">✓ 儲存並更新建議</button>
     <div id="skin-advice" style="margin-top:12px;"></div>
     <div class="card" style="margin-top:16px;">
-      <div class="card-title">🔔 每日提醒設定</div>
+      <div class="card-title">每日提醒設定</div>
       <div class="reminder-row">
         <div><div class="reminder-label">早間保養提醒</div><div class="reminder-sub">提醒早間保養 routine</div></div>
         <div style="display:flex;align-items:center;gap:8px;">
@@ -1031,14 +1032,14 @@ function renderSkin(){
       <div id="notif-status" style="margin-top:4px;"></div>
     </div>
     <div class="card" style="margin-top:16px;">
-      <div class="card-title">💾 資料備份</div>
+      <div class="card-title">資料備份</div>
       <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">定期匯出備份，避免資料遺失。匯入時會覆蓋現有資料。</div>
       <div style="display:flex;gap:8px;">
-        <button class="submit-btn" style="flex:1;" onclick="exportBackup()">⬇ 匯出備份</button>
-        <button class="ghost-btn" style="flex:1;margin-top:0;" onclick="document.getElementById('import-input').click()">⬆ 匯入備份</button>
+        <button class="submit-btn" style="flex:1;" onclick="exportBackup()">匯出備份</button>
+        <button class="ghost-btn" style="flex:1;margin-top:0;" onclick="document.getElementById('import-input').click()">匯入備份</button>
       </div>
       <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importBackup(event)">
-      <button id="cloud-load-btn" class="ghost-btn" style="margin-top:8px;" onclick="manualLoadFromCloud()">☁️ 從雲端重新載入資料</button>
+      <button id="cloud-load-btn" class="ghost-btn" style="margin-top:8px;" onclick="manualLoadFromCloud()">從雲端重新載入資料</button>
       <div id="backup-status" style="margin-top:8px;"></div>
     </div>`;
 }
@@ -1135,7 +1136,7 @@ async function requestNotifPermission(){
   if(Notification.permission==='granted')return true;
   const perm=await Notification.requestPermission();
   if(perm==='granted'){
-    setTimeout(()=>new Notification('SkincareVault ✨',{body:'通知設定成功！你將收到保養提醒',icon:'/icon-192.png'}),500);
+    setTimeout(()=>new Notification('SkincareVault',{body:'通知設定成功！你將收到保養提醒',icon:'/icon-192.png'}),500);
     return true;
   }
   return false;
