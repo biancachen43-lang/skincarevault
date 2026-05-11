@@ -529,10 +529,43 @@ function buildAddModal(){
 }
 function setAddMode(m){addMode=m;searchResults=[];selectedResult=null;showModal(buildAddModal());}
 
+function buildOptionalPhotoSection(){
+  const preview=window._photoUrl?`<div style="position:relative;display:inline-block;"><img src="${window._photoUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);"><label style="position:absolute;inset:0;cursor:pointer;border-radius:8px;"><input type="file" accept="image/*" style="display:none" onchange="handleOptionalPhoto(event)"></label></div>`:
+    `<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px dashed var(--border);border-radius:20px;font-size:12px;color:var(--purple);cursor:pointer;background:var(--bg2);">📷 上傳照片<input type="file" accept="image/*" style="display:none" onchange="handleOptionalPhoto(event)"></label>`;
+  return `<div style="margin-top:12px;border-top:0.5px solid var(--border);padding-top:12px;"><div style="font-size:11px;color:var(--text2);margin-bottom:8px;">產品照片（選填）</div><div id="opt-photo-area">${preview}</div><div id="opt-photo-status" style="margin-top:6px;"></div></div>`;
+}
+
 function buildAddModeBody(){
-  if(addMode==='search')return `<div class="search-wrap"><input class="search-input" id="sq" placeholder="例：SK-II 神仙水、美容儀器..." onkeydown="if(event.key==='Enter')doSearch()"><button class="search-btn" id="sbtn" onclick="doSearch()">搜尋</button></div><div id="ss"></div><div id="sr">${searchResults.map(buildRcard).join('')}</div>`;
+  if(addMode==='search')return `<div class="search-wrap"><input class="search-input" id="sq" placeholder="例：SK-II 神仙水、美容儀器..." onkeydown="if(event.key==='Enter')doSearch()"><button class="search-btn" id="sbtn" onclick="doSearch()">搜尋</button></div><div id="ss"></div><div id="sr">${searchResults.map(buildRcard).join('')}</div>${buildOptionalPhotoSection()}`;
   if(addMode==='photo')return `<div class="upload-area"><input type="file" accept="image/*" onchange="handlePhoto(event)">${currentImgData?`<img src="${currentImgData}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px;">`:`<div class="upload-icon">📷</div><div class="upload-text">點擊上傳或拍照</div>`}</div><div id="photo-status"></div>`;
-  return `<div class="sbox sinfo">直接填寫下方資訊</div>`;
+  return `<div class="sbox sinfo">直接填寫下方資訊</div>${buildOptionalPhotoSection()}`;
+}
+
+async function handleOptionalPhoto(e){
+  const file=e.target.files[0];if(!file)return;
+  const ps=document.getElementById('opt-photo-status');
+  if(ps)ps.innerHTML=`<div class="sbox sloading">上傳中 <span class="dot-anim">●</span></div>`;
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    let compressed;
+    try{compressed=await compressImage(ev.target.result,800,0.75);}catch{compressed=ev.target.result;}
+    const base64=compressed.split(',')[1];
+    try{
+      const res=await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageData:base64,mimeType:'image/jpeg'})});
+      const data=await res.json();
+      if(data.url){
+        window._photoUrl=data.url;
+        const area=document.getElementById('opt-photo-area');
+        if(area)area.innerHTML=`<div style="position:relative;display:inline-block;"><img src="${data.url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);"><label style="position:absolute;inset:0;cursor:pointer;border-radius:8px;" title="點擊更換照片"><input type="file" accept="image/*" style="display:none" onchange="handleOptionalPhoto(event)"></label></div>`;
+        if(ps)ps.innerHTML=`<div class="sbox ssuccess">✓ 照片已上傳</div>`;
+      }else{
+        if(ps)ps.innerHTML=`<div class="sbox swarn">上傳失敗：${data.error||'未知錯誤'}</div>`;
+      }
+    }catch(err){
+      if(ps)ps.innerHTML=`<div class="sbox swarn">上傳失敗，請再試一次</div>`;
+    }
+  };
+  reader.readAsDataURL(file);
 }
 function buildRcard(r,i){
   return `<div class="rcard ${selectedResult===i?'sel':''}" id="rc${i}" onclick="pickResult(${i})">
@@ -637,7 +670,7 @@ function handlePhoto(e){
 function confirmAdd(){
   const v=getFormValues();if(!v.brand||!v.name)return;
   const src=selectedResult!=null?searchResults[selectedResult]:(window._photoInfo||{});
-  state.products.push({id:state.nextId++,...v,emoji:src.emoji||window._pendingEmoji||'🧴',advice:src.advice||window._pendingAdvice||'',imgUrl:addMode==='photo'?(window._photoUrl||null):null});
+  state.products.push({id:state.nextId++,...v,emoji:src.emoji||window._pendingEmoji||'🧴',advice:src.advice||window._pendingAdvice||'',imgUrl:window._photoUrl||null});
   saveState();window._photoInfo=null;window._pendingAdvice=null;window._pendingEmoji=null;currentImgData=null;window._photoUrl=null;searchResults=[];selectedResult=null;
   closeModal();render();
 }
