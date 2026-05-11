@@ -797,13 +797,24 @@ async function genRoutine(tod){
   console.log('[genRoutine] prods='+prods.substring(0,100));
   try{
     console.log('[genRoutine] calling Claude...');
-    const raw=await callClaude(`你是專業保養師。使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
-她的所有保養品：${prods}。
-請規劃完整的${lbl}間保養計畫，必須把所有保養品都安排進去，不能遺漏任何一個。
-有些產品適合每天用，有些適合輪替（例如週一三五用A，週二四六用B）。
-只回純JSON格式：
-{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"產品名稱，多個用逗號分隔"}],"rotate":[{"days":"哪幾天，例如：週一、三、五","products":"產品名稱，多個用逗號分隔","reason":"輪替原因1句"}]}
-rotate放需要輪替的產品，若所有產品都適合每天用則rotate為空陣列。`);
+    const raw=await callClaude(`你是專業保養師。使用者：${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
+
+保養品清單（product欄位必須使用以下完整名稱，一字不差）：
+${prods}
+
+成分時段規則：
+【${lbl}上優先】${tod==='morning'?'抗氧化成分（維他命C、白藜蘆醇）、防曬、輕薄精華、保濕基底':'修復成分（A醇/視黃醇、胜肽、PDRN）、酸類（AHA/BHA/果酸/水楊酸）、滋潤乳霜、面膜'}
+【${tod==='morning'?'晚':'早'}上才用】${tod==='morning'?'A醇/視黃醇、酸類（AHA/BHA/果酸）、PDRN修復精華':'高濃度維他命C、防曬'}
+【成分衝突，不可同時使用】A醇+任何酸類、高濃度維他命C+酸類
+
+任務：規劃${lbl}間保養流程。
+第一步：逐一分析每個產品的成分，判斷是否適合${lbl}上使用。
+第二步：把適合${lbl}上的產品按使用順序排入daily（由薄到厚，精華→乳液→乳霜）。
+第三步：若有衝突成分（如A醇與酸類），安排輪替（週一三五/週二四六）避免同日使用。
+第四步：不適合${lbl}上的產品可省略（留給另一時段），不強行塞入。
+
+只回純JSON，不加任何說明文字：
+{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"週幾使用，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]}`);
     console.log('[genRoutine] raw response:',raw);
     const data=parseJSON(raw);
     console.log('[genRoutine] parsed data:',data);
@@ -828,13 +839,25 @@ async function genWeekPlan(){
   document.getElementById('week-result').innerHTML=`<div class="sbox sloading">AI 規劃一週排程中 <span class="dot-anim">●</span></div>`;
   const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}）`).join('；');
   try{
-    const raw=await callClaude(`你是專業保養師。使用者是${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
-保養品：${prods}。
-請規劃完整一週（週一到週日）的早晚保養排程，必須把所有保養品都安排進去。
-每天早晚各列出要用的產品清單（按使用順序）。
-只回純JSON：
-{"week":[{"day":"週一","morning":["產品名1","產品名2"],"evening":["產品名1","產品名2"]},{"day":"週二",...},...]}
-共7天，每天都要有morning和evening，產品名稱要和我給的完全一致。`);
+    const raw=await callClaude(`你是專業保養師。使用者：${state.skin.type}，困擾：${state.skin.concerns.join('、')}。
+
+保養品清單（陣列中必須使用以下完整名稱，一字不差）：
+${prods}
+
+成分排程規則：
+【早上】抗氧化（維他命C、白藜蘆醇）、防曬、輕薄精華、日常保濕
+【晚上】修復成分（A醇/視黃醇、胜肽、PDRN）、酸類（AHA/BHA/果酸/水楊酸）、滋潤乳霜、面膜
+【同天嚴禁】A醇+任何酸類、高濃度維他命C+酸類、多種高濃度活性成分同時出現
+
+任務：規劃週一到週日的早晚保養排程，必須遵守：
+1. 每個產品依成分特性固定排早上或晚上，不要早晚都放
+2. 含A醇或高濃度酸類的產品：每週最多使用3次，且不與其他強效活性成分排同天晚上
+3. 面膜、去角質：每週1-2次即可，不每天
+4. 防曬：每天早上必排
+5. 確保同天morning和evening沒有衝突成分組合
+
+只回純JSON，不加任何說明文字：
+{"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
     const data=parseJSON(raw);
     window._weekplan={...data,skin:state.skin.type};
     document.getElementById('advice-content').innerHTML=renderWeekPlanResult(window._weekplan);
