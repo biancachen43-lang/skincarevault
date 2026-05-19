@@ -262,8 +262,9 @@ function loadState(){
   return null;
 }
 
+function serializeState(s){const{tab:_,...rest}=s;return JSON.stringify(rest);}
 function saveState(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
+  try{localStorage.setItem(STORAGE_KEY,serializeState(state));}catch(e){}
   // 只有使用者有真實資料時才存到雲端（id > 3 代表是使用者自己新增的）
   const hasRealData = state.products.some(p=>p.id>3);
   if(hasRealData){
@@ -459,7 +460,7 @@ async function initFromCloud(){
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
-      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
+      try{localStorage.setItem(STORAGE_KEY,serializeState(state));}catch(e){}
       render();
     }
     // load confirmed plan from cloud if not already in localStorage
@@ -487,7 +488,7 @@ async function manualLoadFromCloud(){
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
-      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
+      try{localStorage.setItem(STORAGE_KEY,serializeState(state));}catch(e){}
       render();
       const el=document.getElementById('backup-status');
       if(el)el.innerHTML='<div class="sbox ssuccess">✓ 已從雲端載入 '+state.products.length+' 個產品！</div>';
@@ -1454,7 +1455,7 @@ function importBackup(e){
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
       // 先存本地
-      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
+      try{localStorage.setItem(STORAGE_KEY,serializeState(state));}catch(e){}
       render();
       // 強制存到雲端，不管有沒有真實資料
       const el=document.getElementById('backup-status');
