@@ -450,7 +450,7 @@ if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle)
 if(!state.skin.ageRange)state.skin.ageRange='';
 if(!state.skin.name)state.skin.name='';
 if(!state.productPlan)state.productPlan={activeIds:[],standbyIds:[],plannedAt:null,userModified:false};
-state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
+state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',benefits:'',...p}));
 loadAdviceCache();
 window._planningLoading=false;
 window._planningCardOpen=false;
@@ -472,7 +472,7 @@ async function initFromCloud(){
       state={...DEFAULT,...cloudData};
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
-      state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
+      state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',benefits:'',...p}));
       state.tab='home';
       try{localStorage.setItem(STORAGE_KEY,serializeState(state));}catch(e){}
       render();
@@ -502,7 +502,7 @@ async function manualLoadFromCloud(){
       state={...DEFAULT,...cloudData};
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
-      state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
+      state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',benefits:'',...p}));
       try{localStorage.setItem(STORAGE_KEY,serializeState(state));}catch(e){}
       render();
       const el=document.getElementById('backup-status');
@@ -675,6 +675,7 @@ function renderPcard(p){
     <div class="pcard-body">
       <div class="pcard-brand">${p.brand} · ${p.category}</div>
       <div class="pcard-name">${p.name}</div>
+      ${p.benefits?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;">${p.benefits.split(/[,，、]/).map(b=>b.trim()).filter(Boolean).map(b=>`<span style="font-size:11px;color:#8B7355;background:#F5EFE6;border-radius:6px;padding:2px 7px;">${b}</span>`).join('')}</div>`:''}
       ${isDevice?`<span class="tag tgray" style="margin-top:5px;">美容儀器</span>`:`
       <div class="pcard-bar-wrap">
         <div class="pbar"><div class="pbar-fill" style="width:${pct}%;background:${expColor(s)};"></div></div>
@@ -720,9 +721,13 @@ function buildProductForm(p){
         </select>
       </div>
       <div>
-        <span class="fl">主要成分（選填）</span>
-        <input class="fi fi-opt" id="fing" placeholder="玻尿酸、維他命C..." value="${p.ingredients||''}">
+        <span class="fl">主要功效（選填）</span>
+        <input class="fi fi-opt" id="fbenefits" placeholder="保濕、抗老、美白..." value="${p.benefits||''}">
       </div>
+    </div>
+    <div>
+      <span class="fl">主要成分（選填）</span>
+      <input class="fi fi-opt" id="fing" placeholder="玻尿酸、維他命C..." value="${p.ingredients||''}">
     </div>
     <div id="expiry-section" ${isDevice?'style="display:none"':''}>
       <div class="expiry-hint">效期資料不需全填，app 會依你填的資料自動推算到期日</div>
@@ -745,7 +750,7 @@ function onCatChange(){
 
 function getFormValues(){
   const g=id=>((document.getElementById(id)||{}).value||'').trim();
-  return{brand:g('fb'),name:g('fn'),category:g('fc')||'其他',ingredients:g('fing'),mfgDate:g('fmfg'),openedDate:g('fopened'),pao:parseInt(g('fp'))||0,expiryDate:g('fexpiry')};
+  return{brand:g('fb'),name:g('fn'),category:g('fc')||'其他',benefits:g('fbenefits'),ingredients:g('fing'),mfgDate:g('fmfg'),openedDate:g('fopened'),pao:parseInt(g('fp'))||0,expiryDate:g('fexpiry')};
 }
 function checkAddBtn(){
   const b=(document.getElementById('fb')||{}).value||'',n=(document.getElementById('fn')||{}).value||'';
@@ -833,7 +838,7 @@ async function doSearch(){
   if(btn)btn.disabled=true;
   if(ss)ss.innerHTML=`<div class="sbox sloading">查詢中 <span class="dot-anim">●</span></div>`;
   try{
-    const raw=await callClaude(`你是保養品與美容儀器專家資料庫。搜尋：「${q}」。回傳最多3個符合的真實產品。如果該產品有官方中文品名，name欄位請優先使用中文品名；若無中文品名再使用英文。只回純JSON：[{"brand":"","name":"","category":"化妝水或精華或乳液或乳霜或防曬或潔顏或面膜或美容儀器或其他","pao":月數或0,"emoji":"","desc":"功效1句","tags":["標籤"],"advice":"使用建議1-2句","ingredients":"主要成分或空字串"}]`);
+    const raw=await callClaude(`你是保養品與美容儀器專家資料庫。搜尋：「${q}」。回傳最多3個符合的真實產品。如果該產品有官方中文品名，name欄位請優先使用中文品名；若無中文品名再使用英文。只回純JSON：[{"brand":"","name":"","category":"化妝水或精華或乳液或乳霜或防曬或潔顏或面膜或美容儀器或其他","pao":月數或0,"emoji":"","desc":"功效1句","tags":["標籤"],"advice":"使用建議1-2句","ingredients":"主要成分或空字串","benefits":"主要功效，用逗號分隔，例如：保濕、抗老、美白"}]`);
     searchResults=parseJSON(raw);selectedResult=null;
     if(ss)ss.innerHTML=`<div class="sbox ssuccess">✓ 找到 ${searchResults.length} 個結果，點選後自動填入</div>`;
     const sr=document.getElementById('sr');
@@ -895,7 +900,7 @@ function handlePhoto(e){
     try{
       const [uploadResult,claudeResult]=await Promise.allSettled([
         fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageData:base64,mimeType:mime})}).then(r=>{console.log('[upload] HTTP status:',r.status);return r.json();}),
-        fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,system:'請使用台灣繁體中文回答，不要使用簡體中文。',messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器。如果有官方中文品名，name請優先使用中文。只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":""}'}]}]})}).then(r=>{console.log('[claude] HTTP status:',r.status);return r.json();})
+        fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,system:'請使用台灣繁體中文回答，不要使用簡體中文。',messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:'辨識此保養品或美容儀器。如果有官方中文品名，name請優先使用中文。只回純JSON：{"brand":"","name":"","category":"","pao":12,"emoji":"","advice":"1-2句","ingredients":"","benefits":"主要功效，用逗號分隔，例如：保濕、抗老"}'}]}]})}).then(r=>{console.log('[claude] HTTP status:',r.status);return r.json();})
       ]);
       console.log('[handlePhoto] uploadResult:',uploadResult.status, uploadResult.status==='fulfilled'?uploadResult.value:uploadResult.reason);
       console.log('[handlePhoto] claudeResult:',claudeResult.status);
@@ -919,7 +924,7 @@ function handlePhoto(e){
 function confirmAdd(){
   const v=getFormValues();if(!v.brand||!v.name)return;
   const src=selectedResult!=null?searchResults[selectedResult]:(window._photoInfo||{});
-  state.products.push({id:state.nextId++,...v,emoji:src.emoji||window._pendingEmoji||'',advice:src.advice||window._pendingAdvice||'',imgUrl:window._photoUrl||null});
+  state.products.push({id:state.nextId++,...v,benefits:v.benefits||src.benefits||'',emoji:src.emoji||window._pendingEmoji||'',advice:src.advice||window._pendingAdvice||'',imgUrl:window._photoUrl||null});
   saveState();clearAdviceCache();window._photoInfo=null;window._pendingAdvice=null;window._pendingEmoji=null;currentImgData=null;window._photoUrl=null;searchResults=[];selectedResult=null;
   closeModal();
   // Check if new product has urgent expiry and plan exists
@@ -979,6 +984,7 @@ function openDetail(id){
     ${p.pao&&!isDevice?`<div class="det-row"><span class="det-k">開封後可用</span><span class="det-v">${p.pao} 個月</span></div>`:''}
     ${exp&&!isDevice?`<div class="det-row"><span class="det-k">建議用完日期</span><span class="det-v">${exp.toISOString().split('T')[0].replace(/-/g,'/')}</span></div>`:''}
     ${!isDevice?`<div class="det-row"><span class="det-k">效期狀態</span><span class="det-v"><span class="tag ${tagCls(s)}">${tagTxt(d)}</span></span></div>`:''}
+    ${p.benefits?`<div class="det-row"><span class="det-k">主要功效</span><span class="det-v" style="text-align:right;max-width:65%;display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;">${p.benefits.split(/[,，、]/).map(b=>b.trim()).filter(Boolean).map(b=>`<span style="font-size:11px;color:#8B7355;background:#F5EFE6;border-radius:6px;padding:2px 7px;">${b}</span>`).join('')}</span></div>`:''}
     ${p.ingredients?`<div class="det-row"><span class="det-k">主要成分</span><span class="det-v" style="font-size:11px;text-align:right;max-width:60%;">${p.ingredients}</span></div>`:''}
     ${p.advice?`<div class="infobox infobox-purple"><div class="infobox-title">AI 使用建議</div><div class="infobox-body">${p.advice}</div></div>`:''}
     ${isDevice?`<button class="ghost-btn" style="margin-top:10px;" onclick="closeModal();currentAdviceTab='device';gotoTab('advice')">查看儀器搭配建議 →</button>`:''}
@@ -1468,7 +1474,7 @@ function importBackup(e){
       state={...DEFAULT,...data};
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
-      state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
+      state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',benefits:'',...p}));
       // 先存本地
       try{localStorage.setItem(STORAGE_KEY,serializeState(state));}catch(e){}
       render();
