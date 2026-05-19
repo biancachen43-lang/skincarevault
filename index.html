@@ -984,8 +984,8 @@ function openDetail(id){
     ${p.pao&&!isDevice?`<div class="det-row"><span class="det-k">開封後可用</span><span class="det-v">${p.pao} 個月</span></div>`:''}
     ${exp&&!isDevice?`<div class="det-row"><span class="det-k">建議用完日期</span><span class="det-v">${exp.toISOString().split('T')[0].replace(/-/g,'/')}</span></div>`:''}
     ${!isDevice?`<div class="det-row"><span class="det-k">效期狀態</span><span class="det-v"><span class="tag ${tagCls(s)}">${tagTxt(d)}</span></span></div>`:''}
-    ${p.benefits?`<div class="det-row"><span class="det-k">主要功效</span><span class="det-v" style="text-align:right;max-width:65%;display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;">${p.benefits.split(/[,，、]/).map(b=>b.trim()).filter(Boolean).map(b=>`<span style="font-size:11px;color:#8B7355;background:#F5EFE6;border-radius:6px;padding:2px 7px;">${b}</span>`).join('')}</span></div>`:''}
     ${p.ingredients?`<div class="det-row"><span class="det-k">主要成分</span><span class="det-v" style="font-size:11px;text-align:right;max-width:60%;">${p.ingredients}</span></div>`:''}
+    ${p.benefits?`<div class="det-row" style="align-items:flex-start;"><span class="det-k">主要功效</span><div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:65%;">${p.benefits.split(/[,，、]/).map(b=>b.trim()).filter(Boolean).map(b=>`<span style="font-size:11px;color:#8B7355;background:#F5EFE6;border-radius:6px;padding:2px 7px;">${b}</span>`).join('')}</div></div>`:''}
     ${p.advice?`<div class="infobox infobox-purple"><div class="infobox-title">AI 使用建議</div><div class="infobox-body">${p.advice}</div></div>`:''}
     ${isDevice?`<button class="ghost-btn" style="margin-top:10px;" onclick="closeModal();currentAdviceTab='device';gotoTab('advice')">查看儀器搭配建議 →</button>`:''}
     <button class="edit-btn" onclick="closeModal();openEdit(${p.id})">編輯產品資料</button>
@@ -1565,14 +1565,20 @@ if('serviceWorker' in navigator){
 setTimeout(checkExpiryNotifications,3000);
 render();
 initFromCloud();
+function dismissWelcome(){
+  localStorage.setItem('sv_welcome_shown','1');
+  const el=document.getElementById('sv-welcome-overlay');
+  if(el)el.remove();
+}
 (function showWelcomeIfFirst(){
   if(localStorage.getItem('sv_welcome_shown'))return;
   const overlay=document.createElement('div');
-  overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(44,40,36,0.6);display:flex;align-items:center;justify-content:center;padding:24px;';
+  overlay.id='sv-welcome-overlay';
+  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:rgba(44,40,36,0.6);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
   overlay.innerHTML=`<div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 8px 32px rgba(44,40,36,0.18);">
     <div style="font-size:20px;font-weight:400;color:#2C2824;margin-bottom:14px;letter-spacing:0.04em;">嗨！歡迎來到<br>SkinKu 保養酷</div>
     <p style="font-size:14px;color:#6B5F58;line-height:1.8;margin:0 0 20px;">這裡會根據你的產品庫、膚質和生活習慣，為你量身規劃保養建議。不過要提醒你，所有建議都由 AI 生成，僅供參考，不代表醫療意見。如果肌膚有任何不適，記得諮詢皮膚科醫師喔！<br><br>準備好開始你的保養之旅了嗎？</p>
-    <button onclick="localStorage.setItem('sv_welcome_shown','1');this.closest('[style*=position\\:fixed]').remove();" style="width:100%;padding:14px;background:linear-gradient(135deg,#2C2824 0%,#5A4535 60%,#8B7355 100%);color:#fff;border:none;border-radius:24px;font-size:15px;font-weight:400;letter-spacing:0.08em;cursor:pointer;font-family:inherit;">出發！</button>
+    <button onclick="dismissWelcome()" style="width:100%;padding:14px;background:linear-gradient(135deg,#2C2824 0%,#5A4535 60%,#8B7355 100%);color:#fff;border:none;border-radius:24px;font-size:15px;font-weight:400;letter-spacing:0.08em;cursor:pointer;font-family:inherit;">出發！</button>
   </div>`;
   document.body.appendChild(overlay);
 })();
