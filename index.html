@@ -204,7 +204,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
   <div id="modal-root"></div>
   <div class="bottom-nav-wrap">
     <div class="bottom-nav">
-      <button class="bnav-btn active" onclick="gotoTab('home')" id="tab-home">
+      <button class="bnav-btn" onclick="gotoTab('home')" id="tab-home">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V21H15v-8H9v8H3V10.5z"/></svg>首頁
       </button>
       <button class="bnav-btn" onclick="gotoTab('products')" id="tab-products">
@@ -566,7 +566,6 @@ function parseJSON(raw){
 
 function gotoTab(t){
   state.tab=t;saveState();
-  ['home','products','advice','skin'].forEach(x=>{const el=document.getElementById('tab-'+x);if(el)el.classList.toggle('active',x===t);});
   render();
 }
 function render(){
@@ -575,6 +574,7 @@ function render(){
     state.tab==='products'?renderProducts():
     state.tab==='advice'?renderAdvice():renderSkin();
   updateTopbar();
+  ['home','products','advice','skin'].forEach(x=>{const el=document.getElementById('tab-'+x);if(el)el.classList.toggle('active',x===state.tab);});
 }
 function updateTopbar(){
   document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
