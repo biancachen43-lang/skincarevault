@@ -623,10 +623,10 @@ function renderUrgentCard(p){
   const successor=(preferred.length?preferred:candidates)[0]||null;
   let hint='';
   if(successor){
-    hint=`<div style="display:flex;align-items:center;gap:5px;margin-top:6px;padding:6px 10px;background:rgba(59,109,17,0.08);border-radius:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span style="font-size:11px;color:#3B6D11;">用完後可接續使用：${se(successor.name)}</span></div>`;
+    hint=`<div style="display:flex;align-items:center;gap:5px;margin-top:6px;padding:6px 10px;background:rgba(59,109,17,0.08);border-radius:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span style="font-size:11px;color:#3B6D11;font-weight:500;">用完後可接續使用：${se(successor.name)}</span></div>`;
   }else{
     const recId=`succ-rec-${p.id}`;
-    hint=`<div style="margin-top:6px;padding:7px 10px;background:rgba(133,79,11,0.07);border-radius:8px;"><div style="font-size:11px;color:#854F0B;margin-bottom:2px;">目前沒有可接續的產品，建議可以添購喔！</div><div id="${recId}" style="font-size:11px;color:#A89E94;line-height:1.5;"></div></div>`;
+    hint=`<div style="margin-top:6px;padding:7px 10px;background:rgba(133,79,11,0.07);border-radius:8px;"><div style="font-size:11px;color:#854F0B;font-weight:500;margin-bottom:2px;">目前沒有可接續的產品，建議可以添購喔！</div><div id="${recId}" style="font-size:11px;color:#2C2824;font-weight:400;line-height:1.5;"></div></div>`;
     setTimeout(()=>_fetchSuccRec(p.category,recId),200);
   }
   return`<div>${renderPcard(p)}${hint}</div>`;
