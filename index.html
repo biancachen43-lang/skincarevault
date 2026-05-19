@@ -1401,6 +1401,11 @@ function renderSkin(){
       </div>
       <div id="notif-status" style="margin-top:4px;"></div>
     </div>
+    <div style="margin-top:20px;padding-top:16px;border-top:0.5px solid #E8E2D9;">
+      <div style="border-left:2px solid #E8E2D9;padding-left:12px;">
+        <p style="font-size:11px;color:#A89E94;line-height:1.6;margin:0;">本 app 提供之保養建議、成分分析及產品資訊均由 AI 自動生成，僅供個人參考使用，不構成醫療建議。成分相容性分析結果可能因個人膚質差異而有所不同。如有肌膚問題或過敏反應，請諮詢皮膚科醫師。</p>
+      </div>
+    </div>
     <div class="card" style="margin-top:16px;">
       <button onclick="toggleAdvanced()" style="width:100%;background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
         <span style="font-size:15px;font-weight:500;color:var(--text);">進階設定</span>
@@ -1560,6 +1565,17 @@ if('serviceWorker' in navigator){
 setTimeout(checkExpiryNotifications,3000);
 render();
 initFromCloud();
+(function showWelcomeIfFirst(){
+  if(localStorage.getItem('sv_welcome_shown'))return;
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(44,40,36,0.6);display:flex;align-items:center;justify-content:center;padding:24px;';
+  overlay.innerHTML=`<div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 8px 32px rgba(44,40,36,0.18);">
+    <div style="font-size:20px;font-weight:400;color:#2C2824;margin-bottom:14px;letter-spacing:0.04em;">嗨！歡迎來到<br>SkinKu 保養酷</div>
+    <p style="font-size:14px;color:#6B5F58;line-height:1.8;margin:0 0 20px;">這裡會根據你的產品庫、膚質和生活習慣，為你量身規劃保養建議。不過要提醒你，所有建議都由 AI 生成，僅供參考，不代表醫療意見。如果肌膚有任何不適，記得諮詢皮膚科醫師喔！<br><br>準備好開始你的保養之旅了嗎？</p>
+    <button onclick="localStorage.setItem('sv_welcome_shown','1');this.closest('[style*=position\\:fixed]').remove();" style="width:100%;padding:14px;background:linear-gradient(135deg,#2C2824 0%,#5A4535 60%,#8B7355 100%);color:#fff;border:none;border-radius:24px;font-size:15px;font-weight:400;letter-spacing:0.08em;cursor:pointer;font-family:inherit;">出發！</button>
+  </div>`;
+  document.body.appendChild(overlay);
+})();
 
 document.addEventListener('click',function(e){
   const delBtn=e.target.closest('[data-del-id]');
