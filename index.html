@@ -302,6 +302,91 @@ function keepExistingPlan(){
 }
 function regenPlan(startTab){window._confirmedPlan=null;clearAllRoutines();generateAll(startTab||'morning');}
 
+// Smart product planning helpers
+function getActiveSkinProds(){
+  const plan=state.productPlan;
+  if(plan&&plan.activeIds&&plan.activeIds.length>0)return state.products.filter(p=>plan.activeIds.includes(p.id));
+  return state.products.filter(p=>p.category!=='美容儀器');
+}
+function getProductPlanStatus(p){
+  const plan=state.productPlan;
+  if(!plan||(!plan.activeIds.length&&!plan.standbyIds.length))return'unplanned';
+  if(plan.activeIds.includes(p.id))return'active';
+  const d=daysLeft(p);
+  if(d!==null&&d<=30)return'expiry-warning';
+  return'standby';
+}
+function planStatusTagHtml(p){
+  if(p.category==='美容儀器')return'';
+  const s=getProductPlanStatus(p);
+  if(s==='unplanned')return'';
+  if(s==='active')return`<button class="tag" style="background:rgba(99,102,241,0.12);color:#6366f1;border:1px solid rgba(99,102,241,0.25);cursor:pointer;font-size:10px;padding:2px 8px;margin-top:4px;display:inline-block;" onclick="event.stopPropagation();toggleProductPlan(${p.id})" title="點擊移至待用">使用中</button>`;
+  if(s==='expiry-warning')return`<button class="tag twarn" style="cursor:pointer;font-size:10px;padding:2px 8px;margin-top:4px;display:inline-block;" onclick="event.stopPropagation();toggleProductPlan(${p.id})" title="點擊加入使用清單">效期警示</button>`;
+  return`<button class="tag tgray" style="cursor:pointer;font-size:10px;padding:2px 8px;margin-top:4px;display:inline-block;" onclick="event.stopPropagation();toggleProductPlan(${p.id})" title="點擊加入使用清單">待用</button>`;
+}
+function toggleProductPlan(id){
+  const plan=state.productPlan;
+  if(!plan)return;
+  if(plan.activeIds.includes(id)){
+    plan.activeIds=plan.activeIds.filter(x=>x!==id);
+    if(!plan.standbyIds.includes(id))plan.standbyIds.push(id);
+  }else{
+    plan.standbyIds=plan.standbyIds.filter(x=>x!==id);
+    if(!plan.activeIds.includes(id))plan.activeIds.push(id);
+  }
+  plan.userModified=true;
+  saveState();render();
+}
+async function planProducts(){
+  const skinProds=state.products.filter(p=>p.category!=='美容儀器');
+  if(!skinProds.length)return;
+  window._planningLoading=true;render();
+  const prodList=skinProds.map(p=>{
+    const d=daysLeft(p);
+    const expInfo=d===null?'未設定效期':d<0?'已過期':`剩 ${d} 天`;
+    return`ID:${p.id} ${p.brand} ${p.name}（${p.category}，${expInfo}${p.ingredients?'，成分：'+p.ingredients:''}）`;
+  }).join('\n');
+  try{
+    const raw=await callClaude(`你是一位專業保養師。請從以下保養品中，根據效期緊急程度、成分相容性和功效互補性，智慧挑選「當前使用清單」。
+
+【挑選原則】
+1. 效期越近的產品優先納入使用清單
+2. 功效相近的同類產品（如多瓶精華）→ 選最適合的放入輪替，不全部同時使用
+3. 功效互補的產品（如化妝水+精華+乳霜）→ 可同時納入不同步驟
+4. 已過期的產品不納入使用清單
+
+【用戶膚質】膚質：${state.skin.type}，困擾：${state.skin.concerns.join('、')}
+
+【產品庫】
+${prodList}
+
+只回純JSON，active 為現在應使用的產品 ID 陣列，standby 為暫時待命的 ID 陣列（所有 ID 必須分配完畢）：
+{"active":[1,2],"standby":[3,4]}`);
+    const data=parseJSON(raw);
+    const activeIds=(data.active||[]).map(Number);
+    const standbyIds=(data.standby||[]).map(Number).filter(id=>!activeIds.includes(id));
+    const allIds=skinProds.map(p=>p.id);
+    const unassigned=allIds.filter(id=>!activeIds.includes(id)&&!standbyIds.includes(id));
+    state.productPlan={activeIds,standbyIds:[...standbyIds,...unassigned],plannedAt:new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}),userModified:false};
+    saveState();
+  }catch(e){console.error('[planProducts]',e);}
+  window._planningLoading=false;render();
+}
+function renderPlanningCard(){
+  const skinProds=state.products.filter(p=>p.category!=='美容儀器');
+  if(!skinProds.length)return'';
+  if(window._planningLoading)return`<div class="card" style="text-align:center;padding:20px 16px;"><div style="font-size:14px;color:var(--text2);font-weight:300;">使用清單規劃中，請稍候<span class="dots-seq"><span>．</span><span>．</span><span>．</span></span></div></div>`;
+  const plan=state.productPlan;
+  const hasplan=plan&&(plan.activeIds.length||plan.standbyIds.length);
+  if(hasplan){
+    const expiredActive=state.products.filter(p=>plan.activeIds.includes(p.id)&&daysLeft(p)!==null&&daysLeft(p)<0);
+    const expiredBanner=expiredActive.length?`<div class="sbox swarn" style="margin-bottom:10px;">${expiredActive.map(p=>p.name).join('、')} 已過期，建議更新使用清單</div>`:'';
+    const modBadge=plan.userModified?`<span style="font-size:11px;color:var(--text2);margin-left:6px;">（已手動調整）</span>`:'';
+    return`<div class="card" style="margin-bottom:12px;">${expiredBanner}<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">智慧使用清單${modBadge}</div><div style="font-size:13px;color:var(--text2);margin-bottom:10px;">使用中 ${plan.activeIds.length} 項 · 待用 ${plan.standbyIds.length} 項 · 規劃於 ${plan.plannedAt||''}　點擊各產品標籤可手動調整</div><div style="display:flex;gap:8px;"><button class="ghost-btn" style="flex:1;margin-top:0;font-size:13px;padding:9px 8px;" onclick="planProducts()">重新規劃清單</button><button class="submit-btn" style="flex:1;font-size:13px;padding:9px 8px;" onclick="gotoTab('advice');regenPlan('morning')">重新生成保養建議</button></div></div>`;
+  }
+  return`<div class="card" style="margin-bottom:12px;"><div class="card-title">智慧使用清單</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">讓 AI 根據效期、成分相容性和你的膚質，智慧挑選現在最適合使用的產品組合，並標記待命產品。</div><button class="submit-btn" onclick="planProducts()">開始規劃</button></div>`;
+}
+
 function saveSkinAdviceCache(advices){try{localStorage.setItem('sv_cache_skin_advice',JSON.stringify({k:_adviceCacheKey(),v:advices}));}catch(e){}}
 function loadSkinAdviceCache(){try{const c=JSON.parse(localStorage.getItem('sv_cache_skin_advice')||'null');return(c&&c.k===_adviceCacheKey())?c.v:null;}catch(e){return null;}}
 function renderSkinAdviceHtml(advices){return advices.map(a=>`<div class="advice-card"><div class="ac-hd"><span class="ac-icon">${SVG_TIP}</span><span class="ac-title">${se(a.title)}</span></div><div class="ac-body">${se(a.body)}</div></div>`).join('');}
@@ -317,18 +402,22 @@ const DEFAULT={
     {id:2,brand:'SK-II',name:'神仙水（青春露）',category:'化妝水',mfgDate:'',openedDate:'2024-11-15',pao:6,expiryDate:'',emoji:'',advice:'含豐富 Pitera，洗臉後第一步使用，改善膚質。',ingredients:'Pitera、菸鹼醯胺',imgData:null},
     {id:3,brand:'Sulwhasoo',name:'人蔘精華',category:'精華',mfgDate:'',openedDate:'2024-12-01',pao:12,expiryDate:'',emoji:'',advice:'富含紅蔘，適合熟齡肌使用。',ingredients:'紅蔘萃取、甘草萃取',imgData:null},
   ],
-  skin:{type:'混合肌',concerns:['毛孔','暗沉']},
+  skin:{type:'混合肌',concerns:['毛孔','暗沉'],ageRange:''},
   nextId:4,
   reminders:{morningEnabled:false,morningTime:'07:30',eveningEnabled:false,eveningTime:'21:00',expiryEnabled:true},
   lifestyle:{wakeTime:'7:00',sleepTime:'23:00',makeup:true,environment:'室內冷氣房',exercise:false,sensitivity:'偶爾敏感',morningTime:'5-10分鐘',eveningTime:'10-20分鐘'},
-  skinAdvice:null
+  skinAdvice:null,
+  productPlan:{activeIds:[],standbyIds:[],plannedAt:null,userModified:false}
 };
 
 let state=loadState()||JSON.parse(JSON.stringify(DEFAULT));
 if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
+if(!state.skin.ageRange)state.skin.ageRange='';
+if(!state.productPlan)state.productPlan={activeIds:[],standbyIds:[],plannedAt:null,userModified:false};
 state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
 loadAdviceCache();
+window._planningLoading=false;
 window._confirmedPlan=loadConfirmedPlanLocal();
 if(window._confirmedPlan){
   if(!window._routine_morning)window._routine_morning=window._confirmedPlan.morning;
@@ -501,6 +590,7 @@ function renderHome(){
 function renderProducts(){
   const showList=productFilter==='美容儀器'?state.products.filter(p=>p.category==='美容儀器'):productFilter==='保養品'?state.products.filter(p=>p.category!=='美容儀器'):state.products;
   return `
+    ${renderPlanningCard()}
     <div class="section-hd"><span class="section-label">產品庫 (${state.products.length})</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
     <div class="seg-row">
       ${['all','保養品','美容儀器'].map(f=>`<button class="seg-tag ${productFilter===f?'active':''}" onclick="setFilter('${f}')">${f==='all'?'全部':f}</button>`).join('')}
@@ -533,7 +623,8 @@ function renderPcard(p){
       <div class="pcard-bar-wrap">
         <div class="pbar"><div class="pbar-fill" style="width:${pct}%;background:${expColor(s)};"></div></div>
         <span class="tag ${tagCls(s)}">${tagTxt(d)}</span>
-      </div>`}
+      </div>
+      ${planStatusTagHtml(p)}`}
     </div>
   </div>`;
 }
@@ -774,7 +865,26 @@ function confirmAdd(){
   const src=selectedResult!=null?searchResults[selectedResult]:(window._photoInfo||{});
   state.products.push({id:state.nextId++,...v,emoji:src.emoji||window._pendingEmoji||'',advice:src.advice||window._pendingAdvice||'',imgUrl:window._photoUrl||null});
   saveState();clearAdviceCache();window._photoInfo=null;window._pendingAdvice=null;window._pendingEmoji=null;currentImgData=null;window._photoUrl=null;searchResults=[];selectedResult=null;
-  closeModal();render();
+  closeModal();
+  // Check if new product has urgent expiry and plan exists
+  const plan=state.productPlan;
+  if(plan&&plan.activeIds.length>0){
+    const newProd=state.products[state.products.length-1];
+    const newDays=daysLeft(newProd);
+    if(newDays!==null&&newDays>=0&&newDays<=30){
+      const activeExpiries=state.products.filter(p=>plan.activeIds.includes(p.id)).map(p=>daysLeft(p)).filter(d=>d!==null);
+      const minActive=activeExpiries.length?Math.min(...activeExpiries):999;
+      if(newDays<=minActive){
+        if(confirm(`你新增的「${newProd.name}」效期較近（還有 ${newDays} 天），是否要重新規劃使用清單？`)){
+          render();planProducts();return;
+        }else{
+          if(!plan.standbyIds.includes(newProd.id))plan.standbyIds.push(newProd.id);
+          saveState();
+        }
+      }
+    }
+  }
+  render();
 }
 
 // EDIT
@@ -942,7 +1052,7 @@ function renderRoutineResult(data,tod,isConfirmed){
 // Runs text-format compat analysis for use inside generation prompts.
 async function ensureCompatText(){
   if(window._compatText)return window._compatText;
-  const prods=state.products.filter(p=>p.category!=='美容儀器').map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
+  const prods=getActiveSkinProds().map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   const raw=await callClaude(`你是保養品成分分析師。請分析以下保養品，輸出結構化文字結論，供保養師規劃保養行程使用。
 
 保養品清單：${prods}
@@ -984,7 +1094,7 @@ async function generateAll(startTab){
   document.querySelectorAll('.aseg-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes("'"+startTab+"'")));
   const adviceEl=document.getElementById('advice-content');
   if(adviceEl)adviceEl.innerHTML=`<div class="card" style="text-align:center;padding:32px 16px;"><div style="font-size:14px;color:var(--text2);font-weight:300;letter-spacing:0.05em;">保養建議生成中，請稍候<span class="dots-seq"><span>．</span><span>．</span><span>．</span></span></div></div>`;
-  const skinProds=state.products.filter(p=>p.category!=='美容儀器');
+  const skinProds=getActiveSkinProds();
   const prods=skinProds.map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   const prodNames=skinProds.map(p=>`${p.brand} ${p.name}`).join('、');
   try{
@@ -1006,6 +1116,7 @@ ${compatText}
 
 【維度二：用戶肌膚狀況】
 膚質：${state.skin.type}
+年齡區間：${state.skin.ageRange||'未設定'}
 困擾：${state.skin.concerns.join('、')}
 ${skinAdviceContext()||''}
 【維度三：用戶生活樣貌】
@@ -1157,8 +1268,10 @@ function renderSkin(){
   const l=state.lifestyle||{};
   const wakeOpts=['5:00','5:30','6:00','6:30','7:00','7:30','8:00','8:30','9:00 以後'];
   const sleepOpts=['21:00','21:30','22:00','22:30','23:00','23:30','00:00','00:30','1:00 以後'];
+  const ageRanges=['20歲以下','20-25歲','26-30歲','31-35歲','36-40歲','40歲以上'];
   return `
     <div class="card"><div class="card-title">我的膚質</div><div class="opt-grid">${types.map(t=>`<button class="opt-btn ${state.skin.type===t?'sel':''}" onclick="setSkinType('${t}')">${t}</button>`).join('')}</div></div>
+    <div class="card"><div class="card-title">年齡區間</div><div class="opt-grid3">${ageRanges.map(a=>`<button class="opt-btn ${state.skin.ageRange===a?'sel':''}" onclick="setSkinAgeRange('${a}')">${a}</button>`).join('')}</div></div>
     <div class="card"><div class="card-title">膚況困擾（可複選）</div><div class="opt-grid3">${concerns.map(c=>`<button class="opt-btn ${state.skin.concerns.includes(c)?'sel':''}" onclick="toggleConcern('${c}')">${c}</button>`).join('')}</div></div>
     <div class="card" style="margin-top:12px;">
       <div class="card-title">生活樣貌</div>
@@ -1232,6 +1345,7 @@ function renderSkin(){
     </div>`;
 }
 function setSkinType(t){state.skin.type=t;saveState();render();}
+function setSkinAgeRange(a){state.skin.ageRange=a;saveState();render();}
 function toggleConcern(c){const i=state.skin.concerns.indexOf(c);if(i>=0)state.skin.concerns.splice(i,1);else state.skin.concerns.push(c);saveState();render();}
 function setLifestyle(field,val){if(!state.lifestyle)state.lifestyle={};state.lifestyle[field]=val;saveState();render();}
 function lifestyleContext(){
