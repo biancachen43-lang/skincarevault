@@ -600,6 +600,37 @@ function renderTodayRoutine(){
   const pRow=n=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">${prodThumb(n)}<span style="font-size:11px;color:rgba(255,255,255,0.82);">${n}</span></div>`;
   return`<div style="background:linear-gradient(135deg,#3D3028 0%,#6B5040 50%,#A8845A 100%);border:none;border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;"><div style="font-size:11px;font-weight:300;color:rgba(255,255,255,0.45);margin-bottom:12px;letter-spacing:0.12em;">今日保養行程 · ${dayLabel}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div><div style="font-size:11px;font-weight:500;color:rgba(220,165,80,0.9);margin-bottom:8px;letter-spacing:0.06em;">早間</div>${mProds.map(pRow).join('')||'<div style="font-size:11px;color:rgba(255,255,255,0.3);">今日無早間產品</div>'}</div><div><div style="font-size:11px;font-weight:500;color:rgba(160,155,230,0.9);margin-bottom:8px;letter-spacing:0.06em;">晚間</div>${eProds.map(pRow).join('')||'<div style="font-size:11px;color:rgba(255,255,255,0.3);">今日無晚間產品</div>'}</div></div><button style="width:100%;background:none;border:0.5px solid rgba(255,255,255,0.2);border-radius:var(--radius);padding:9px;font-size:13px;cursor:pointer;color:rgba(255,255,255,0.5);font-family:inherit;margin-top:10px;font-weight:300;letter-spacing:0.06em;" onclick="gotoTab('advice')">查看完整週計畫 →</button></div>`;}
 
+function _succCacheKey(cat){return`sv_succ_${cat}_${state.skin.type}_${(state.skin.concerns||[]).join(',')}`;}
+function _getSuccRec(cat){try{return JSON.parse(localStorage.getItem(_succCacheKey(cat))||'null');}catch(e){return null;}}
+function _setSuccRec(cat,text){try{localStorage.setItem(_succCacheKey(cat),JSON.stringify(text));}catch(e){}}
+async function _fetchSuccRec(cat,elId){
+  const cached=_getSuccRec(cat);
+  if(cached){const el=document.getElementById(elId);if(el)el.textContent=cached;return;}
+  try{
+    const l=state.lifestyle||{};
+    const ctx=`膚質：${state.skin.type}，困擾：${(state.skin.concerns||[]).join('、')}${l.environment?'，環境：'+l.environment:''}${l.sensitivity?'，敏感度：'+l.sensitivity:''}`;
+    const rec=await callClaude(`${ctx}。請推薦 2-3 個適合補充的${cat}產品成分，只回一句話，格式：根據你的膚質，建議尋找含有 [成分A]、[成分B] 的${cat}產品。`,150);
+    const text=rec.trim();
+    _setSuccRec(cat,text);
+    const el=document.getElementById(elId);if(el)el.textContent=text;
+  }catch(e){}
+}
+function renderUrgentCard(p){
+  const urgentIds=new Set(state.products.filter(x=>{const d=daysLeft(x);return d!==null&&d<=30;}).map(x=>x.id));
+  const plan=state.productPlan;
+  const candidates=state.products.filter(x=>x.id!==p.id&&x.category===p.category&&!urgentIds.has(x.id));
+  const preferred=plan&&plan.standbyIds&&plan.standbyIds.length?candidates.filter(x=>plan.standbyIds.includes(x.id)):candidates;
+  const successor=(preferred.length?preferred:candidates)[0]||null;
+  let hint='';
+  if(successor){
+    hint=`<div style="display:flex;align-items:center;gap:5px;margin-top:6px;padding:6px 10px;background:rgba(59,109,17,0.08);border-radius:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span style="font-size:11px;color:#3B6D11;">用完後可接續使用：${se(successor.name)}</span></div>`;
+  }else{
+    const recId=`succ-rec-${p.id}`;
+    hint=`<div style="margin-top:6px;padding:7px 10px;background:rgba(133,79,11,0.07);border-radius:8px;"><div style="font-size:11px;color:#854F0B;margin-bottom:2px;">目前沒有可接續的產品，建議可以添購喔！</div><div id="${recId}" style="font-size:11px;color:#A89E94;line-height:1.5;"></div></div>`;
+    setTimeout(()=>_fetchSuccRec(p.category,recId),200);
+  }
+  return`<div>${renderPcard(p)}${hint}</div>`;
+}
 function renderHome(){
   const total=state.products.length;
   const expiring=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d>=0&&d<=30;}).length;
@@ -610,7 +641,7 @@ function renderHome(){
   if(expired>0)alerts+=`<div class="alert-banner alert-danger"><span class="alert-icon">${SVG_WARN}</span><div><div class="alert-title">${expired} 個產品已過期</div>請儘快更換，以免刺激肌膚</div></div>`;
   if(soon.length>0)alerts+=`<div class="alert-banner alert-warn"><span class="alert-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M5 3 3 5M19 3l2 2"/></svg></span><div><div class="alert-title">${soon.map(p=>p.name).join('、')} 即將到期</div>建議優先使用以免浪費</div></div>`;
   const urgentProds=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d<=30;}).sort((a,b)=>(daysLeft(a)||0)-(daysLeft(b)||0));
-  const urgentHtml=urgentProds.length>0?urgentProds.map(renderPcard).join(''):`<div style="padding:16px 0;font-size:14px;color:var(--text2);text-align:center;">目前沒有即將到期的產品</div>`;
+  const urgentHtml=urgentProds.length>0?urgentProds.map(renderUrgentCard).join(''):`<div style="padding:16px 0;font-size:14px;color:var(--text2);text-align:center;">目前沒有即將到期的產品</div>`;
   return `
     ${renderTodayRoutine()}
     <div class="skin-banner" onclick="gotoTab('skin')">
