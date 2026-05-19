@@ -396,6 +396,8 @@ ${prodList}
   }catch(e){console.error('[planProducts]',e);}
   window._planningLoading=false;render();
 }
+function togglePlanningCard(){window._planningCardOpen=!window._planningCardOpen;renderProductsSection();}
+function renderProductsSection(){document.getElementById('main-content').innerHTML=renderProducts();updateTopbar();}
 function renderPlanningCard(){
   const skinProds=state.products.filter(p=>p.category!=='美容儀器');
   if(!skinProds.length)return'';
@@ -403,10 +405,17 @@ function renderPlanningCard(){
   const plan=state.productPlan;
   const hasplan=plan&&(plan.activeIds.length||plan.standbyIds.length);
   if(hasplan){
+    const open=!!window._planningCardOpen;
     const expiredActive=state.products.filter(p=>plan.activeIds.includes(p.id)&&daysLeft(p)!==null&&daysLeft(p)<0);
-    const expiredBanner=expiredActive.length?`<div class="sbox swarn" style="margin-bottom:10px;">${expiredActive.map(p=>p.name).join('、')} 已過期，建議更新使用清單</div>`:'';
-    const modBadge=plan.userModified?`<span style="font-size:11px;color:var(--text2);margin-left:6px;">（已手動調整）</span>`:'';
-    return`<div class="card" style="margin-bottom:12px;">${expiredBanner}<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">智慧使用清單${modBadge}</div><div style="font-size:13px;color:var(--text2);margin-bottom:10px;">使用中 ${plan.activeIds.length} 項 · 待用 ${plan.standbyIds.length} 項 · 規劃於 ${plan.plannedAt||''}　點擊各產品標籤可手動調整</div><div style="display:flex;gap:8px;"><button class="ghost-btn" style="flex:1;margin-top:0;font-size:13px;padding:9px 8px;" onclick="planProducts()">重新規劃清單</button><button class="submit-btn" style="flex:1;font-size:13px;padding:9px 8px;" onclick="gotoTab('advice');regenPlan('morning')">重新生成保養建議</button></div></div>`;
+    const expiredDot=expiredActive.length?`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#C0392B;margin-left:6px;vertical-align:middle;"></span>`:'';
+    const modBadge=plan.userModified?`<span style="font-size:11px;color:var(--text2);margin-left:6px;">已調整</span>`:'';
+    const chevron=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>`;
+    const header=`<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;" onclick="togglePlanningCard()"><div style="display:flex;align-items:center;gap:4px;"><span style="font-size:13px;font-weight:500;color:var(--text);">智慧使用清單</span>${modBadge}${expiredDot}</div><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;color:var(--text2);">使用中 ${plan.activeIds.length} · 待用 ${plan.standbyIds.length}</span>${chevron}</div></div>`;
+    if(!open)return`<div class="card" style="margin-bottom:12px;padding:12px 14px;">${header}</div>`;
+    const expiredBanner=expiredActive.length?`<div class="sbox swarn" style="margin:10px 0 4px;">${expiredActive.map(p=>p.name).join('、')} 已過期，建議更新使用清單</div>`:'';
+    const detail=`<div style="font-size:12px;color:var(--text2);margin-top:8px;margin-bottom:10px;">規劃於 ${plan.plannedAt||''}　· 點擊各產品標籤可手動調整</div>`;
+    const btns=`<div style="display:flex;gap:8px;"><button class="ghost-btn" style="flex:1;margin-top:0;font-size:13px;padding:9px 8px;" onclick="planProducts()">重新規劃</button><button class="submit-btn" style="flex:1;font-size:13px;padding:9px 8px;" onclick="gotoTab('advice');regenPlan('morning')">重新生成建議</button></div>`;
+    return`<div class="card" style="margin-bottom:12px;padding:12px 14px;">${header}${expiredBanner}${detail}${btns}</div>`;
   }
   return`<div class="card" style="margin-bottom:12px;"><div class="card-title">智慧使用清單</div><div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">讓 AI 根據效期、成分相容性和你的膚質，智慧挑選現在最適合使用的產品組合，並標記待命產品。</div><button class="submit-btn" onclick="planProducts()">開始規劃</button></div>`;
 }
@@ -444,6 +453,7 @@ if(!state.productPlan)state.productPlan={activeIds:[],standbyIds:[],plannedAt:nu
 state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
 loadAdviceCache();
 window._planningLoading=false;
+window._planningCardOpen=false;
 window._confirmedPlan=loadConfirmedPlanLocal();
 if(window._confirmedPlan){
   if(!window._routine_morning)window._routine_morning=window._confirmedPlan.morning;
