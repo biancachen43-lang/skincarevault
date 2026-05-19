@@ -473,6 +473,7 @@ async function initFromCloud(){
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
       state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
+      state.tab='home';
       try{localStorage.setItem(STORAGE_KEY,serializeState(state));}catch(e){}
       render();
     }
@@ -485,6 +486,7 @@ if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle)
         if(!window._routine_morning)window._routine_morning=cloudPlan.morning;
         if(!window._routine_evening)window._routine_evening=cloudPlan.evening;
         if(!window._weekplan)window._weekplan=cloudPlan.weekplan;
+        state.tab='home';
         render();
       }
     }
