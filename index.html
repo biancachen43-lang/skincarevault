@@ -729,6 +729,10 @@ function buildProductForm(p){
       <span class="fl">主要成分（選填）</span>
       <input class="fi fi-opt" id="fing" placeholder="玻尿酸、維他命C..." value="${p.ingredients||''}">
     </div>
+    <div>
+      <span class="fl">AI 使用建議（選填）</span>
+      <textarea class="fi fi-opt" id="fadvice" rows="3" placeholder="輸入或修改 AI 使用建議..." style="resize:vertical;min-height:72px;">${se(p.advice||'')}</textarea>
+    </div>
     <div id="expiry-section" ${isDevice?'style="display:none"':''}>
       <div class="expiry-hint">效期資料不需全填，app 會依你填的資料自動推算到期日</div>
       <div class="form-row">
@@ -750,7 +754,7 @@ function onCatChange(){
 
 function getFormValues(){
   const g=id=>((document.getElementById(id)||{}).value||'').trim();
-  return{brand:g('fb'),name:g('fn'),category:g('fc')||'其他',benefits:g('fbenefits'),ingredients:g('fing'),mfgDate:g('fmfg'),openedDate:g('fopened'),pao:parseInt(g('fp'))||0,expiryDate:g('fexpiry')};
+  return{brand:g('fb'),name:g('fn'),category:g('fc')||'其他',benefits:g('fbenefits'),ingredients:g('fing'),advice:g('fadvice'),mfgDate:g('fmfg'),openedDate:g('fopened'),pao:parseInt(g('fp'))||0,expiryDate:g('fexpiry')};
 }
 function checkAddBtn(){
   const b=(document.getElementById('fb')||{}).value||'',n=(document.getElementById('fn')||{}).value||'';
@@ -986,13 +990,28 @@ function openDetail(id){
     ${!isDevice?`<div class="det-row"><span class="det-k">效期狀態</span><span class="det-v"><span class="tag ${tagCls(s)}">${tagTxt(d)}</span></span></div>`:''}
     ${p.ingredients?`<div class="det-row"><span class="det-k">主要成分</span><span class="det-v" style="font-size:11px;text-align:right;max-width:60%;">${p.ingredients}</span></div>`:''}
     ${p.benefits?`<div class="det-row" style="align-items:flex-start;"><span class="det-k">主要功效</span><div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:65%;">${p.benefits.split(/[,，、]/).map(b=>b.trim()).filter(Boolean).map(b=>`<span style="font-size:11px;color:#8B7355;background:#F5EFE6;border-radius:6px;padding:2px 7px;">${b}</span>`).join('')}</div></div>`:''}
-    ${p.advice?`<div class="infobox infobox-purple"><div class="infobox-title">AI 使用建議</div><div class="infobox-body">${p.advice}</div></div>`:''}
-    ${isDevice?`<button class="ghost-btn" style="margin-top:10px;" onclick="closeModal();currentAdviceTab='device';gotoTab('advice')">查看儀器搭配建議 →</button>`:''}
+    <div id="det-advice-${p.id}">${p.advice?`<div class="infobox infobox-purple"><div class="infobox-title">AI 使用建議</div><div class="infobox-body">${p.advice}</div></div>`:''}</div>
+    <button class="ghost-btn" style="margin-top:4px;margin-bottom:0;font-size:13px;" onclick="regenProductAdvice(${p.id})">↻ 重新生成 AI 建議</button>
+    ${isDevice?`<button class="ghost-btn" style="margin-top:8px;" onclick="closeModal();currentAdviceTab='device';gotoTab('advice')">查看儀器搭配建議 →</button>`:''}
     <button class="edit-btn" onclick="closeModal();openEdit(${p.id})">編輯產品資料</button>
     <button class="danger-btn" onclick="deleteProduct(${p.id})">刪除此產品</button>
   </div></div>`);
 }
 function deleteProduct(id){if(!confirm('確定要刪除？'))return;state.products=state.products.filter(p=>p.id!==id);saveState();clearAdviceCache();closeModal();render();}
+async function regenProductAdvice(id){
+  const p=state.products.find(x=>x.id===id);if(!p)return;
+  const box=document.getElementById('det-advice-'+id);
+  if(box)box.innerHTML=`<div class="infobox infobox-purple"><div class="infobox-title">AI 使用建議</div><div class="infobox-body" style="color:var(--text2);">生成中<span class="dots-seq"><span>．</span><span>．</span><span>．</span></span></div></div>`;
+  try{
+    const advice=await callClaude(`請為以下保養品生成 1-2 句繁體中文使用建議，語氣親切實用，不要重複品名，直接說明使用時機與搭配方式：\n品牌：${p.brand}\n名稱：${p.name}\n類別：${p.category}${p.ingredients?'\n成分：'+p.ingredients:''}${p.benefits?'\n功效：'+p.benefits:''}\n\n只回使用建議的文字，不要 JSON，不要標題。`,300);
+    const trimmed=advice.trim();
+    p.advice=trimmed;
+    saveState();
+    if(box)box.innerHTML=`<div class="infobox infobox-purple"><div class="infobox-title">AI 使用建議</div><div class="infobox-body">${trimmed}</div></div>`;
+  }catch(e){
+    if(box)box.innerHTML=`<div class="infobox infobox-purple"><div class="infobox-title">AI 使用建議</div><div class="infobox-body" style="color:#C0392B;">生成失敗，請稍後再試</div></div>`;
+  }
+}
 
 // ADVICE
 function renderPlanBanner(){
