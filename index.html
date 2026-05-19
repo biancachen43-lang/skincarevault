@@ -320,9 +320,12 @@ function planStatusTagHtml(p){
   if(p.category==='美容儀器')return'';
   const s=getProductPlanStatus(p);
   if(s==='unplanned')return'';
-  if(s==='active')return`<button class="tag" style="background:rgba(99,102,241,0.12);color:#6366f1;border:1px solid rgba(99,102,241,0.25);cursor:pointer;font-size:10px;padding:2px 8px;margin-top:4px;display:inline-block;" onclick="event.stopPropagation();toggleProductPlan(${p.id})" title="點擊移至待用">使用中</button>`;
-  if(s==='expiry-warning')return`<button class="tag twarn" style="cursor:pointer;font-size:10px;padding:2px 8px;margin-top:4px;display:inline-block;" onclick="event.stopPropagation();toggleProductPlan(${p.id})" title="點擊加入使用清單">效期警示</button>`;
-  return`<button class="tag tgray" style="cursor:pointer;font-size:10px;padding:2px 8px;margin-top:4px;display:inline-block;" onclick="event.stopPropagation();toggleProductPlan(${p.id})" title="點擊加入使用清單">待用</button>`;
+  const svgSwitch=`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;vertical-align:middle;flex-shrink:0;"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>`;
+  const hint=`<div style="font-size:10px;color:var(--text2);margin-top:3px;line-height:1.2;">點擊切換狀態</div>`;
+  const base='cursor:pointer;font-size:10px;padding:2px 8px;margin-top:4px;display:inline-flex;align-items:center;border:none;transition:transform 0.12s,opacity 0.12s;active:scale(0.92);';
+  if(s==='active')return`<div onclick="event.stopPropagation();toggleProductPlan(${p.id})" style="display:inline-block;"><button class="tag" style="background:rgba(99,102,241,0.12);color:#6366f1;border:1px solid rgba(99,102,241,0.25);${base}" onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform=''">使用中${svgSwitch}</button>${hint}</div>`;
+  if(s==='expiry-warning')return`<div onclick="event.stopPropagation();toggleProductPlan(${p.id})" style="display:inline-block;"><button class="tag twarn" style="${base}" onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform=''">效期警示${svgSwitch}</button>${hint}</div>`;
+  return`<div onclick="event.stopPropagation();toggleProductPlan(${p.id})" style="display:inline-block;"><button class="tag tgray" style="${base}" onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform=''">待用${svgSwitch}</button>${hint}</div>`;
 }
 function toggleProductPlan(id){
   const plan=state.productPlan;
@@ -1333,19 +1336,27 @@ function renderSkin(){
       <div id="notif-status" style="margin-top:4px;"></div>
     </div>
     <div class="card" style="margin-top:16px;">
-      <div class="card-title">資料備份</div>
-      <div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">定期匯出備份，避免資料遺失。匯入時會覆蓋現有資料。</div>
-      <div style="display:flex;gap:8px;">
-        <button class="submit-btn" style="flex:1;" onclick="exportBackup()">匯出備份</button>
-        <button class="ghost-btn" style="flex:1;margin-top:0;" onclick="document.getElementById('import-input').click()">匯入備份</button>
+      <button onclick="toggleAdvanced()" style="width:100%;background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:15px;font-weight:500;color:var(--text);">進階設定</span>
+        <svg id="advanced-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text2);transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="advanced-body" style="display:none;margin-top:14px;border-top:0.5px solid var(--border);padding-top:14px;">
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:8px;">資料備份</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;">定期匯出備份，避免資料遺失。匯入時會覆蓋現有資料。</div>
+        <div style="display:flex;gap:8px;">
+          <button class="submit-btn" style="flex:1;" onclick="exportBackup()">匯出備份</button>
+          <button class="ghost-btn" style="flex:1;margin-top:0;" onclick="document.getElementById('import-input').click()">匯入備份</button>
+        </div>
+        <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importBackup(event)">
+        <button id="cloud-load-btn" class="ghost-btn" style="margin-top:8px;" onclick="manualLoadFromCloud()">從雲端重新載入資料</button>
+        <div id="backup-status" style="margin-top:8px;"></div>
       </div>
-      <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importBackup(event)">
-      <button id="cloud-load-btn" class="ghost-btn" style="margin-top:8px;" onclick="manualLoadFromCloud()">從雲端重新載入資料</button>
-      <div id="backup-status" style="margin-top:8px;"></div>
     </div>`;
 }
 function setSkinType(t){state.skin.type=t;saveState();render();}
 function setSkinAgeRange(a){state.skin.ageRange=a;saveState();render();}
+window._advancedOpen=false;
+function toggleAdvanced(){window._advancedOpen=!window._advancedOpen;const el=document.getElementById('advanced-body');const arrow=document.getElementById('advanced-arrow');if(el){el.style.display=window._advancedOpen?'block':'none';}if(arrow){arrow.style.transform=window._advancedOpen?'rotate(180deg)':'';} }
 function toggleConcern(c){const i=state.skin.concerns.indexOf(c);if(i>=0)state.skin.concerns.splice(i,1);else state.skin.concerns.push(c);saveState();render();}
 function setLifestyle(field,val){if(!state.lifestyle)state.lifestyle={};state.lifestyle[field]=val;saveState();render();}
 function lifestyleContext(){
