@@ -726,7 +726,7 @@ function buildProductForm(p){
       <div class="expiry-hint">效期資料不需全填，app 會依你填的資料自動推算到期日</div>
       <div class="form-row">
         <div><span class="fl">製造日期（選填）</span><input class="fi fi-opt" type="date" id="fmfg" value="${p.mfgDate||''}"></div>
-        <div><span class="fl">開封日期（選填）</span><input class="fi fi-opt" type="date" id="fopened" value="${p.openedDate||today()}"></div>
+        <div><span class="fl">開封日期（選填）</span><input class="fi fi-opt" type="date" id="fopened" value="${p.openedDate||''}"></div>
       </div>
       <div class="form-row">
         <div><span class="fl">開封後可用月數（選填）</span><input class="fi fi-opt" type="number" id="fp" placeholder="12" min="1" max="60" value="${p.pao||''}"></div>
