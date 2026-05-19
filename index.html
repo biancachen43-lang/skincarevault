@@ -26,15 +26,20 @@
 }
 body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;width:100%;margin:0;padding:0;font-weight:300;}
 .app{min-height:100vh;min-height:-webkit-fill-available;display:flex;flex-direction:column;background:var(--bg);width:100%;}
-.topbar{background:var(--bg2);border-bottom:0.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;width:100%;}
-.topbar-title{font-size:15px;font-weight:300;color:var(--text);letter-spacing:0.16em;}
-.topbar-sub{font-size:12px;color:var(--text2);margin-top:1px;letter-spacing:0.06em;}
-.nav{display:flex;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:53px;z-index:10;width:100%;}
-.nav-btn{flex:1;min-width:0;padding:10px 2px 8px;font-size:11px;color:var(--text2);background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;font-weight:400;letter-spacing:0.06em;}
-.nav-btn.active{color:var(--text);}
-.nav-btn.active svg{stroke:var(--text);}
+.topbar{background:linear-gradient(135deg,#2C2824 0%,#5A4535 60%,#8B7355 100%);padding:12px 16px 0;position:sticky;top:0;z-index:10;width:100%;}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;}
+.topbar-title{font-size:15px;font-weight:300;letter-spacing:0.16em;}
+.topbar-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:1px;letter-spacing:0.06em;}
+.topbar-greeting{font-size:13px;color:rgba(255,255,255,0.85);padding:0 0 12px;font-weight:300;letter-spacing:0.04em;}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.15);border:0.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;color:white;font-weight:400;flex-shrink:0;}
+.nav{display:none;}
+.bottom-nav{display:flex;background:linear-gradient(180deg,#FAF8F4,#EDE5D8);border-top:0.5px solid var(--border);position:fixed;bottom:0;left:0;right:0;z-index:10;width:100%;padding-bottom:env(safe-area-inset-bottom,0);}
+.bnav-btn{flex:1;min-width:0;padding:10px 2px 8px;font-size:10px;color:#A89E94;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;font-weight:400;letter-spacing:0.06em;}
+.bnav-btn svg{stroke:#A89E94;}
+.bnav-btn.active{color:#2C2824;}
+.bnav-btn.active svg{stroke:#2C2824;}
 .nav-icon{display:flex;align-items:center;justify-content:center;}
-.content{padding:14px;flex:1;}
+.content{padding:14px;flex:1;padding-bottom:80px;}
 .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
 .card-title{font-size:11px;font-weight:300;color:var(--text);margin-bottom:10px;letter-spacing:0.12em;}
 .section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
@@ -185,19 +190,31 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 <body>
 <div class="app" id="app">
   <div class="topbar">
-    <div>
-      <div class="topbar-title">SKINCARE VAULT</div>
-      <div class="topbar-sub" id="topbar-date"></div>
+    <div class="topbar-inner">
+      <div>
+        <div class="topbar-title"><span style="color:white;">SkinKu</span> <span style="color:rgba(255,255,255,0.6);">保養酷</span></div>
+        <div class="topbar-sub" id="topbar-date"></div>
+      </div>
+      <div class="topbar-avatar" id="topbar-avatar"></div>
     </div>
-  </div>
-  <div class="nav">
-    <button class="nav-btn active" onclick="gotoTab('home')" id="tab-home"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V21H15v-8H9v8H3V10.5z"/></svg></span>首頁</button>
-    <button class="nav-btn" onclick="gotoTab('products')" id="tab-products"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M8 3v4l-3 3v11a1 1 0 001 1h12a1 1 0 001-1V10l-3-3V3"/><line x1="5" y1="13" x2="19" y2="13"/></svg></span>產品庫</button>
-    <button class="nav-btn" onclick="gotoTab('advice')" id="tab-advice"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12M12 12C12 7 8 4 4 3c0 5 4 9 8 9z"/><path d="M12 12C12 7 16 4 20 3c0 5-4 9-8 9z"/></svg></span>保養建議</button>
-    <button class="nav-btn" onclick="gotoTab('skin')" id="tab-skin"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span>設定</button>
+    <div class="topbar-greeting" id="topbar-greeting"></div>
   </div>
   <div class="content" id="main-content"></div>
   <div id="modal-root"></div>
+  <div class="bottom-nav">
+    <button class="bnav-btn active" onclick="gotoTab('home')" id="tab-home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V21H15v-8H9v8H3V10.5z"/></svg>首頁
+    </button>
+    <button class="bnav-btn" onclick="gotoTab('products')" id="tab-products">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>產品庫
+    </button>
+    <button class="bnav-btn" onclick="gotoTab('advice')" id="tab-advice">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>保養建議
+    </button>
+    <button class="bnav-btn" onclick="gotoTab('skin')" id="tab-skin">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>設定
+    </button>
+  </div>
 </div>
 <script>
 const API_ENDPOINT='/api/claude';
@@ -405,7 +422,7 @@ const DEFAULT={
     {id:2,brand:'SK-II',name:'神仙水（青春露）',category:'化妝水',mfgDate:'',openedDate:'2024-11-15',pao:6,expiryDate:'',emoji:'',advice:'含豐富 Pitera，洗臉後第一步使用，改善膚質。',ingredients:'Pitera、菸鹼醯胺',imgData:null},
     {id:3,brand:'Sulwhasoo',name:'人蔘精華',category:'精華',mfgDate:'',openedDate:'2024-12-01',pao:12,expiryDate:'',emoji:'',advice:'富含紅蔘，適合熟齡肌使用。',ingredients:'紅蔘萃取、甘草萃取',imgData:null},
   ],
-  skin:{type:'混合肌',concerns:['毛孔','暗沉'],ageRange:''},
+  skin:{type:'混合肌',concerns:['毛孔','暗沉'],ageRange:'',name:''},
   nextId:4,
   reminders:{morningEnabled:false,morningTime:'07:30',eveningEnabled:false,eveningTime:'21:00',expiryEnabled:true},
   lifestyle:{wakeTime:'7:00',sleepTime:'23:00',makeup:true,environment:'室內冷氣房',exercise:false,sensitivity:'偶爾敏感',morningTime:'5-10分鐘',eveningTime:'10-20分鐘'},
@@ -418,6 +435,7 @@ state.tab='home'; // always start on home regardless of last saved tab
 if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
 if(!state.skin.ageRange)state.skin.ageRange='';
+if(!state.skin.name)state.skin.name='';
 if(!state.productPlan)state.productPlan={activeIds:[],standbyIds:[],plannedAt:null,userModified:false};
 state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',...p}));
 loadAdviceCache();
@@ -534,7 +552,7 @@ function parseJSON(raw){
 
 function gotoTab(t){
   state.tab=t;saveState();
-  ['home','products','advice','skin'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
+  ['home','products','advice','skin'].forEach(x=>{const el=document.getElementById('tab-'+x);if(el)el.classList.toggle('active',x===t);});
   render();
 }
 function render(){
@@ -546,6 +564,11 @@ function render(){
 }
 function updateTopbar(){
   document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
+  const name=state.skin&&state.skin.name||'';
+  const avatarEl=document.getElementById('topbar-avatar');
+  if(avatarEl)avatarEl.textContent=name?name.charAt(0):'';
+  const greetEl=document.getElementById('topbar-greeting');
+  if(greetEl)greetEl.textContent=`Hi, ${name||'您'}，準備好今天的保養了嗎？`;
 }
 
 // HOME
@@ -559,7 +582,7 @@ function renderTodayRoutine(){
   const mProds=(today?today.morning||[]:[]).filter(Boolean);
   const eProds=(today?today.evening||[]:[]).filter(Boolean);
   const pRow=n=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">${prodThumb(n)}<span style="font-size:11px;color:rgba(255,255,255,0.82);">${n}</span></div>`;
-  return`<div style="background:#2C2824;border:none;border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;"><div style="font-size:11px;font-weight:300;color:rgba(255,255,255,0.45);margin-bottom:12px;letter-spacing:0.12em;">今日保養行程 · ${dayLabel}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div><div style="font-size:11px;font-weight:500;color:rgba(220,165,80,0.9);margin-bottom:8px;letter-spacing:0.06em;">早間</div>${mProds.map(pRow).join('')||'<div style="font-size:11px;color:rgba(255,255,255,0.3);">今日無早間產品</div>'}</div><div><div style="font-size:11px;font-weight:500;color:rgba(160,155,230,0.9);margin-bottom:8px;letter-spacing:0.06em;">晚間</div>${eProds.map(pRow).join('')||'<div style="font-size:11px;color:rgba(255,255,255,0.3);">今日無晚間產品</div>'}</div></div><button style="width:100%;background:none;border:0.5px solid rgba(255,255,255,0.2);border-radius:var(--radius);padding:9px;font-size:13px;cursor:pointer;color:rgba(255,255,255,0.5);font-family:inherit;margin-top:10px;font-weight:300;letter-spacing:0.06em;" onclick="gotoTab('advice')">查看完整週計畫 →</button></div>`;}
+  return`<div style="background:linear-gradient(135deg,#3D3028 0%,#6B5040 50%,#A8845A 100%);border:none;border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;"><div style="font-size:11px;font-weight:300;color:rgba(255,255,255,0.45);margin-bottom:12px;letter-spacing:0.12em;">今日保養行程 · ${dayLabel}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div><div style="font-size:11px;font-weight:500;color:rgba(220,165,80,0.9);margin-bottom:8px;letter-spacing:0.06em;">早間</div>${mProds.map(pRow).join('')||'<div style="font-size:11px;color:rgba(255,255,255,0.3);">今日無早間產品</div>'}</div><div><div style="font-size:11px;font-weight:500;color:rgba(160,155,230,0.9);margin-bottom:8px;letter-spacing:0.06em;">晚間</div>${eProds.map(pRow).join('')||'<div style="font-size:11px;color:rgba(255,255,255,0.3);">今日無晚間產品</div>'}</div></div><button style="width:100%;background:none;border:0.5px solid rgba(255,255,255,0.2);border-radius:var(--radius);padding:9px;font-size:13px;cursor:pointer;color:rgba(255,255,255,0.5);font-family:inherit;margin-top:10px;font-weight:300;letter-spacing:0.06em;" onclick="gotoTab('advice')">查看完整週計畫 →</button></div>`;}
 
 function renderHome(){
   const total=state.products.length;
@@ -585,7 +608,7 @@ function renderHome(){
       <div class="stat"><div class="stat-n" style="color:var(--purple)">${ok}</div><div class="stat-l">狀態良好</div></div>
     </div>
     ${alerts}
-    <div style="background:#FDF3E3;border:0.5px solid #E8C570;border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;">
+    <div style="background:linear-gradient(135deg,#FDF3E3,#FAE8C8);border:0.5px solid #E8C570;border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <span style="font-size:12px;font-weight:400;color:#854F0B;letter-spacing:0.1em;">效期警示</span>
         <button class="add-btn" onclick="openAdd()">＋ 新增</button>
@@ -1293,6 +1316,7 @@ function renderSkin(){
   const sleepOpts=['21:00','21:30','22:00','22:30','23:00','23:30','00:00','00:30','1:00 以後'];
   const ageRanges=['20歲以下','20-25歲','26-30歲','31-35歲','36-40歲','40歲以上'];
   return `
+    <div class="card"><div class="card-title">您的名稱</div><input class="fi" type="text" placeholder="輸入您的名字" value="${se(state.skin.name||'')}" oninput="setSkinName(this.value)" style="margin-bottom:0;"></div>
     <div class="card"><div class="card-title">我的膚質</div><div class="opt-grid">${types.map(t=>`<button class="opt-btn ${state.skin.type===t?'sel':''}" onclick="setSkinType('${t}')">${t}</button>`).join('')}</div></div>
     <div class="card"><div class="card-title">年齡區間</div><div class="opt-grid3">${ageRanges.map(a=>`<button class="opt-btn ${state.skin.ageRange===a?'sel':''}" onclick="setSkinAgeRange('${a}')">${a}</button>`).join('')}</div></div>
     <div class="card"><div class="card-title">膚況困擾（可複選）</div><div class="opt-grid3">${concerns.map(c=>`<button class="opt-btn ${state.skin.concerns.includes(c)?'sel':''}" onclick="toggleConcern('${c}')">${c}</button>`).join('')}</div></div>
@@ -1375,6 +1399,7 @@ function renderSkin(){
 }
 function setSkinType(t){state.skin.type=t;saveState();render();}
 function setSkinAgeRange(a){state.skin.ageRange=a;saveState();render();}
+function setSkinName(n){state.skin.name=n;saveState();updateTopbar();}
 window._advancedOpen=false;
 function toggleAdvanced(){window._advancedOpen=!window._advancedOpen;const el=document.getElementById('advanced-body');const arrow=document.getElementById('advanced-arrow');if(el){el.style.display=window._advancedOpen?'block':'none';}if(arrow){arrow.style.transform=window._advancedOpen?'rotate(180deg)':'';} }
 function toggleConcern(c){const i=state.skin.concerns.indexOf(c);if(i>=0)state.skin.concerns.splice(i,1);else state.skin.concerns.push(c);saveState();render();}
