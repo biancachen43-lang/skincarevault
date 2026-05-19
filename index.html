@@ -578,13 +578,41 @@ function render(){
   updateTopbar();
   ['home','products','advice','skin'].forEach(x=>{const el=document.getElementById('tab-'+x);if(el)el.classList.toggle('active',x===state.tab);});
 }
+const _WEATHER_FALLBACKS=['準備好今天的保養了嗎？','每天一點點，肌膚慢慢變好','今天也要好好愛護自己的肌膚！','堅持保養，你的肌膚會感謝你的','美麗需要時間，但每天都值得'];
+window._weatherGreet=null;
+async function fetchWeatherGreet(){
+  if(window._weatherGreet!==null)return window._weatherGreet;
+  const fallback=_WEATHER_FALLBACKS[new Date().getDate()%5];
+  try{
+    const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:6000}));
+    const{latitude:lat,longitude:lon}=pos.coords;
+    const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=d26f1bb8ade9c4a5bb44571789f95a2b&units=metric&lang=zh_tw`);
+    const w=await r.json();
+    const temp=w.main?.temp,hum=w.main?.humidity,wid=w.weather?.[0]?.id;
+    let msg=fallback;
+    if(wid&&wid>=200&&wid<600)msg='今天下雨，記得加強保濕喔';
+    else if(temp>28)msg='今天紫外線強，出門記得防曬！';
+    else if(hum<40)msg='今天空氣乾燥，多補充水分！';
+    else if(temp<15)msg='天氣轉涼，記得加強滋潤保護肌膚';
+    window._weatherGreet=msg;
+    return msg;
+  }catch(e){window._weatherGreet=fallback;return fallback;}
+}
 function updateTopbar(){
   document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
   const name=state.skin&&state.skin.name||'';
   const avatarEl=document.getElementById('topbar-avatar');
   if(avatarEl)avatarEl.textContent=name?name.charAt(0):'';
   const greetEl=document.getElementById('topbar-greeting');
-  if(greetEl)greetEl.textContent=`Hi, ${name||'您'}，準備好今天的保養了嗎？`;
+  if(!greetEl)return;
+  const current=window._weatherGreet||_WEATHER_FALLBACKS[new Date().getDate()%5];
+  greetEl.textContent=`Hi, ${name||'您'}，${current}`;
+  if(window._weatherGreet===null){
+    fetchWeatherGreet().then(msg=>{
+      const el=document.getElementById('topbar-greeting');
+      if(el)el.textContent=`Hi, ${name||'您'}，${msg}`;
+    });
+  }
 }
 
 // HOME
@@ -1258,6 +1286,10 @@ ${prods}
 - 讓所有產品在一週內都能合理使用到
 - 即將到期的產品優先安排更高的使用頻率
 - 以用戶肌膚健康為最優先，而不是產品使用數量
+- 晚間保養步驟請依照「由薄到厚、由水到油」的質地順序排列：化妝水 → 水感精華 → 乳感精華 → 乳液 → 面霜 → 面油
+- 面膜與精華可同晚使用，但僅限成分互補且有加乘效果者；不相容的請安排在不同晚
+- 晚間步驟數量應控制在合理範圍內，以保養效果最大化為目標，不要把所有產品都塞進同一晚
+- 面霜是最後鎖水步驟，所有精華類產品必須安排在面霜之前使用
 
 只回純JSON，不加任何說明文字：
 {"morning":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"evening":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名，多個用逗號分隔"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
