@@ -414,6 +414,7 @@ const DEFAULT={
 };
 
 let state=loadState()||JSON.parse(JSON.stringify(DEFAULT));
+state.tab='home'; // always start on home regardless of last saved tab
 if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
 if(!state.skin.ageRange)state.skin.ageRange='';
