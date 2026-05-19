@@ -44,7 +44,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg
 .stat{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 8px;}
 .stat-n{font-size:20px;font-weight:300;color:var(--text);}
 .stat-l{font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:0.08em;}
-.skin-banner{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.skin-banner{background:#F5EFE6;border:0.5px solid #DCCFBC;border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
 .skin-val{font-size:15px;font-weight:300;color:var(--text);}
 .skin-sub{font-size:12px;color:var(--text2);margin-top:2px;}
 .skin-btn{font-size:12px;color:var(--text);background:var(--bg2);border:0.5px solid var(--border);border-radius:2px;padding:4px 10px;cursor:pointer;letter-spacing:0.08em;font-weight:300;}
@@ -558,8 +558,8 @@ function renderTodayRoutine(){
   const dayLabel=Object.keys(dayMap).find(k=>dayMap[k]===todayIdx)||'';
   const mProds=(today?today.morning||[]:[]).filter(Boolean);
   const eProds=(today?today.evening||[]:[]).filter(Boolean);
-  const pRow=n=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">${prodThumb(n)}<span style="font-size:11px;color:var(--text);">${n}</span></div>`;
-  return`<div class="card"><div class="card-title">今日保養行程 · ${dayLabel}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div><div style="font-size:11px;font-weight:400;color:var(--amber);margin-bottom:8px;">早間</div>${mProds.map(pRow).join('')||'<div style="font-size:11px;color:var(--text3);">今日無早間產品</div>'}</div><div><div style="font-size:11px;font-weight:400;color:var(--accent);margin-bottom:8px;">晚間</div>${eProds.map(pRow).join('')||'<div style="font-size:11px;color:var(--text3);">今日無晚間產品</div>'}</div></div><button class="ghost-btn" style="margin-top:8px;" onclick="gotoTab('advice')">查看完整週計畫 →</button></div>`;}
+  const pRow=n=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">${prodThumb(n)}<span style="font-size:11px;color:rgba(255,255,255,0.82);">${n}</span></div>`;
+  return`<div style="background:#2C2824;border:none;border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;"><div style="font-size:11px;font-weight:300;color:rgba(255,255,255,0.45);margin-bottom:12px;letter-spacing:0.12em;">今日保養行程 · ${dayLabel}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div><div style="font-size:11px;font-weight:500;color:rgba(220,165,80,0.9);margin-bottom:8px;letter-spacing:0.06em;">早間</div>${mProds.map(pRow).join('')||'<div style="font-size:11px;color:rgba(255,255,255,0.3);">今日無早間產品</div>'}</div><div><div style="font-size:11px;font-weight:500;color:rgba(160,155,230,0.9);margin-bottom:8px;letter-spacing:0.06em;">晚間</div>${eProds.map(pRow).join('')||'<div style="font-size:11px;color:rgba(255,255,255,0.3);">今日無晚間產品</div>'}</div></div><button style="width:100%;background:none;border:0.5px solid rgba(255,255,255,0.2);border-radius:var(--radius);padding:9px;font-size:13px;cursor:pointer;color:rgba(255,255,255,0.5);font-family:inherit;margin-top:10px;font-weight:300;letter-spacing:0.06em;" onclick="gotoTab('advice')">查看完整週計畫 →</button></div>`;}
 
 function renderHome(){
   const total=state.products.length;
@@ -585,21 +585,34 @@ function renderHome(){
       <div class="stat"><div class="stat-n" style="color:var(--purple)">${ok}</div><div class="stat-l">狀態良好</div></div>
     </div>
     ${alerts}
-    <div class="section-hd"><span class="section-label">下方產品已接近效期，建議盡快使用</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
-    <div class="product-list">${urgentHtml}</div>
+    <div style="background:#FDF3E3;border:0.5px solid #E8C570;border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:12px;font-weight:400;color:#854F0B;letter-spacing:0.1em;">效期警示</span>
+        <button class="add-btn" onclick="openAdd()">＋ 新增</button>
+      </div>
+      <div class="product-list">${urgentHtml}</div>
+    </div>
     <div style="margin-top:10px;font-size:12px;color:#6B5F58;line-height:1.6;">效期以開封後可用月數（PAO）為主要計算依據。即使產品仍在製造效期內，超過 PAO 建議停止使用，以避免氧化變質產品對肌膚造成刺激。若未填寫 PAO，則以產品標示之到期日計算。</div>`;
 }
 
 // PRODUCTS
 function renderProducts(){
+  const plan=state.productPlan;
+  const hasplan=plan&&(plan.activeIds.length||plan.standbyIds.length);
+  const hdr=`${renderPlanningCard()}<div class="section-hd"><span class="section-label">產品庫 (${state.products.length})</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>`;
+  if(hasplan){
+    const activeProds=state.products.filter(p=>plan.activeIds.includes(p.id));
+    const standbyProds=state.products.filter(p=>!plan.activeIds.includes(p.id)&&p.category!=='美容儀器');
+    const devices=state.products.filter(p=>p.category==='美容儀器');
+    const grpLabel=(txt,color='var(--text2)')=>`<div style="font-size:10px;font-weight:500;color:${color};letter-spacing:0.14em;margin:12px 0 6px;">${txt}</div>`;
+    const activeHtml=activeProds.length?`${grpLabel('使用中','#3B6D11')}<div class="product-list" style="margin-bottom:6px;">${activeProds.map(p=>`<div style="border-left:2px solid #3B6D11;border-radius:var(--radius);overflow:hidden;">${renderPcard(p)}</div>`).join('')}</div>`:'';
+    const standbyHtml=standbyProds.length?`${grpLabel('待用')}<div class="product-list" style="margin-bottom:6px;">${standbyProds.map(renderPcard).join('')}</div>`:'';
+    const deviceHtml=devices.length?`${grpLabel('美容儀器')}<div class="product-list">${devices.map(renderPcard).join('')}</div>`:'';
+    if(!state.products.length)return hdr+`<div class="empty"><div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M8 3v4l-3 3v11a1 1 0 001 1h12a1 1 0 001-1V10l-3-3V3"/><line x1="5" y1="13" x2="19" y2="13"/></svg></div>還沒有產品，點擊新增吧！</div>`;
+    return hdr+activeHtml+standbyHtml+deviceHtml;
+  }
   const showList=productFilter==='美容儀器'?state.products.filter(p=>p.category==='美容儀器'):productFilter==='保養品'?state.products.filter(p=>p.category!=='美容儀器'):state.products;
-  return `
-    ${renderPlanningCard()}
-    <div class="section-hd"><span class="section-label">產品庫 (${state.products.length})</span><button class="add-btn" onclick="openAdd()">＋ 新增</button></div>
-    <div class="seg-row">
-      ${['all','保養品','美容儀器'].map(f=>`<button class="seg-tag ${productFilter===f?'active':''}" onclick="setFilter('${f}')">${f==='all'?'全部':f}</button>`).join('')}
-    </div>
-    ${showList.length?`<div class="product-list">${showList.map(renderPcard).join('')}</div>`:`<div class="empty"><div class="empty-icon">${productFilter==='美容儀器'?'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4l5 5L8 21H3v-5L15 4z"/><line x1="12" y1="7" x2="17" y2="12"/></svg>':'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M8 3v4l-3 3v11a1 1 0 001 1h12a1 1 0 001-1V10l-3-3V3"/><line x1="5" y1="13" x2="19" y2="13"/></svg>'}</div>還沒有${productFilter==='all'?'':productFilter}，點擊新增吧！</div>`}`;
+  return hdr+`<div class="seg-row">${['all','保養品','美容儀器'].map(f=>`<button class="seg-tag ${productFilter===f?'active':''}" onclick="setFilter('${f}')">${f==='all'?'全部':f}</button>`).join('')}</div>${showList.length?`<div class="product-list">${showList.map(renderPcard).join('')}</div>`:`<div class="empty"><div class="empty-icon">${productFilter==='美容儀器'?'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4l5 5L8 21H3v-5L15 4z"/><line x1="12" y1="7" x2="17" y2="12"/></svg>':'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M8 3v4l-3 3v11a1 1 0 001 1h12a1 1 0 001-1V10l-3-3V3"/><line x1="5" y1="13" x2="19" y2="13"/></svg>'}</div>還沒有${productFilter==='all'?'':productFilter}，點擊新增吧！</div>`}`;
 }
 function setFilter(f){productFilter=f;render();}
 function imgSrc(p){return p.imgUrl||p.imgData||null;}
@@ -1018,39 +1031,41 @@ function renderRoutineResult(data,tod,isConfirmed){
   const dailyHtml=data.daily.map((s,i)=>{
     const names=(s.product||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
     const thumbsHtml=names.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${names.map(n=>`
-      <div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border-radius:20px;padding:4px 10px 4px 4px;">
+      <div style="display:flex;align-items:center;gap:6px;background:#F5EFE6;border-radius:20px;padding:4px 10px 4px 4px;border:0.5px solid #DCCFBC;">
         ${prodThumb(n)}
-        <span style="font-size:11px;color:var(--text);font-weight:500;">${n}</span>
+        <span style="font-size:11px;color:var(--text);font-weight:400;">${n}</span>
       </div>`).join('')}</div>`:'';
-    return`<div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start;">
-      <div style="width:26px;height:26px;border-radius:50%;background:var(--purple);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;margin-top:2px;">${i+1}</div>
-      <div style="flex:1;">
-        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:2px;">${s.step}</div>
-        <div style="font-size:14px;color:var(--text2);line-height:1.6;">${s.how}</div>
-        ${thumbsHtml}
+    return`<div style="background:white;border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:22px;height:22px;border-radius:50%;background:#F5EFE6;border:0.5px solid #DCCFBC;color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px;">${i+1}</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px;">${s.step}</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.6;">${s.how}</div>
+          ${thumbsHtml}
+        </div>
       </div>
     </div>`;
   }).join('');
   const rotateHtml=data.rotate&&data.rotate.length?`
-    <div style="margin-top:14px;border-top:0.5px solid var(--border);padding-top:14px;">
-      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;">輪替使用計畫</div>
+    <div style="background:#F5EFE6;border:0.5px solid #DCCFBC;border-radius:var(--radius);padding:12px 14px;margin-top:4px;margin-bottom:4px;">
+      <div style="font-size:11px;font-weight:500;color:var(--accent);letter-spacing:0.1em;margin-bottom:10px;">輪替使用計畫</div>
       ${data.rotate.map(r=>{
         const names=(r.products||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
-        return`<div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-          <div style="font-size:11px;font-weight:600;color:var(--purple);margin-bottom:6px;">${r.days}</div>
+        return`<div style="background:white;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;border:0.5px solid #DCCFBC;">
+          <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px;">${r.days}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">${names.map(n=>`
-            <div style="display:flex;align-items:center;gap:6px;background:white;border-radius:20px;padding:4px 10px 4px 4px;">
+            <div style="display:flex;align-items:center;gap:6px;background:#F5EFE6;border-radius:20px;padding:4px 10px 4px 4px;border:0.5px solid #DCCFBC;">
               ${prodThumb(n)}
-              <span style="font-size:11px;color:var(--text);font-weight:500;">${n}</span>
+              <span style="font-size:11px;color:var(--text);font-weight:400;">${n}</span>
             </div>`).join('')}</div>
           <div style="font-size:11px;color:var(--text2);line-height:1.5;">${r.reason}</div>
         </div>`;
       }).join('')}
     </div>`:
-    `<div style="margin-top:10px;font-size:14px;color:var(--text2);">✓ 所有保養品都已安排在每日步驟中</div>`;
+    `<div style="margin-top:8px;font-size:13px;color:var(--text2);">✓ 所有保養品都已安排在每日步驟中</div>`;
   const confirmedBadge=isConfirmed?`<div style="font-size:12px;color:#4caf50;margin-bottom:12px;font-weight:500;">已確認 · 上次確認：${window._confirmedPlan?.confirmedAt||''}</div>`:'';
   const confirmBtn=!isConfirmed&&window._routine_morning&&window._routine_evening&&window._weekplan?`<button class="submit-btn" style="margin-top:8px;" onclick="confirmPlan()">確認並儲存這份保養計畫</button>`:'';
-  return`<div class="card"><div class="card-title">${lbl}間保養流程</div>${confirmedBadge}${dailyHtml}${rotateHtml}${confirmBtn}<button class="ghost-btn" style="margin-top:8px;" onclick="regenPlan('${tod}')">重新生成</button></div>`;
+  return`<div style="background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;"><div class="card-title">${lbl}間保養流程</div>${confirmedBadge}${dailyHtml}${rotateHtml}${confirmBtn}<button class="ghost-btn" style="margin-top:8px;" onclick="regenPlan('${tod}')">重新生成</button></div>`;
 }
 
 // Runs text-format compat analysis for use inside generation prompts.
@@ -1176,36 +1191,40 @@ function renderWeekPlanResult(data,isConfirmed){
   const dayMap={'週一':1,'週二':2,'週三':3,'週四':4,'週五':5,'週六':6,'週日':0};
   const html=days.map(d=>{
     const isToday=dayMap[d.day]===todayIdx;
+    const prodTxtColor=isToday?'rgba(255,255,255,0.82)':'var(--text)';
     const morningProds=(d.morning||[]).map(n=>`
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
         ${prodThumb(n)}
-        <span style="font-size:11px;color:var(--text);">${n}</span>
+        <span style="font-size:11px;color:${prodTxtColor};">${n}</span>
       </div>`).join('');
     const eveningProds=(d.evening||[]).map(n=>`
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
         ${prodThumb(n)}
-        <span style="font-size:11px;color:var(--text);">${n}</span>
+        <span style="font-size:11px;color:${prodTxtColor};">${n}</span>
       </div>`).join('');
-    return`<div style="background:${isToday?'var(--purple-light)':'var(--bg2)'};border:${isToday?'1.5px solid var(--purple-mid)':'0.5px solid var(--border)'};border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
+    const mLabelColor=isToday?'rgba(220,165,80,0.9)':'#A07820';
+    const eLabelColor=isToday?'rgba(160,155,230,0.9)':'#534AB7';
+    const emptyTxtColor=isToday?'rgba(255,255,255,0.3)':'var(--text3)';
+    return`<div style="background:${isToday?'#2C2824':'white'};border:${isToday?'none':'0.5px solid var(--border)'};border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-        <span style="font-size:15px;font-weight:600;color:${isToday?'var(--purple)':'var(--text)'};">${d.day}</span>
-        ${isToday?`<span style="font-size:12px;background:var(--purple);color:white;padding:2px 7px;border-radius:10px;font-weight:500;">今天</span>`:''}
+        <span style="font-size:15px;font-weight:${isToday?500:400};color:${isToday?'rgba(255,255,255,0.9)':'var(--text)'};">${d.day}</span>
+        ${isToday?`<span style="font-size:11px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:2px 8px;border-radius:10px;font-weight:400;letter-spacing:0.06em;">今天</span>`:''}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div>
-          <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:6px;">早間</div>
-          ${morningProds||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}
+          <div style="font-size:11px;font-weight:500;color:${mLabelColor};margin-bottom:6px;letter-spacing:0.06em;">早間</div>
+          ${morningProds||`<div style="font-size:11px;color:${emptyTxtColor};">基礎清潔保濕</div>`}
         </div>
         <div>
-          <div style="font-size:12px;font-weight:600;color:#534AB7;margin-bottom:6px;">晚間</div>
-          ${eveningProds||'<div style="font-size:11px;color:var(--text3);">基礎清潔保濕</div>'}
+          <div style="font-size:11px;font-weight:500;color:${eLabelColor};margin-bottom:6px;letter-spacing:0.06em;">晚間</div>
+          ${eveningProds||`<div style="font-size:11px;color:${emptyTxtColor};">基礎清潔保濕</div>`}
         </div>
       </div>
     </div>`;
   }).join('');
   const confirmedBadgeW=isConfirmed?`<div style="font-size:12px;color:#4caf50;margin-bottom:12px;font-weight:500;">已確認 · 上次確認：${window._confirmedPlan?.confirmedAt||''}</div>`:'';
   const confirmBtnW=!isConfirmed&&window._routine_morning&&window._routine_evening&&window._weekplan?`<button class="submit-btn" style="margin-top:8px;" onclick="confirmPlan()">確認並儲存這份保養計畫</button>`:'';
-  return`<div class="card"><div class="card-title">一週保養排程</div>${confirmedBadgeW}${html}${confirmBtnW}<button class="ghost-btn" style="margin-top:8px;" onclick="regenPlan('week')">重新生成</button></div>`;
+  return`<div style="background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;"><div class="card-title">一週保養排程</div>${confirmedBadgeW}${html}${confirmBtnW}<button class="ghost-btn" style="margin-top:8px;" onclick="regenPlan('week')">重新生成</button></div>`;
 }
 
 function renderCondition(){
