@@ -224,12 +224,15 @@ const API_ENDPOINT='/api/claude';
 // NO EMOJI POLICY: All icons must use SVG line icons (stroke-width:1.5, fill:none). No emoji in UI.
 const STORAGE_KEY='skincarevault_v2';
 
+// User ID — one per device, persisted in localStorage
+(function(){let id=localStorage.getItem('sv_user_id');if(!id){id='user_'+Math.random().toString(36).slice(2,10);localStorage.setItem('sv_user_id',id);}window._userId=id;})();
+
 // 雲端儲存
 async function saveToCloud(data) {
   const res = await fetch('/api/claude', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'save', data })
+    body: JSON.stringify({ action: 'save', data, userId: window._userId })
   });
   if(!res.ok) throw new Error('Save failed');
   return true;
@@ -240,7 +243,7 @@ async function loadFromCloud() {
     const res = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'load' })
+      body: JSON.stringify({ action: 'load', userId: window._userId })
     });
     const json = await res.json();
     return json.data || null;
@@ -303,8 +306,8 @@ function clearAdviceCache(){
 function _planFingerprint(){return state.products.map(p=>p.id+'|'+p.category).sort().join(',');}
 function saveConfirmedPlanLocal(plan){try{localStorage.setItem('sv_confirmed_plan',JSON.stringify(plan));}catch(e){}}
 function loadConfirmedPlanLocal(){try{return JSON.parse(localStorage.getItem('sv_confirmed_plan')||'null');}catch(e){return null;}}
-async function saveConfirmedPlanCloud(plan){try{await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save_plan',data:plan})});}catch(e){console.warn('[plan] cloud save failed:',e);}}
-async function loadConfirmedPlanCloud(){try{const r=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'load_plan'})});const j=await r.json();return j.data||null;}catch(e){return null;}}
+async function saveConfirmedPlanCloud(plan){try{await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save_plan',data:plan,userId:window._userId})});}catch(e){console.warn('[plan] cloud save failed:',e);}}
+async function loadConfirmedPlanCloud(){try{const r=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'load_plan',userId:window._userId})});const j=await r.json();return j.data||null;}catch(e){return null;}}
 async function confirmPlan(){
   if(!window._routine_morning||!window._routine_evening||!window._weekplan)return;
   const plan={confirmedAt:new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}),productFingerprint:_planFingerprint(),morning:window._routine_morning,evening:window._routine_evening,weekplan:window._weekplan};
@@ -468,7 +471,9 @@ let currentAdviceTab='morning',currentConditionResult=null,editingId=null,produc
 async function initFromCloud(){
   try{
     const cloudData=await loadFromCloud();
-    if(cloudData&&cloudData.products){
+    const hasCloudData=!!(cloudData&&cloudData.products&&cloudData.products.length>0);
+    if(hasCloudData){
+      // 既有用戶：從雲端載入資料
       state={...DEFAULT,...cloudData};
       if(!state.reminders)state.reminders=JSON.parse(JSON.stringify(DEFAULT.reminders));
 if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle));
@@ -476,6 +481,16 @@ if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle)
       state.tab='home';
       try{localStorage.setItem(STORAGE_KEY,serializeState(state));}catch(e){}
       render();
+    } else {
+      // 雲端無此用戶資料
+      const hasRealLocal=state.products.some(p=>p.id>3);
+      if(hasRealLocal){
+        // 本機有真實資料（如從舊版遷移）→ 視為既有用戶，同步到雲端
+        saveState();
+      } else if(!localStorage.getItem('sv_onboarding_done_'+window._userId)){
+        // 真正的新用戶 → 顯示歡迎引導
+        showWelcomeDialog();
+      }
     }
     // load confirmed plan from cloud if not already in localStorage
     if(!window._confirmedPlan){
@@ -490,7 +505,13 @@ if(!state.lifestyle)state.lifestyle=JSON.parse(JSON.stringify(DEFAULT.lifestyle)
         render();
       }
     }
-  }catch(e){console.log('Cloud load failed:',e);}
+  }catch(e){
+    console.log('Cloud load failed:',e);
+    // 網路失敗時，若本機也無真實資料且未完成引導 → 顯示歡迎
+    if(!localStorage.getItem('sv_onboarding_done_'+window._userId)&&!state.products.some(p=>p.id>3)){
+      showWelcomeDialog();
+    }
+  }
 }
 
 async function manualLoadFromCloud(){
@@ -1667,11 +1688,23 @@ async function autofillBenefits(){
     }
   }catch(e){console.log('[autofillBenefits] failed:',e.message);}
 }
+function showWelcomeDialog(){
+  if(document.getElementById('sv-welcome-overlay'))return;
+  const overlay=document.createElement('div');
+  overlay.id='sv-welcome-overlay';
+  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:rgba(44,40,36,0.6);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
+  overlay.innerHTML=`<div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 8px 32px rgba(44,40,36,0.18);">
+    <div style="font-size:20px;font-weight:400;color:#2C2824;margin-bottom:14px;letter-spacing:0.04em;">嗨！歡迎來到<br>SkinKu 保養酷</div>
+    <p style="font-size:14px;color:#6B5F58;line-height:1.8;margin:0 0 20px;">這裡會根據你的產品庫、膚質和生活習慣，為你量身規劃保養建議。不過要提醒你，所有建議都由 AI 生成，僅供參考，不代表醫療意見。如果肌膚有任何不適，記得諮詢皮膚科醫師喔！<br><br>準備好開始你的保養之旅了嗎？</p>
+    <button onclick="dismissWelcome()" style="width:100%;padding:14px;background:linear-gradient(135deg,#2C2824 0%,#5A4535 60%,#8B7355 100%);color:#fff;border:none;border-radius:24px;font-size:15px;font-weight:400;letter-spacing:0.08em;cursor:pointer;font-family:inherit;">出發！</button>
+  </div>`;
+  document.body.appendChild(overlay);
+}
 function dismissWelcome(){
-  localStorage.setItem('sv_welcome_shown','1');
+  localStorage.setItem('sv_welcome_shown_'+window._userId,'1');
   const el=document.getElementById('sv-welcome-overlay');
   if(el)el.remove();
-  if(!localStorage.getItem('sv_onboarding_done'))showOnboarding();
+  if(!localStorage.getItem('sv_onboarding_done_'+window._userId))showOnboarding();
 }
 
 // ── Onboarding ────────────────────────────────────────────────────────────
@@ -1749,23 +1782,12 @@ function _obFinish(){
   if(d.eveningTime)state.lifestyle.eveningTime=d.eveningTime;
   if(d.environment)state.lifestyle.environment=d.environment;
   saveState();
-  localStorage.setItem('sv_onboarding_done','1');
+  localStorage.setItem('sv_onboarding_done_'+window._userId,'1');
   var el=_obEl();if(!el)return;
   var name=d.name||'';
   el.innerHTML='<div style="width:100%;max-width:360px;text-align:center;"><div style="margin-bottom:20px;display:flex;justify-content:center;"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#FAF8F4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div style="font-size:22px;font-weight:500;color:#FAF8F4;margin-bottom:12px;line-height:1.4;">太棒了！<br>你的專屬保養旅程開始了'+(name?'，'+se(name):'')+'！</div><p style="font-size:14px;color:rgba(255,255,255,0.75);line-height:1.7;margin:0 0 28px;">我們已記錄你的膚質和生活習慣，現在就開始建立你的產品庫，讓 AI 為你量身規劃最適合的保養計畫！</p><button onclick="document.getElementById(\'sv-onboarding\').remove();updateTopbar();render();" style="width:100%;padding:16px;background:linear-gradient(135deg,#FAF8F4 0%,#EDE5D8 100%);color:#2C2824;border:none;border-radius:24px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;">進入 SkinKu 保養酷</button></div>';
 }
-(function showWelcomeIfFirst(){
-  if(localStorage.getItem('sv_welcome_shown'))return;
-  const overlay=document.createElement('div');
-  overlay.id='sv-welcome-overlay';
-  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:rgba(44,40,36,0.6);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
-  overlay.innerHTML=`<div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 8px 32px rgba(44,40,36,0.18);">
-    <div style="font-size:20px;font-weight:400;color:#2C2824;margin-bottom:14px;letter-spacing:0.04em;">嗨！歡迎來到<br>SkinKu 保養酷</div>
-    <p style="font-size:14px;color:#6B5F58;line-height:1.8;margin:0 0 20px;">這裡會根據你的產品庫、膚質和生活習慣，為你量身規劃保養建議。不過要提醒你，所有建議都由 AI 生成，僅供參考，不代表醫療意見。如果肌膚有任何不適，記得諮詢皮膚科醫師喔！<br><br>準備好開始你的保養之旅了嗎？</p>
-    <button onclick="dismissWelcome()" style="width:100%;padding:14px;background:linear-gradient(135deg,#2C2824 0%,#5A4535 60%,#8B7355 100%);color:#fff;border:none;border-radius:24px;font-size:15px;font-weight:400;letter-spacing:0.08em;cursor:pointer;font-family:inherit;">出發！</button>
-  </div>`;
-  document.body.appendChild(overlay);
-})();
+// Welcome is now shown from initFromCloud() based on cloud data availability
 
 document.addEventListener('click',function(e){
   const delBtn=e.target.closest('[data-del-id]');

@@ -1,7 +1,9 @@
 const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
-const USER_KEY = 'skincarevault_user_data';
-const PLAN_KEY = 'sv_confirmed_plan';
+const USER_KEY = 'skincarevault_user_data'; // legacy fallback
+const PLAN_KEY = 'sv_confirmed_plan';       // legacy fallback
+function userKey(userId){ return userId ? 'skincarevault_' + userId : USER_KEY; }
+function planKey(userId){ return userId ? 'sv_confirmed_plan_' + userId : PLAN_KEY; }
 
 async function kvGet(key) {
   const res = await fetch(`${KV_URL}/get/${key}`, {
@@ -40,7 +42,7 @@ module.exports = async function handler(req, res) {
 
   if (req.body && req.body.action === 'load') {
     try {
-      const data = await kvGet(USER_KEY);
+      const data = await kvGet(userKey(req.body.userId));
       return res.status(200).json({ data });
     } catch (e) {
       console.error('Load error:', e.message);
@@ -50,7 +52,7 @@ module.exports = async function handler(req, res) {
 
   if (req.body && req.body.action === 'save') {
     try {
-      await kvSet(USER_KEY, req.body.data);
+      await kvSet(userKey(req.body.userId), req.body.data);
       return res.status(200).json({ ok: true });
     } catch (e) {
       console.error('Save error:', e.message);
@@ -60,7 +62,7 @@ module.exports = async function handler(req, res) {
 
   if (req.body && req.body.action === 'load_plan') {
     try {
-      const res2 = await fetch(`${KV_URL}/get/${PLAN_KEY}`, {
+      const res2 = await fetch(`${KV_URL}/get/${planKey(req.body.userId)}`, {
         headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
       const d = await res2.json();
@@ -74,7 +76,7 @@ module.exports = async function handler(req, res) {
   if (req.body && req.body.action === 'save_plan') {
     try {
       const encoded = encodeURIComponent(JSON.stringify(req.body.data));
-      await fetch(`${KV_URL}/set/${PLAN_KEY}/${encoded}`, {
+      await fetch(`${KV_URL}/set/${planKey(req.body.userId)}/${encoded}`, {
         method: 'GET',
         headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
