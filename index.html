@@ -710,7 +710,7 @@ function updateTopbar(){
   const dateEl=document.getElementById('topbar-date');
   if(dateEl)dateEl.textContent=now.toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
   const eyebrowEl=document.getElementById('topbar-eyebrow');
-  if(eyebrowEl){const vol=String(now.getMonth()*4+Math.ceil(now.getDate()/7)).padStart(2,'0');eyebrowEl.textContent=`DAILY SKINCARE ROUTINE · VOL. ${vol}`;}
+  if(eyebrowEl){eyebrowEl.textContent='DAILY SKINCARE ROUTINE';}
   const name=state.skin&&state.skin.name||'';
   const avatarEl=document.getElementById('topbar-avatar');
   if(avatarEl)avatarEl.textContent=name?name.charAt(0).toUpperCase():'S';
@@ -753,12 +753,12 @@ function renderTodayRoutine(){
     <div style="font-size:24px;font-weight:500;color:var(--cocoa);letter-spacing:-0.02em;line-height:1.15;margin-bottom:18px;">今日 <em>行程</em></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:16px;">
       <div>
-        <div style="font-size:16px;font-weight:600;color:var(--cocoa);letter-spacing:0.04em;margin-bottom:4px;">A.M.</div>
+        <div style="font-size:16px;font-weight:600;color:var(--cocoa);letter-spacing:0.04em;margin-bottom:4px;">早上</div>
         <div class="eyebrow" style="margin-bottom:10px;">MORNING</div>
         ${mProds.map(pRowLight).join('')||emptyRow}
       </div>
       <div>
-        <div style="font-size:16px;font-weight:600;color:var(--cocoa);letter-spacing:0.04em;margin-bottom:4px;">P.M.</div>
+        <div style="font-size:16px;font-weight:600;color:var(--cocoa);letter-spacing:0.04em;margin-bottom:4px;">晚上</div>
         <div class="eyebrow" style="margin-bottom:10px;">EVENING</div>
         ${eProds.map(pRowLight).join('')||emptyRow}
       </div>
@@ -856,7 +856,7 @@ function renderProducts(){
   const titleBlock=`<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;">
     <div>
       <div class="eyebrow" style="margin-bottom:8px;">產品庫 <span class="dot">·</span> MY INVENTORY</div>
-      <div class="section-title">保養品 <em>清單</em></div>
+      <div class="section-title">我的保養品 <em>清單</em></div>
       <div style="font-size:12px;color:var(--muted);margin-top:8px;font-weight:400;">${state.products.length} 件 · 使用中 ${using} · 待用 ${standby} · 即將過期 ${expiring_count()}</div>
     </div>
     <button class="add-btn" onclick="openAdd()">＋ 新增</button>
@@ -893,7 +893,12 @@ function se(s){return s?s.replace(/[⌀-⟿⬀-⯿︀-️]|[\u{1F000}-\u{1FFFF}]
 function renderPcard(p){
   const d=daysLeft(p),s=expStatus(d),pct=expPct(p);
   const isDevice=p.category==='美容儀器';
-  const statusMono=isDevice?'DEVICE':s==='ok'?'IN USE':s==='warn'||s==='danger'?'EXPIRES SOON':'EXPIRED';
+  let statusMono;
+  if(isDevice){statusMono='BEAUTY DEVICE';}
+  else if(d===null){statusMono='NO DATE';}
+  else if(d<0){statusMono='EXPIRED';}
+  else if(d<=60){statusMono='EXPIRES SOON';}
+  else{const ps=getProductPlanStatus(p);statusMono=ps==='active'?'IN USE':ps==='standby'?'IN RESERVE':'IN GOOD CONDITION';}
   const benefitTags=p.benefits?p.benefits.split(/[,，、]/).map(b=>b.trim()).filter(Boolean).map(b=>`<span style="font-size:10px;color:var(--rust);background:rgba(156,94,46,0.08);border-radius:var(--r-chip);padding:2px 8px;font-weight:500;">${b}</span>`).join(''):'';
   return `<div class="pcard" data-pid="${p.id}">
     <div class="pcard-emoji">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(prodIcon(p))}</div>
@@ -1265,7 +1270,7 @@ function renderAdvice(){
   const svgDrop=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c0 0-8 8-8 13a8 8 0 0016 0c0-5-8-13-8-13z"/></svg>`;
   const svgWand=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4l5 5L8 21H3v-5L15 4z"/><line x1="12" y1="7" x2="17" y2="12"/></svg>`;
   const svgFlask=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M8 3v8l-4 6a1 1 0 001 1h14a1 1 0 001-1l-4-6V3"/><line x1="6.5" y1="14" x2="17.5" y2="14"/></svg>`;
-  const tabDefs=[['morning',svgSun,'早上','AM'],['evening',svgMoon,'晚上','PM'],['week',svgCal,'週計畫','WK'],['condition',svgDrop,'狀況','CONDITION'],['device',svgWand,'儀器','DEV'],['compat',svgFlask,'成分','LAB']];
+  const tabDefs=[['morning',svgSun,'早上','AM'],['evening',svgMoon,'晚上','PM'],['week',svgCal,'週計畫','WEEK'],['condition',svgDrop,'狀況','CONDITION'],['device',svgWand,'儀器','DEVICE'],['compat',svgFlask,'成分','LAB']];
   const tabsHtml=tabDefs.map(([id,icon,lbl,sub])=>{
     const act=currentAdviceTab===id;
     return`<button class="aseg-btn ${act?'active':''}" onclick="setAdviceTab('${id}')" style="min-width:60px;">
@@ -1337,7 +1342,7 @@ function renderRoutine(tod){
   if(window._confirmedPlan&&window._confirmedPlan[planKey])return renderRoutineResult(window._confirmedPlan[planKey],tod,true);
   const key='_routine_'+tod;
   if(window[key]&&window[key].skin===state.skin.type)return renderRoutineResult(window[key],tod,false);
-  return `<div style="margin-bottom:20px;"><div class="eyebrow" style="margin-bottom:10px;">${lbl}間保養流程 <span class="dot">·</span> ${tod==='morning'?'AM':'PM'} routine</div></div><div class="card"><div class="card-title">${lbl}間保養流程</div><div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6;">尚未生成保養計畫。</div><button class="submit-btn" onclick="generateAll('${tod}')">開始生成</button></div>`;
+  return `<div style="margin-bottom:20px;"><div class="eyebrow" style="margin-bottom:10px;">${lbl}上保養流程 <span class="dot">·</span> ${tod==='morning'?'AM':'PM'} routine</div></div><div class="card"><div class="card-title">${lbl}上保養流程</div><div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6;">尚未生成保養計畫。</div><button class="submit-btn" onclick="generateAll('${tod}')">開始生成</button></div>`;
 }
 
 function renderRoutineResult(data,tod,isConfirmed){
@@ -1386,7 +1391,7 @@ function renderRoutineResult(data,tod,isConfirmed){
     `<div style="margin-bottom:12px;font-size:13px;color:var(--muted);padding:12px 0;">所有保養品都已安排在每日步驟中</div>`;
   const flowHeader=`<div style="margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-end;">
     <div>
-      <div class="eyebrow" style="margin-bottom:6px;">${lbl}間保養流程 <span class="dot">·</span> ${lblEng} routine</div>
+      <div class="eyebrow" style="margin-bottom:6px;">${lbl}上保養流程 <span class="dot">·</span> ${lblEng} routine</div>
       ${confirmedDate?`<div style="font-size:13px;color:var(--muted);">上次確認 · <span style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;">${confirmedDate}</span></div>`:''}
     </div>
     ${isConfirmed?`<span class="chip">已確認</span>`:''}
@@ -1628,10 +1633,10 @@ function renderSkin(){
   return `<div class="tab-content">
     <div style="margin-bottom:28px;">
       <div class="eyebrow" style="margin-bottom:8px;">個人檔案 <span class="dot">·</span> THE PROFILE</div>
-      <div class="section-title">您的 <em>肌膚資料</em></div>
+      <div class="section-title">我的 <em>肌膚資料</em></div>
     </div>
     <section style="margin-bottom:32px;">
-      <div class="field-label">您的名稱 · NAME</div>
+      <div class="field-label">我的名稱 · NAME</div>
       <input class="field-input" type="text" placeholder="Your name" value="${se(state.skin.name||'')}" oninput="setSkinName(this.value)">
     </section>
     <section style="margin-bottom:32px;">
