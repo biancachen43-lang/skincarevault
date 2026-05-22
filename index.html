@@ -281,7 +281,7 @@ em{font-style:normal;font-weight:400;color:var(--muted);}
       </div>
       <div class="topbar-avatar" id="topbar-avatar"></div>
     </div>
-    <div class="topbar-eyebrow" id="topbar-eyebrow">DAILY RITUAL</div>
+    <div class="topbar-eyebrow" id="topbar-eyebrow">DAILY SKINCARE ROUTINE</div>
     <div class="topbar-date" id="topbar-date"></div>
     <div class="topbar-greeting" id="topbar-greeting"></div>
   </div>
@@ -710,7 +710,7 @@ function updateTopbar(){
   const dateEl=document.getElementById('topbar-date');
   if(dateEl)dateEl.textContent=now.toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
   const eyebrowEl=document.getElementById('topbar-eyebrow');
-  if(eyebrowEl){const vol=String(now.getMonth()*4+Math.ceil(now.getDate()/7)).padStart(2,'0');eyebrowEl.textContent=`DAILY RITUAL · VOL. ${vol}`;}
+  if(eyebrowEl){const vol=String(now.getMonth()*4+Math.ceil(now.getDate()/7)).padStart(2,'0');eyebrowEl.textContent=`DAILY SKINCARE ROUTINE · VOL. ${vol}`;}
   const name=state.skin&&state.skin.name||'';
   const avatarEl=document.getElementById('topbar-avatar');
   if(avatarEl)avatarEl.textContent=name?name.charAt(0).toUpperCase():'S';
@@ -736,7 +736,7 @@ function renderTodayRoutine(){
   const dayEng=dayEngNames[todayIdx];
   if(!wp||wp.skin!==state.skin.type){
     return`<div class="card" style="padding:22px;">
-      <div class="eyebrow" style="margin-bottom:10px;">今日保養 <span class="dot">·</span> RITUAL OF ${dayEng}</div>
+      <div class="eyebrow" style="margin-bottom:10px;">今日保養 <span class="dot">·</span> ROUTINE OF ${dayEng}</div>
       <div style="font-size:24px;font-weight:500;color:var(--cocoa);letter-spacing:-0.02em;line-height:1.15;margin-bottom:14px;">今日 <em>行程</em></div>
       <div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:16px;">尚未生成週計畫。前往「保養建議」頁面生成後，此處會自動顯示今日行程。</div>
       <button class="ghost-btn" style="margin-top:0;" onclick="gotoTab('advice')">前往保養建議生成週計畫 →</button>
@@ -749,7 +749,7 @@ function renderTodayRoutine(){
   const pRowLight=n=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">${prodThumb(n)}<span style="font-size:11.5px;color:var(--cocoa-2);line-height:1.35;font-weight:400;">${n}</span></div>`;
   const emptyRow=`<div style="font-size:12px;color:var(--muted);opacity:0.6;">今日無安排</div>`;
   return`<div class="card" style="padding:22px;">
-    <div class="eyebrow" style="margin-bottom:10px;">今日保養 <span class="dot">·</span> RITUAL OF ${dayEng}</div>
+    <div class="eyebrow" style="margin-bottom:10px;">今日保養 <span class="dot">·</span> ROUTINE OF ${dayEng}</div>
     <div style="font-size:24px;font-weight:500;color:var(--cocoa);letter-spacing:-0.02em;line-height:1.15;margin-bottom:18px;">今日 <em>行程</em></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:16px;">
       <div>
@@ -822,12 +822,12 @@ function renderHome(){
       <button class="skin-btn">設定 →</button>
     </div>
     <div>
-      <div class="eyebrow" style="margin-bottom:12px;">產品庫概況 <span class="dot">·</span> inventory at a glance</div>
+      <div class="eyebrow" style="margin-bottom:12px;">產品庫概況 <span class="dot">·</span> My Inventory</div>
       <div class="stats-row">
         <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">產品總數</div><div class="stat-sub">total</div></div>
-        <div class="stat"><div class="stat-n" style="color:var(--amber)">${expiring}</div><div class="stat-l">即將過期</div><div class="stat-sub">soon</div></div>
+        <div class="stat"><div class="stat-n" style="color:var(--amber)">${expiring}</div><div class="stat-l">即將過期</div><div class="stat-sub">expires soon</div></div>
         <div class="stat"><div class="stat-n" style="color:var(--red)">${expired}</div><div class="stat-l">已過期</div><div class="stat-sub">expired</div></div>
-        <div class="stat"><div class="stat-n" style="color:var(--rust)">${ok}</div><div class="stat-l">狀態良好</div><div class="stat-sub">fresh</div></div>
+        <div class="stat"><div class="stat-n" style="color:var(--rust)">${ok}</div><div class="stat-l">狀態良好</div><div class="stat-sub">in good condition</div></div>
       </div>
     </div>
     ${alerts}
@@ -867,9 +867,9 @@ function renderProducts(){
     const standbyProds=state.products.filter(p=>!plan.activeIds.includes(p.id)&&p.category!=='美容儀器');
     const devices=state.products.filter(p=>p.category==='美容儀器');
     const grpLabel=(txt,sub,color='var(--muted-2)')=>`<div class="eyebrow" style="color:${color};margin:18px 0 10px;">${txt} <span class="dot">·</span> <span>${sub}</span></div>`;
-    const activeHtml=activeProds.length?`${grpLabel('使用中','IN ROTATION','var(--cocoa-2)')}<div class="product-list" style="margin-bottom:6px;">${activeProds.map(renderPcard).join('')}</div>`:'';
-    const standbyHtml=standbyProds.length?`${grpLabel('待用','STANDBY')}<div class="product-list" style="margin-bottom:6px;">${standbyProds.map(renderPcard).join('')}</div>`:'';
-    const deviceHtml=devices.length?`${grpLabel('美容儀器','DEVICES')}<div class="product-list">${devices.map(renderPcard).join('')}</div>`:'';
+    const activeHtml=activeProds.length?`${grpLabel('使用中','IN USE','var(--cocoa-2)')}<div class="product-list" style="margin-bottom:6px;">${activeProds.map(renderPcard).join('')}</div>`:'';
+    const standbyHtml=standbyProds.length?`${grpLabel('待用','IN RESERVE')}<div class="product-list" style="margin-bottom:6px;">${standbyProds.map(renderPcard).join('')}</div>`:'';
+    const deviceHtml=devices.length?`${grpLabel('美容儀器','BEAUTY DEVICE')}<div class="product-list">${devices.map(renderPcard).join('')}</div>`:'';
     if(!state.products.length)return`<div class="tab-content">${hdr}<div class="empty"><div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M8 3v4l-3 3v11a1 1 0 001 1h12a1 1 0 001-1V10l-3-3V3"/><line x1="5" y1="13" x2="19" y2="13"/></svg></div>還沒有產品，點擊新增吧！</div></div>`;
     return`<div class="tab-content">${hdr}${activeHtml}${standbyHtml}${deviceHtml}</div>`;
   }
@@ -893,7 +893,7 @@ function se(s){return s?s.replace(/[⌀-⟿⬀-⯿︀-️]|[\u{1F000}-\u{1FFFF}]
 function renderPcard(p){
   const d=daysLeft(p),s=expStatus(d),pct=expPct(p);
   const isDevice=p.category==='美容儀器';
-  const statusMono=isDevice?'DEVICE':s==='ok'?'IN USE':s==='warn'||s==='danger'?'SOON':'STANDBY';
+  const statusMono=isDevice?'DEVICE':s==='ok'?'IN USE':s==='warn'||s==='danger'?'EXPIRES SOON':'EXPIRED';
   const benefitTags=p.benefits?p.benefits.split(/[,，、]/).map(b=>b.trim()).filter(Boolean).map(b=>`<span style="font-size:10px;color:var(--rust);background:rgba(156,94,46,0.08);border-radius:var(--r-chip);padding:2px 8px;font-weight:500;">${b}</span>`).join(''):'';
   return `<div class="pcard" data-pid="${p.id}">
     <div class="pcard-emoji">${imgSrc(p)?`<img src="${imgSrc(p)}">`:(prodIcon(p))}</div>
@@ -1248,7 +1248,7 @@ function renderPlanBanner(){
   if(!window._confirmedPlan)return'';
   if(_planFingerprint()!==window._confirmedPlan.productFingerprint){
     return`<div style="padding:20px;border-radius:var(--r-card);background:linear-gradient(135deg,#FBF0DC,#F5E4C4);border:0.5px solid rgba(122,86,51,0.15);margin-bottom:22px;">
-      <div class="eyebrow" style="color:#7a5028;margin-bottom:8px;">需要調整 <span class="dot">·</span> heads up</div>
+      <div class="eyebrow" style="color:#7a5028;margin-bottom:8px;">需要調整 <span class="dot">·</span> ADJUST ROUTINE</div>
       <div style="font-size:15px;font-weight:500;line-height:1.45;color:#3a2410;margin-bottom:14px;letter-spacing:-0.005em;">你的產品庫已更新，目前保養計畫可能需要調整。</div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-dark" style="flex:1;" onclick="regenPlan('morning')">重新生成</button>
@@ -1276,7 +1276,7 @@ function renderAdvice(){
   }).join('');
   return `<div class="tab-content">
     <div style="margin-bottom:22px;">
-      <div class="eyebrow" style="margin-bottom:8px;">保養建議 <span class="dot">·</span> THE METHOD</div>
+      <div class="eyebrow" style="margin-bottom:8px;">保養建議 <span class="dot">·</span> SKINCARE ADVICE</div>
       <div class="section-title">每日 <em>儀式</em></div>
     </div>
     ${renderPlanBanner()}
@@ -1337,12 +1337,12 @@ function renderRoutine(tod){
   if(window._confirmedPlan&&window._confirmedPlan[planKey])return renderRoutineResult(window._confirmedPlan[planKey],tod,true);
   const key='_routine_'+tod;
   if(window[key]&&window[key].skin===state.skin.type)return renderRoutineResult(window[key],tod,false);
-  return `<div style="margin-bottom:20px;"><div class="eyebrow" style="margin-bottom:10px;">${lbl}間保養流程 <span class="dot">·</span> ${tod==='morning'?'A.M.':'P.M.'} ritual</div></div><div class="card"><div class="card-title">${lbl}間保養流程</div><div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6;">尚未生成保養計畫。</div><button class="submit-btn" onclick="generateAll('${tod}')">開始生成</button></div>`;
+  return `<div style="margin-bottom:20px;"><div class="eyebrow" style="margin-bottom:10px;">${lbl}間保養流程 <span class="dot">·</span> ${tod==='morning'?'AM':'PM'} routine</div></div><div class="card"><div class="card-title">${lbl}間保養流程</div><div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6;">尚未生成保養計畫。</div><button class="submit-btn" onclick="generateAll('${tod}')">開始生成</button></div>`;
 }
 
 function renderRoutineResult(data,tod,isConfirmed){
   const lbl=tod==='morning'?'早':'晚';
-  const lblEng=tod==='morning'?'A.M.':'P.M.';
+  const lblEng=tod==='morning'?'AM':'PM';
   const confirmedDate=isConfirmed&&window._confirmedPlan?.confirmedAt||'';
   const dailyHtml=data.daily.map((s,i)=>{
     const names=(s.product||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
@@ -1386,7 +1386,7 @@ function renderRoutineResult(data,tod,isConfirmed){
     `<div style="margin-bottom:12px;font-size:13px;color:var(--muted);padding:12px 0;">所有保養品都已安排在每日步驟中</div>`;
   const flowHeader=`<div style="margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-end;">
     <div>
-      <div class="eyebrow" style="margin-bottom:6px;">${lbl}間保養流程 <span class="dot">·</span> ${lblEng} ritual</div>
+      <div class="eyebrow" style="margin-bottom:6px;">${lbl}間保養流程 <span class="dot">·</span> ${lblEng} routine</div>
       ${confirmedDate?`<div style="font-size:13px;color:var(--muted);">上次確認 · <span style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;">${confirmedDate}</span></div>`:''}
     </div>
     ${isConfirmed?`<span class="chip">已確認</span>`:''}
@@ -1707,7 +1707,7 @@ function renderSkin(){
     </div>
     <div style="padding:20px 0 12px;border-top:0.5px solid var(--hairline);margin-top:4px;">
       <div class="eyebrow" style="margin-bottom:8px;">關於 SkinKu</div>
-      <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px;">A quiet skincare archive — let your routine breathe.</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px;">Every product tracked. Every routine planned.</div>
       <div style="font-size:11px;color:var(--muted-2);line-height:1.7;">本 app 提供之保養建議、成分分析及產品資訊均由 AI 自動生成，僅供個人參考使用，不構成醫療建議。如有肌膚問題或過敏反應，請諮詢皮膚科醫師。</div>
     </div>
     <div class="card" style="margin-top:4px;">
