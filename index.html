@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
@@ -755,39 +755,35 @@ function renderTodayRoutine(){
   const today=(wp.week||[]).find(d=>dayMap[d.day]===todayIdx);
   const mProds=(today?today.morning||[]:[]).filter(Boolean);
   const eProds=(today?today.evening||[]:[]).filter(Boolean);
-  const dayNameMap = {0:'週日',1:'週一',2:'週二',3:'週三',4:'週四',5:'週五',6:'週六'};
-  const todayDevSched = (window._device_schedule||[]).find(d => d.day === dayNameMap[todayIdx]) || null;
   const pRowLight = n => {
-    const {name: dn, mode} = _devEntry(n);
-    const isDevice = findProduct(dn)?.category === '美容儀器' ||
-      state.products.some(p => p.category === '美容儀器' &&
-        (dn.includes(p.name) || p.name.includes(dn)));
-    if (isDevice) {
-      const ds = todayDevSched && todayDevSched.product &&
-        (todayDevSched.product === dn ||
-         dn.includes(todayDevSched.product) ||
-         todayDevSched.product.includes(dn))
-        ? todayDevSched : null;
-      const displayMode = (ds && ds.mode) ? ds.mode : mode;
-      if (displayMode) {
-        return `<div style="margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          ${prodThumb(dn)}
-          <span style="font-size:11.5px;color:var(--cocoa-2);font-weight:400;">${se(dn)}</span>
-        </div>
-        <div style="margin-left:44px;padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,#F5E8D0,#EFDCB8);border:0.5px solid rgba(156,94,46,0.2);">
-          <div style="font-family:var(--mono);font-size:8.5px;letter-spacing:0.12em;color:var(--rust);margin-bottom:4px;">TODAY · DEVICE MODE</div>
-          <div style="font-size:13px;font-weight:600;color:var(--cocoa);margin-bottom:${ds ? '8px' : '0'};">${se(displayMode)}</div>
-          ${ds && ds.paired ? `<div style="display:flex;gap:6px;margin-bottom:4px;"><span style="font-size:10px;color:var(--muted);min-width:44px;flex-shrink:0;">搭配</span><span style="font-size:11px;color:var(--cocoa-2);line-height:1.45;">${se(ds.paired)}</span></div>` : ''}
-          ${ds && ds.effect ? `<div style="display:flex;gap:6px;"><span style="font-size:10px;color:var(--muted);min-width:44px;flex-shrink:0;">效果</span><span style="font-size:11px;color:var(--cocoa-2);line-height:1.45;">${se(ds.effect)}</span></div>` : ''}
-        </div>
-      </div>`;
-      }
-      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">${prodThumb(dn)}<span style="font-size:11.5px;color:var(--cocoa-2);font-weight:400;">${se(dn)}</span></div>`;
-    }
+    const {name: dn} = _devEntry(n);
     return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">${prodThumb(dn)}<span style="font-size:11.5px;color:var(--cocoa-2);line-height:1.35;font-weight:400;">${se(dn)}</span></div>`;
   };
   const emptyRow=`<div style="font-size:12px;color:var(--muted);opacity:0.6;">今日無安排</div>`;
+  // 今日美容儀建議區塊
+  const dayNameMap2 = {0:'週日',1:'週一',2:'週二',3:'週三',4:'週四',5:'週五',6:'週六'};
+  const todaySched = (window._device_schedule||[]).find(d => d.day === dayNameMap2[todayIdx]) || null;
+  const deviceProds = state.products.filter(p => p.category === '美容儀器');
+  const renderDeviceSession = (session, label, labelEng) => {
+    if (!session || !session.mode) return '';
+    return `<div style="margin-bottom:10px;">
+    <div style="font-family:var(--mono);font-size:8.5px;letter-spacing:0.1em;color:var(--rust);margin-bottom:4px;">${labelEng}</div>
+    <div style="font-size:13px;font-weight:600;color:var(--cocoa);margin-bottom:6px;">${se(session.mode)}</div>
+    ${session.paired?`<div style="display:flex;gap:6px;margin-bottom:3px;"><span style="font-size:10px;color:var(--muted);min-width:44px;flex-shrink:0;">搭配</span><span style="font-size:11px;color:var(--cocoa-2);line-height:1.4;">${se(session.paired)}</span></div>`:''}
+    ${session.effect?`<div style="display:flex;gap:6px;margin-bottom:3px;"><span style="font-size:10px;color:var(--muted);min-width:44px;flex-shrink:0;">效果</span><span style="font-size:11px;color:var(--cocoa-2);line-height:1.4;">${se(session.effect)}</span></div>`:''}
+    ${session.tip?`<div style="font-size:10.5px;color:var(--muted);margin-top:4px;padding:6px 8px;background:rgba(255,255,255,0.6);border-radius:8px;line-height:1.5;">提示 · ${se(session.tip)}</div>`:''}
+  </div>`;
+  };
+  const deviceSectionHtml = (deviceProds.length > 0 && todaySched && (todaySched.morning?.mode || todaySched.evening?.mode)) ? `
+  <div style="border-top:0.5px solid var(--hairline);padding-top:14px;margin-bottom:14px;">
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:var(--rust);margin-bottom:8px;">TODAY · DEVICE</div>
+    <div style="font-size:12px;font-weight:500;color:var(--cocoa);margin-bottom:10px;">${se(deviceProds[0].brand)} ${se(deviceProds[0].name)}</div>
+    <div style="display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:12px;background:linear-gradient(135deg,#F5E8D0,#EFDCB8);border:0.5px solid rgba(156,94,46,0.2);">
+      ${renderDeviceSession(todaySched.morning,'早上','☀ MORNING')}
+      ${todaySched.morning?.mode && todaySched.evening?.mode ? '<div style="height:0.5px;background:rgba(156,94,46,0.2);margin:2px 0;"></div>' : ''}
+      ${renderDeviceSession(todaySched.evening,'晚上','🌙 EVENING')}
+    </div>
+  </div>` : '';
   return`<div class="card" style="padding:22px;">
     <div class="eyebrow" style="margin-bottom:10px;">今日保養 <span class="dot">·</span> ROUTINE OF ${dayEng}</div>
     <div style="font-size:24px;font-weight:500;color:var(--cocoa);letter-spacing:-0.02em;line-height:1.15;margin-bottom:18px;">今日 <em>行程</em></div>
@@ -803,6 +799,7 @@ function renderTodayRoutine(){
         ${eProds.map(pRowLight).join('')||emptyRow}
       </div>
     </div>
+    ${deviceSectionHtml}
     <div style="border-top:0.5px solid var(--hairline);padding-top:14px;">
       <button style="width:100%;background:none;border:none;padding:0;font-size:13px;cursor:pointer;color:var(--muted);font-family:var(--sans);font-weight:400;text-align:center;" onclick="gotoTab('advice')">查看完整週計畫 →</button>
     </div>
@@ -1535,7 +1532,12 @@ async function generateAll(startTab){
   const prods=skinProds.map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   const prodNames=skinProds.map(p=>`${p.brand} ${p.name}`).join('、');
   const devices=state.products.filter(p=>p.category==='美容儀器');
-  const devDim=devices.length>0?devices.map(p=>`${p.brand} ${p.name}（主要功效：${p.benefits||'未填寫'}）`).join('\n'):'（無美容儀器）';
+  const devDim = devices.length > 0 ? devices.map(p => {
+    const modesStr = p.modes && p.modes.length
+      ? '\n可用模式：\n' + p.modes.map(m => `  - ${m.name}：${m.function}（適合：${(m.targets||[]).join('、')}）`).join('\n')
+      : '（模式資訊待填充）';
+    return `${p.brand} ${p.name}（主要功效：${p.benefits||'未填寫'}）${modesStr}`;
+  }).join('\n') : '（無美容儀器）';
   try{
     // Step 1: get text-format compat analysis (cached after first run)
     let compatText='（尚未分析）';
@@ -1575,18 +1577,19 @@ ${expiryDim}
 ${devDim}
 
 ${devices.length>0?`美容儀器整合規則：
-- 請根據品牌和名稱判斷其功能和可用模式。如果是知名儀器，請使用準確的官方模式名稱；如果不熟悉，請根據「主要功效」欄位推測使用方式
-- 使用頻率需合理且符合官方建議，同時考慮用戶膚質；每天可安排不同模式，也可在同一次保養中疊加不同模式，但所有建議必須合理且搭配適合的保養品
-- 使用順序需正確：需在乾燥肌膚上使用的模式（如射頻、微電流）請排在保養品步驟之前；導入類模式請搭配對應保養品並安排在該保養品步驟緊接之後
-- 請將美容儀步驟整合進 morning 和 evening 的 daily 步驟中；每個美容儀 daily 步驟除 step/how/product 外，必須額外填入：
-  device_mode（代表性模式名稱，例如：Booster Mode）
-  device_paired（搭配使用的保養品，從使用中清單選擇，逗號分隔）
-  device_effect（達到的效果，例如：加強精華吸收、緊緻提拉）
-  device_tip（簡短操作提示，例如：在乾燥肌膚上使用，每次 3-5 分鐘）
-- 請額外輸出 device_schedule 陣列（7筆，週一到週日），為每天分別指定最適合的美容儀使用方式：
-  根據當天週計畫中的保養品、用戶膚質需求和儀器功能，合理分配不同模式（不要每天都相同）
-  每筆包含：day（週一～週日）、product（儀器完整名稱）、mode（模式名稱）、paired（搭配保養品）、effect（達到效果）、tip（操作提示）
-- week 計畫陣列中，美容儀條目的模式名稱需與 device_schedule 中對應星期的 mode 一致，格式：「品牌 儀器名 — 模式名」；普通保養品維持原格式`:''}
+- 請根據品牌和名稱判斷其功能。如果是知名儀器，請使用準確的官方模式名稱
+- 請對照用戶的肌膚困擾（${state.skin.concerns.join('、')}）和膚質（${state.skin.type}），從該儀器的可用模式中選出最能針對用戶需求的模式組合
+- 七天排程中，每個模式使用不超過 3 天；若儀器有 3 種以上模式，請盡量在一週內涵蓋所有主要模式
+- 使用順序需正確：需在乾燥肌膚上使用的模式（如射頻、微電流 EMS）請排在保養品步驟之前；導入類模式請搭配對應保養品並安排在該保養品步驟緊接之後
+- 搭配的保養品必須與該模式功效相符，並從當天實際使用的產品中選擇
+- 請將美容儀步驟整合進 morning 和 evening 的 daily 步驟中，填入完整欄位：
+  device_mode（該步驟建議的代表性模式名稱）
+  device_paired（搭配使用的保養品）
+  device_effect（達到的效果）
+  device_tip（簡短操作提示）
+- 請額外輸出 device_schedule 陣列（7筆，週一到週日），早晚分別指定最適合的模式：
+  每筆包含 day、morning（含 mode/paired/effect/tip，若早上無安排則為 null）、evening（含 mode/paired/effect/tip，若晚上無安排則為 null）
+- week 計畫陣列中，美容儀條目格式：「品牌 儀器名 — 模式名」，模式名需與 device_schedule 對應星期對應時段一致`:''}
 
 以下是完整保養品清單，product 欄位必須使用以下完整名稱（一字不差）：
 ${prods}
@@ -1610,7 +1613,15 @@ ${prods}
 美容儀步驟格式（必須包含以下所有欄位）：{"step":"步驟名稱","how":"操作說明","product":"儀器完整名稱","device_mode":"今日模式","device_paired":"搭配保養品","device_effect":"達到效果","device_tip":"操作提示"}
 week 計畫中美容儀格式："品牌 名稱 — 模式名"
 
-{"morning":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"evening":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}],"device_schedule":[{"day":"週一","product":"儀器完整名稱","mode":"模式名","paired":"搭配保養品","effect":"達到效果","tip":"操作提示"},{"day":"週二","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週三","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週四","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週五","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週六","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週日","product":"","mode":"","paired":"","effect":"","tip":""}]}`,6000);
+{"morning":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"evening":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}],"device_schedule":[
+  {"day":"週一","morning":{"mode":"模式名","paired":"搭配保養品","effect":"達到效果","tip":"操作提示"},"evening":{"mode":"模式名","paired":"搭配保養品","effect":"達到效果","tip":"操作提示"}},
+  {"day":"週二","morning":{"mode":"","paired":"","effect":"","tip":""},"evening":{"mode":"","paired":"","effect":"","tip":""}},
+  {"day":"週三","morning":null,"evening":{"mode":"","paired":"","effect":"","tip":""}},
+  {"day":"週四","morning":{"mode":"","paired":"","effect":"","tip":""},"evening":null},
+  {"day":"週五","morning":{"mode":"","paired":"","effect":"","tip":""},"evening":{"mode":"","paired":"","effect":"","tip":""}},
+  {"day":"週六","morning":null,"evening":{"mode":"","paired":"","effect":"","tip":""}},
+  {"day":"週日","morning":{"mode":"","paired":"","effect":"","tip":""},"evening":null}
+]}`,6000);
     const data=parseJSON(raw);
     window._routine_morning={...data.morning,skin:state.skin.type};
     window._routine_evening={...data.evening,skin:state.skin.type};
@@ -2008,6 +2019,7 @@ setTimeout(checkExpiryNotifications,3000);
 render();
 initFromCloud();
 setTimeout(autofillBenefits,4000);
+setTimeout(autofillDeviceModes, 6000);
 async function autofillBenefits(){
   const missing=state.products.filter(p=>!p.benefits);
   if(!missing.length)return;
@@ -2026,6 +2038,23 @@ async function autofillBenefits(){
       if(state.tab==='products'||state.tab==='home')render();
     }
   }catch(e){console.log('[autofillBenefits] failed:',e.message);}
+}
+async function autofillDeviceModes() {
+  const devices = state.products.filter(p => p.category === '美容儀器' && !p.modes);
+  if (!devices.length) return;
+  for (const d of devices) {
+    try {
+      const raw = await callClaude(
+        `你是美容儀器專家。請列出「${d.brand} ${d.name}」的所有主要使用模式。` +
+        `只回純JSON陣列，每項包含：name（模式名稱，使用官方英文名）、function（該模式的主要功效，繁體中文1句）、targets（最適合的肌膚困擾，繁體中文陣列，例如：["暗沉","乾燥"]）。` +
+        `格式：[{"name":"","function":"","targets":[]}]`, 800);
+      const modes = parseJSON(raw);
+      if (Array.isArray(modes) && modes.length) {
+        d.modes = modes;
+        saveState();
+      }
+    } catch(e) { console.warn('[autofillDeviceModes]', e); }
+  }
 }
 function showWelcomeDialog(){
   if(document.getElementById('sv-welcome-overlay'))return;
