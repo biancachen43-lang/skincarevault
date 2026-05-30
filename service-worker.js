@@ -1,9 +1,9 @@
-const CACHE_NAME = 'skincarevault-v2';
+const CACHE_NAME = 'skinku-20260530120000';
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
-  self.skipWaiting();
+  // Do NOT call skipWaiting() here — wait for user to approve via banner
 });
 
 self.addEventListener('activate', e => {
@@ -11,6 +11,13 @@ self.addEventListener('activate', e => {
     Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
   ));
   self.clients.claim();
+});
+
+// Page sends this message when user clicks "立即更新"
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', e => {
