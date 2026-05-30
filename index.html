@@ -373,6 +373,7 @@ function saveAdviceCache(){
   _saveOne('sv_cache_compat',window._compat||null);
   _saveOne('sv_cache_compat_text',window._compatText||null);
   _saveOne('sv_cache_device',window._device_advice||null);
+  _saveOne('sv_cache_device_sched',window._device_schedule||null);
 }
 function loadAdviceCache(){
   const rm=_loadOne('sv_cache_morning');if(rm)window._routine_morning=rm;
@@ -381,11 +382,12 @@ function loadAdviceCache(){
   const cp=_loadOne('sv_cache_compat');if(cp)window._compat=cp;
   const ct=_loadOne('sv_cache_compat_text');if(ct)window._compatText=ct;
   const da=_loadOne('sv_cache_device');if(da)window._device_advice=da;
+  const ds=_loadOne('sv_cache_device_sched');if(ds)window._device_schedule=ds;
 }
 function clearAdviceCache(){
-  window._routine_morning=null;window._routine_evening=null;window._weekplan=null;window._compat=null;window._compatText=null;window._device_advice=null;
+  window._routine_morning=null;window._routine_evening=null;window._weekplan=null;window._compat=null;window._compatText=null;window._device_advice=null;window._device_schedule=null;
   state.skinAdvice=null;
-  ['sv_cache_morning','sv_cache_evening','sv_cache_week','sv_cache_compat','sv_cache_compat_text','sv_cache_device','sv_cache_skin_advice','skincarevault_advice_cache'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+  ['sv_cache_morning','sv_cache_evening','sv_cache_week','sv_cache_compat','sv_cache_compat_text','sv_cache_device','sv_cache_device_sched','sv_cache_skin_advice','skincarevault_advice_cache'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
 }
 // Confirmed plan helpers
 function _planFingerprint(){
@@ -759,10 +761,26 @@ function renderTodayRoutine(){
   const today=(wp.week||[]).find(d=>dayMap[d.day]===todayIdx);
   const mProds=(today?today.morning||[]:[]).filter(Boolean);
   const eProds=(today?today.evening||[]:[]).filter(Boolean);
+  const dayNameMap={0:'週日',1:'週一',2:'週二',3:'週三',4:'週四',5:'週五',6:'週六'};
+  const todayDevSched=(window._device_schedule||[]).find(d=>d.day===dayNameMap[todayIdx])||null;
   const pRowLight=n=>{
     const{name:dn,mode}=_devEntry(n);
     const isDevice=findProduct(dn)?.category==='美容儀器';
-    if(isDevice&&mode)return`<div style="margin-bottom:8px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">${prodThumb(dn)}<span style="font-size:11.5px;color:var(--cocoa-2);font-weight:400;">${dn}</span></div><div style="margin-left:44px;padding:7px 10px;border-radius:10px;background:linear-gradient(135deg,#F5E8D0,#EFDCB8);border:0.5px solid rgba(156,94,46,0.2);"><div style="font-family:var(--mono);font-size:8.5px;letter-spacing:0.12em;color:var(--rust);margin-bottom:2px;">TODAY</div><div style="font-size:12px;font-weight:600;color:var(--cocoa);">${mode}</div></div></div>`;
+    if(isDevice){
+      const ds=todayDevSched&&todayDevSched.product&&
+        (todayDevSched.product===dn||dn.includes(todayDevSched.product)||todayDevSched.product.includes(dn))
+        ?todayDevSched:null;
+      const displayMode=ds?.mode||mode;
+      if(displayMode)return`<div style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">${prodThumb(dn)}<span style="font-size:11.5px;color:var(--cocoa-2);font-weight:400;">${dn}</span></div>
+      <div style="margin-left:44px;padding:8px 10px;border-radius:10px;background:linear-gradient(135deg,#F5E8D0,#EFDCB8);border:0.5px solid rgba(156,94,46,0.2);">
+        <div style="font-family:var(--mono);font-size:8.5px;letter-spacing:0.12em;color:var(--rust);margin-bottom:3px;">TODAY</div>
+        <div style="font-size:12px;font-weight:600;color:var(--cocoa);margin-bottom:${ds?'6px':'0'};">${se(displayMode)}</div>
+        ${ds?.paired?`<div style="display:flex;gap:6px;margin-bottom:3px;"><span style="font-size:10px;color:var(--muted);min-width:44px;flex-shrink:0;">搭配</span><span style="font-size:11px;color:var(--cocoa-2);line-height:1.4;">${se(ds.paired)}</span></div>`:''}
+        ${ds?.effect?`<div style="display:flex;gap:6px;"><span style="font-size:10px;color:var(--muted);min-width:44px;flex-shrink:0;">效果</span><span style="font-size:11px;color:var(--cocoa-2);line-height:1.4;">${se(ds.effect)}</span></div>`:''}
+      </div>
+    </div>`;
+    }
     return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">${prodThumb(dn)}<span style="font-size:11.5px;color:var(--cocoa-2);line-height:1.35;font-weight:400;">${dn}</span></div>`;
   };
   const emptyRow=`<div style="font-size:12px;color:var(--muted);opacity:0.6;">今日無安排</div>`;
@@ -1554,14 +1572,17 @@ ${devDim}
 
 ${devices.length>0?`美容儀器整合規則：
 - 請根據品牌和名稱判斷其功能和可用模式。如果是知名儀器，請使用準確的官方模式名稱；如果不熟悉，請根據「主要功效」欄位推測使用方式
-- 使用頻率需合理且符合官方建議，同時考慮用戶膚質；可每天安排不同模式，或同次保養疊加不同模式，但所有建議必須合理
+- 使用頻率需合理且符合官方建議，同時考慮用戶膚質；每天可安排不同模式，也可在同一次保養中疊加不同模式，但所有建議必須合理且搭配適合的保養品
 - 使用順序需正確：需在乾燥肌膚上使用的模式（如射頻、微電流）請排在保養品步驟之前；導入類模式請搭配對應保養品並安排在該保養品步驟緊接之後
 - 請將美容儀步驟整合進 morning 和 evening 的 daily 步驟中；每個美容儀 daily 步驟除 step/how/product 外，必須額外填入：
-  device_mode（今日建議模式名稱，例如：Booster Mode）
+  device_mode（代表性模式名稱，例如：Booster Mode）
   device_paired（搭配使用的保養品，從使用中清單選擇，逗號分隔）
   device_effect（達到的效果，例如：加強精華吸收、緊緻提拉）
   device_tip（簡短操作提示，例如：在乾燥肌膚上使用，每次 3-5 分鐘）
-- week 計畫陣列中，美容儀條目請用「品牌 儀器名 — 模式名」格式（例如：Medicube Booster Pro — Booster Mode）；普通保養品維持原格式`:''}
+- 請額外輸出 device_schedule 陣列（7筆，週一到週日），為每天分別指定最適合的美容儀使用方式：
+  根據當天週計畫中的保養品、用戶膚質需求和儀器功能，合理分配不同模式（不要每天都相同）
+  每筆包含：day（週一～週日）、product（儀器完整名稱）、mode（模式名稱）、paired（搭配保養品）、effect（達到效果）、tip（操作提示）
+- week 計畫陣列中，美容儀條目的模式名稱需與 device_schedule 中對應星期的 mode 一致，格式：「品牌 儀器名 — 模式名」；普通保養品維持原格式`:''}
 
 以下是完整保養品清單，product 欄位必須使用以下完整名稱（一字不差）：
 ${prods}
@@ -1585,11 +1606,12 @@ ${prods}
 美容儀步驟格式（必須包含以下所有欄位）：{"step":"步驟名稱","how":"操作說明","product":"儀器完整名稱","device_mode":"今日模式","device_paired":"搭配保養品","device_effect":"達到效果","device_tip":"操作提示"}
 week 計畫中美容儀格式："品牌 名稱 — 模式名"
 
-{"morning":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"evening":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}]}`);
+{"morning":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"evening":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}],"device_schedule":[{"day":"週一","product":"儀器完整名稱","mode":"模式名","paired":"搭配保養品","effect":"達到效果","tip":"操作提示"},{"day":"週二","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週三","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週四","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週五","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週六","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週日","product":"","mode":"","paired":"","effect":"","tip":""}]}`);
     const data=parseJSON(raw);
     window._routine_morning={...data.morning,skin:state.skin.type};
     window._routine_evening={...data.evening,skin:state.skin.type};
     window._weekplan={week:data.week,skin:state.skin.type};
+    window._device_schedule=data.device_schedule||[];
     saveAdviceCache();
     if(adviceEl)adviceEl.innerHTML=renderAdviceContent();
   }catch(e){
