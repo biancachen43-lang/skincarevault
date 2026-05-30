@@ -1864,6 +1864,11 @@ function renderSkin(){
         </div>
         <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importBackup(event)">
         <button id="cloud-load-btn" class="ghost-btn" style="margin-top:8px;" onclick="manualLoadFromCloud()">從雲端重新載入資料</button>
+        <div style="border-top:0.5px solid var(--hairline);margin:14px 0 10px;"></div>
+        <div style="font-size:14px;font-weight:500;color:var(--cocoa);margin-bottom:6px;">美容儀器資料</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6;">若美容儀器的使用模式顯示不正確，可清除舊資料並重新用 web search 抓取官方模式。完成後請重新生成保養建議。</div>
+        <button id="refresh-device-modes-btn" class="ghost-btn" style="margin-top:0;" onclick="refreshDeviceModes()">更新美容儀模式資料</button>
+        <div id="refresh-device-status" style="margin-top:8px;"></div>
         <div id="backup-status" style="margin-top:8px;"></div>
       </div>
     </div>
@@ -1874,6 +1879,26 @@ function setSkinAgeRange(a){state.skin.ageRange=a;saveState();render();}
 function setSkinName(n){state.skin.name=n;saveState();updateTopbar();}
 window._advancedOpen=false;
 function toggleAdvanced(){window._advancedOpen=!window._advancedOpen;const el=document.getElementById('advanced-body');const arrow=document.getElementById('advanced-arrow');if(el){el.style.display=window._advancedOpen?'block':'none';}if(arrow){arrow.style.transform=window._advancedOpen?'rotate(180deg)':'';} }
+async function refreshDeviceModes(){
+  const btn=document.getElementById('refresh-device-modes-btn');
+  const status=document.getElementById('refresh-device-status');
+  const devices=state.products.filter(p=>p.category==='美容儀器');
+  if(!devices.length){
+    if(status)status.innerHTML='<div class="sbox swarn">目前沒有美容儀器產品。</div>';
+    return;
+  }
+  if(btn)btn.disabled=true;
+  if(status)status.innerHTML='<div class="sbox sloading">正在用 web search 抓取模式資料，約需 10 秒… <span class="dot-anim">●</span></div>';
+  devices.forEach(p=>{delete p.modes;});
+  saveState();
+  try{
+    await autofillDeviceModes();
+    if(status)status.innerHTML='<div class="sbox ssuccess">✓ 美容儀模式資料已更新！請前往保養建議頁重新生成。</div>';
+  }catch(e){
+    if(status)status.innerHTML=`<div class="sbox swarn">更新失敗：${e.message}</div>`;
+  }
+  if(btn)btn.disabled=false;
+}
 function toggleConcern(c){const i=state.skin.concerns.indexOf(c);if(i>=0)state.skin.concerns.splice(i,1);else state.skin.concerns.push(c);saveState();render();}
 function setLifestyle(field,val){if(!state.lifestyle)state.lifestyle={};state.lifestyle[field]=val;saveState();render();}
 function lifestyleContext(){
