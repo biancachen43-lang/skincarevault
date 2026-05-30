@@ -657,6 +657,22 @@ async function callClaude(prompt,maxTokens=4096){
   if(data.stop_reason&&data.stop_reason!=='end_turn')console.warn('[callClaude] stop_reason:',data.stop_reason);
   return(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
 }
+async function callClaudeWithSearch(prompt, maxTokens) {
+  const res = await fetch(API_ENDPOINT, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens || 1000,
+      tools: [{"type": "web_search_20250305", "name": "web_search"}],
+      messages: [{role: 'user', content: prompt}]
+    })
+  });
+  const data = await res.json();
+  // 從 content blocks 中取出 text 類型的回覆
+  const textBlock = (data.content || []).find(b => b.type === 'text');
+  return textBlock ? textBlock.text : '';
+}
 function parseJSON(raw) {
   if (!raw) return {};
   try {
@@ -2044,10 +2060,10 @@ async function autofillDeviceModes() {
   if (!devices.length) return;
   for (const d of devices) {
     try {
-      const raw = await callClaude(
-        `你是美容儀器專家。請列出「${d.brand} ${d.name}」的所有主要使用模式。` +
-        `只回純JSON陣列，每項包含：name（模式名稱，使用官方英文名）、function（該模式的主要功效，繁體中文1句）、targets（最適合的肌膚困擾，繁體中文陣列，例如：["暗沉","乾燥"]）。` +
-        `格式：[{"name":"","function":"","targets":[]}]`, 800);
+      const raw = await callClaudeWithSearch(
+        `請搜尋「${d.brand} ${d.name}」這台美容儀器的官方規格，列出它所有的正式使用模式。` +
+        `只回純JSON陣列，使用官方英文模式名稱，每項包含：name（官方模式名稱）、function（該模式的主要功效，繁體中文1句）、targets（最適合的肌膚困擾，繁體中文陣列）。` +
+        `格式：[{"name":"","function":"","targets":[]}]`, 1000);
       const modes = parseJSON(raw);
       if (Array.isArray(modes) && modes.length) {
         d.modes = modes;

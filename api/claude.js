@@ -89,15 +89,19 @@ module.exports = async function handler(req, res) {
 
   try {
     const maxTokens = Math.min(req.body.max_tokens || 4000, 8000);
-    const body = { ...req.body, model: 'claude-sonnet-4-6', max_tokens: maxTokens, temperature: 0.3 };
-    console.log('Calling Anthropic, model:', body.model, 'max_tokens:', body.max_tokens, 'messages_len:', JSON.stringify(body.messages||[]).length);
+    const model = req.body.model || 'claude-sonnet-4-6';
+    const body = { ...req.body, model, max_tokens: maxTokens, temperature: 0.3 };
+    const hasTools = Array.isArray(body.tools) && body.tools.length > 0;
+    console.log('Calling Anthropic, model:', body.model, 'max_tokens:', body.max_tokens, 'tools:', hasTools, 'messages_len:', JSON.stringify(body.messages||[]).length);
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    };
+    if (hasTools) headers['anthropic-beta'] = 'web-search-2025-03-05';
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
+      headers,
       body: JSON.stringify(body),
     });
     const data = await response.json();
