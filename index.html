@@ -388,7 +388,11 @@ function clearAdviceCache(){
   ['sv_cache_morning','sv_cache_evening','sv_cache_week','sv_cache_compat','sv_cache_compat_text','sv_cache_device','sv_cache_skin_advice','skincarevault_advice_cache'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
 }
 // Confirmed plan helpers
-function _planFingerprint(){return state.products.map(p=>p.id+'|'+p.category).sort().join(',');}
+function _planFingerprint(){
+  const prodHash=state.products.map(p=>p.id+'|'+p.category).sort().join(',');
+  const activeHash=(state.productPlan&&state.productPlan.activeIds)?state.productPlan.activeIds.slice().sort().join('+'):'none';
+  return prodHash+'::'+activeHash;
+}
 function saveConfirmedPlanLocal(plan){try{localStorage.setItem('sv_confirmed_plan',JSON.stringify(plan));}catch(e){}}
 function loadConfirmedPlanLocal(){try{return JSON.parse(localStorage.getItem('sv_confirmed_plan')||'null');}catch(e){return null;}}
 async function saveConfirmedPlanCloud(plan){try{await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save_plan',data:plan,userId:window._userId})});}catch(e){console.warn('[plan] cloud save failed:',e);}}
@@ -800,6 +804,34 @@ function renderUrgentCard(p){
   }
   return`<div style="margin-bottom:4px;">${renderPcard(p)}${hint}</div>`;
 }
+// Smart standby expiry warnings
+const _CAT_MAX_DAYS={'精華液':90,'乳霜':120,'乳液':120,'化妝水':90,'潔顏':60,'潔面':60,'洗顏':60,'面膜':60,'防曬':60};
+function _catMaxDays(cat){for(const k of Object.keys(_CAT_MAX_DAYS)){if(cat&&cat.includes(k))return _CAT_MAX_DAYS[k];}return 90;}
+function getStandbyExpiryWarnings(){
+  const cacheKey='sv_standby_warnings';
+  const prodHash=state.products.map(p=>p.id).sort().join(',');
+  const planHash=(state.productPlan&&state.productPlan.activeIds)?state.productPlan.activeIds.slice().sort().join('+'):'none';
+  const fingerprint=prodHash+'|'+planHash;
+  try{
+    const c=JSON.parse(localStorage.getItem(cacheKey)||'null');
+    if(c&&c.fp===fingerprint&&(Date.now()-c.ts)<3600000)return c.w;
+  }catch(e){}
+  const plan=state.productPlan;
+  const standbyIds=plan&&plan.standbyIds?plan.standbyIds:[];
+  const hasActivePlan=plan&&(plan.activeIds.length||plan.standbyIds.length);
+  const warnings=[];
+  for(const p of state.products){
+    if(p.category==='美容儀器')continue;
+    if(hasActivePlan&&!standbyIds.includes(p.id))continue; // only standby when plan exists
+    if(!hasActivePlan&&plan)continue; // skip if plan exists but product not classified
+    const d=daysLeft(p);
+    if(d===null||d<0)continue;
+    const maxDays=_catMaxDays(p.category);
+    if(d<=maxDays+60){warnings.push({name:p.name,brand:p.brand,d,maxDays});}
+  }
+  try{localStorage.setItem(cacheKey,JSON.stringify({fp:fingerprint,ts:Date.now(),w:warnings}));}catch(e){}
+  return warnings;
+}
 function renderHome(){
   const total=state.products.length;
   const expiring=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d>=0&&d<=30;}).length;
@@ -809,6 +841,13 @@ function renderHome(){
   let alerts='';
   if(expired>0)alerts+=`<div class="alert-banner alert-danger"><span class="alert-icon">${SVG_WARN}</span><div><div class="alert-title">${expired} 個產品已過期</div>請儘快更換，以免刺激肌膚</div></div>`;
   if(soon.length>0)alerts+=`<div class="alert-banner alert-warn"><span class="alert-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M5 3 3 5M19 3l2 2"/></svg></span><div><div class="alert-title">${soon.map(p=>se(p.name)).join('、')} 即將到期</div>建議優先使用以免浪費</div></div>`;
+  const standbyWarns=getStandbyExpiryWarnings();
+  if(standbyWarns.length>0){
+    const svgClock=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M5 3 3 5M19 3l2 2"/></svg>`;
+    standbyWarns.forEach(w=>{
+      alerts+=`<div class="alert-banner" style="background:rgba(156,94,46,0.07);border:0.5px solid rgba(156,94,46,0.22);"><span class="alert-icon" style="color:var(--rust);">${svgClock}</span><div><div class="alert-title" style="color:var(--rust);">${se(w.name)} 建議納入保養行程</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">剩 ${w.d} 天效期，待用中可能來不及在效期前用完</div></div></div>`;
+    });
+  }
   const urgentProds=state.products.filter(p=>{const d=daysLeft(p);return d!==null&&d<=30;}).sort((a,b)=>(daysLeft(a)||0)-(daysLeft(b)||0));
   const urgentHtml=urgentProds.length>0?urgentProds.map(renderUrgentCard).join(''):`<div style="padding:16px 0;font-size:14px;color:var(--muted);text-align:center;">目前沒有即將到期的產品</div>`;
   return `<div class="tab-content">
@@ -1434,8 +1473,8 @@ async function ensureCompat(){
 }
 
 function clearAllRoutines(){
-  window._routine_morning=null;window._routine_evening=null;window._weekplan=null;
-  ['sv_cache_morning','sv_cache_evening','sv_cache_week'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+  window._routine_morning=null;window._routine_evening=null;window._weekplan=null;window._compatText=null;
+  ['sv_cache_morning','sv_cache_evening','sv_cache_week','sv_cache_compat_text'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
 }
 function regenAll(startTab){clearAllRoutines();generateAll(startTab);}
 
@@ -1448,6 +1487,8 @@ async function generateAll(startTab){
   const skinProds=getActiveSkinProds();
   const prods=skinProds.map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   const prodNames=skinProds.map(p=>`${p.brand} ${p.name}`).join('、');
+  const devices=state.products.filter(p=>p.category==='美容儀器');
+  const devDim=devices.length>0?devices.map(p=>`${p.brand} ${p.name}（主要功效：${p.benefits||'未填寫'}）`).join('\n'):'（無美容儀器）';
   try{
     // Step 1: get text-format compat analysis (cached after first run)
     let compatText='（尚未分析）';
@@ -1457,10 +1498,10 @@ async function generateAll(startTab){
     const expiringProds=skinProds.filter(p=>{const d=daysLeft(p);return d!==null&&d<=30;}).map(p=>{const d=daysLeft(p);return d<0?`${p.brand} ${p.name}（已過期）`:`${p.brand} ${p.name}（還有 ${d} 天到期）`;});
     const expiryDim=expiringProds.length>0?expiringProds.join('\n'):'無即將到期產品';
 
-    // Step 3: single call with all four dimensions
+    // Step 3: single call with all five dimensions
     const raw=await callClaude(`你是一位有 10 年以上經驗的專業保養師。你的目標是幫助用戶用現有產品庫達到最佳的保養效果。
 
-請根據以下四個維度進行完整的專業判斷：
+請根據以下五個維度進行完整的專業判斷：
 
 【維度一：產品成分分析】
 ${compatText}
@@ -1483,7 +1524,17 @@ ${skinAdviceContext()||''}
 以下產品即將到期（30天內），請在保養行程中優先安排這些產品的使用頻率：
 ${expiryDim}
 
-以下是完整產品清單，product 欄位必須使用以下完整名稱（一字不差）：
+【維度五：美容儀器】
+${devDim}
+
+${devices.length>0?`美容儀器整合規則：
+- 請根據品牌和名稱判斷其功能和可用模式。如果是知名儀器，請使用準確的官方模式名稱；如果不熟悉，請根據「主要功效」欄位推測使用方式
+- 在 step 欄位描述：建議使用「XX 模式」搭配 XX 產品，達到 XX 效果；product 欄位填入儀器完整名稱
+- 使用頻率需合理且符合官方建議，同時考慮用戶膚質；可每天安排不同模式，或同次保養疊加不同模式，但所有建議必須合理
+- 使用順序需正確：需在乾燥肌膚上使用的模式（如射頻、微電流）請排在保養品步驟之前；導入類模式請搭配對應保養品並安排在該保養品步驟緊接之後
+- 請將美容儀步驟整合進 morning 和 evening 的 daily 步驟中，並在 week 計畫裡列出儀器名稱`:''}
+
+以下是完整保養品清單，product 欄位必須使用以下完整名稱（一字不差）：
 ${prods}
 
 請以一位真正關心用戶肌膚健康的保養師角色，規劃出早間保養行程、晚間保養行程、和一週保養計畫。
