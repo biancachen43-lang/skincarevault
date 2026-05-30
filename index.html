@@ -1607,6 +1607,7 @@ ${prods}
 week 計畫中美容儀格式："品牌 名稱 — 模式名"
 
 {"morning":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"evening":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}],"device_schedule":[{"day":"週一","product":"儀器完整名稱","mode":"模式名","paired":"搭配保養品","effect":"達到效果","tip":"操作提示"},{"day":"週二","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週三","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週四","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週五","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週六","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週日","product":"","mode":"","paired":"","effect":"","tip":""}]}`,6000);
+    console.log('[debug] raw:', raw ? raw.substring(0, 800) : 'null');
     const data=parseJSON(raw);
     window._routine_morning={...data.morning,skin:state.skin.type};
     window._routine_evening={...data.evening,skin:state.skin.type};
