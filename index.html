@@ -675,22 +675,22 @@ async function callClaudeWithSearch(prompt, maxTokens) {
 }
 function parseJSON(raw) {
   if (!raw) return {};
+  // 先移除 markdown code fence
+  const cleaned = raw.trim().replace(/^```json\s*/i,'').replace(/\s*```\s*$/,'').trim();
+  // 直接解析
+  try { return JSON.parse(cleaned); } catch(e1) {}
+  // 嘗試提取 JSON 陣列 [ ... ]
   try {
-    // 先嘗試直接解析
-    const trimmed = raw.trim().replace(/^```json\s*/,'').replace(/\s*```$/,'');
-    return JSON.parse(trimmed);
-  } catch(e1) {
-    try {
-      // 找第一個 { 到最後一個 }，提取 JSON 區塊
-      const start = raw.indexOf('{');
-      const end = raw.lastIndexOf('}');
-      if (start !== -1 && end > start) {
-        return JSON.parse(raw.substring(start, end + 1));
-      }
-    } catch(e2) {}
-    console.error('[parseJSON] failed:', e1.message);
-    return {};
-  }
+    const s = cleaned.indexOf('['), e = cleaned.lastIndexOf(']');
+    if (s !== -1 && e > s) return JSON.parse(cleaned.substring(s, e + 1));
+  } catch(e2) {}
+  // 嘗試提取 JSON 物件 { ... }
+  try {
+    const s = cleaned.indexOf('{'), e = cleaned.lastIndexOf('}');
+    if (s !== -1 && e > s) return JSON.parse(cleaned.substring(s, e + 1));
+  } catch(e3) {}
+  console.error('[parseJSON] failed:', raw.substring(0, 100));
+  return {};
 }
 
 function gotoTab(t){
