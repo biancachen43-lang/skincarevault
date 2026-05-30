@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": ".",
   "rewrites": [
     { "source": "/api/claude", "destination": "/api/claude" },
     { "source": "/api/upload", "destination": "/api/upload" },

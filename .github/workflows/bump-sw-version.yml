@@ -4,11 +4,13 @@ on:
   push:
     branches: [main]
 
+# Required so GITHUB_TOKEN can push commits back to the repo.
+permissions:
+  contents: write
+
 jobs:
   bump-sw:
     runs-on: ubuntu-latest
-    # GitHub Actions commits made with GITHUB_TOKEN don't re-trigger workflows,
-    # so there is no infinite-loop risk here.
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,9 +21,9 @@ jobs:
         run: |
           TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
           sed -i "s/const CACHE_NAME = 'skinku-[^']*'/const CACHE_NAME = 'skinku-${TIMESTAMP}'/" service-worker.js
-          echo "SW version bumped to skinku-${TIMESTAMP}"
+          echo "SW version → skinku-${TIMESTAMP}"
 
-      - name: Commit if service-worker.js changed
+      - name: Commit if changed
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
@@ -30,5 +32,5 @@ jobs:
             git commit -m "chore: bump SW cache version [auto]"
             git push
           else
-            echo "No change to service-worker.js — skipping commit"
+            echo "service-worker.js unchanged — nothing to commit"
           fi
