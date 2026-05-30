@@ -657,30 +657,24 @@ async function callClaude(prompt,maxTokens=4096){
   if(data.stop_reason&&data.stop_reason!=='end_turn')console.warn('[callClaude] stop_reason:',data.stop_reason);
   return(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
 }
-function parseJSON(raw){
-  const c=raw.replace(/```json|```/g,'').trim();
-  function extractFirst(str,open,close){
-    const s=str.indexOf(open);
-    if(s<0)return null;
-    let depth=0,inStr=false,esc=false;
-    for(let i=s;i<str.length;i++){
-      const ch=str[i];
-      if(esc){esc=false;continue;}
-      if(ch==='\\'&&inStr){esc=true;continue;}
-      if(ch==='"'){inStr=!inStr;continue;}
-      if(inStr)continue;
-      if(ch===open)depth++;
-      else if(ch===close){depth--;if(depth===0)return str.slice(s,i+1);}
-    }
-    return null;
+function parseJSON(raw) {
+  if (!raw) return {};
+  try {
+    // 先嘗試直接解析
+    const trimmed = raw.trim().replace(/^```json\s*/,'').replace(/\s*```$/,'');
+    return JSON.parse(trimmed);
+  } catch(e1) {
+    try {
+      // 找第一個 { 到最後一個 }，提取 JSON 區塊
+      const start = raw.indexOf('{');
+      const end = raw.lastIndexOf('}');
+      if (start !== -1 && end > start) {
+        return JSON.parse(raw.substring(start, end + 1));
+      }
+    } catch(e2) {}
+    console.error('[parseJSON] failed:', e1.message);
+    return {};
   }
-  const arr=extractFirst(c,'[',']');
-  const obj=extractFirst(c,'{','}');
-  const arrIdx=arr?c.indexOf(arr[0]):Infinity;
-  const objIdx=obj?c.indexOf(obj[0]):Infinity;
-  const chosen=arrIdx<=objIdx?arr:obj;
-  if(!chosen)throw new Error('No JSON found in response');
-  return JSON.parse(chosen);
 }
 
 function gotoTab(t){
@@ -1607,7 +1601,6 @@ ${prods}
 week 計畫中美容儀格式："品牌 名稱 — 模式名"
 
 {"morning":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"evening":{"daily":[{"step":"步驟名稱","how":"操作說明1-2句","product":"完整產品名"}],"rotate":[{"days":"使用日，例如：週一、三、五","products":"完整產品名，多個用逗號分隔","reason":"輪替原因1句"}]},"week":[{"day":"週一","morning":["完整產品名"],"evening":["完整產品名"]},{"day":"週二","morning":[],"evening":[]},{"day":"週三","morning":[],"evening":[]},{"day":"週四","morning":[],"evening":[]},{"day":"週五","morning":[],"evening":[]},{"day":"週六","morning":[],"evening":[]},{"day":"週日","morning":[],"evening":[]}],"device_schedule":[{"day":"週一","product":"儀器完整名稱","mode":"模式名","paired":"搭配保養品","effect":"達到效果","tip":"操作提示"},{"day":"週二","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週三","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週四","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週五","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週六","product":"","mode":"","paired":"","effect":"","tip":""},{"day":"週日","product":"","mode":"","paired":"","effect":"","tip":""}]}`,6000);
-    console.log('[debug] raw:', raw ? raw.substring(0, 800) : 'null');
     const data=parseJSON(raw);
     window._routine_morning={...data.morning,skin:state.skin.type};
     window._routine_evening={...data.evening,skin:state.skin.type};
