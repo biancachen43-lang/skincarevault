@@ -759,7 +759,9 @@ function renderTodayRoutine(){
   const todayDevSched = (window._device_schedule||[]).find(d => d.day === dayNameMap[todayIdx]) || null;
   const pRowLight = n => {
     const {name: dn, mode} = _devEntry(n);
-    const isDevice = findProduct(dn)?.category === '美容儀器';
+    const isDevice = findProduct(dn)?.category === '美容儀器' ||
+      state.products.some(p => p.category === '美容儀器' &&
+        (dn.includes(p.name) || p.name.includes(dn)));
     if (isDevice) {
       const ds = todayDevSched && todayDevSched.product &&
         (todayDevSched.product === dn ||
