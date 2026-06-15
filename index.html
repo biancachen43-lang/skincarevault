@@ -556,6 +556,8 @@ state.products=state.products.map(p=>({mfgDate:'',expiryDate:'',benefits:'',...p
 loadAdviceCache();
 window._planningLoading=false;
 window._planningCardOpen=false;
+window._surveyShown=false;
+window._sessionActive=false;
 window._confirmedPlan=loadConfirmedPlanLocal();
 if(window._confirmedPlan){
   if(!window._routine_morning)window._routine_morning=window._confirmedPlan.morning;
@@ -1098,6 +1100,41 @@ function openAdd(){
 }
 function showModal(html){document.getElementById('modal-root').innerHTML=html;}
 function closeModal(){document.getElementById('modal-root').innerHTML='';currentImgData=null;window._photoUrl=null;window._photoInfo=null;editingId=null;}
+
+function showExitSurvey(){
+  window._surveyShown=true;
+  window._sR='';window._sW='';
+  const btnBase='width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--hairline-strong);background:var(--paper-2);font-family:var(--sans);font-size:13px;color:var(--cocoa);text-align:left;cursor:pointer;';
+  const selStyle=(grp)=>`document.querySelectorAll('.sq${grp}').forEach(b=>{b.style.background='var(--paper-2)';b.style.color='var(--cocoa)';b.style.borderColor='var(--hairline-strong)'});this.style.background='var(--cocoa)';this.style.color='#FBF7EE';this.style.borderColor='var(--cocoa)'`;
+  showModal(`<div class="modal-overlay"><div class="modal">
+    <div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;color:var(--cocoa);margin-bottom:18px;">使用還順手嗎？</div>
+    <div style="font-size:13px;font-weight:500;color:var(--cocoa-2);margin-bottom:10px;">今天沒有繼續使用的原因？</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+      <button class="sq1" style="${btnBase}" onclick="window._sR='功能不夠用';${selStyle(1)}">功能不夠用</button>
+      <button class="sq1" style="${btnBase}" onclick="window._sR='操作不順';${selStyle(1)}">操作不順</button>
+      <button class="sq1" style="${btnBase}" onclick="window._sR='只是暫時切走';${selStyle(1)}">只是暫時切走</button>
+    </div>
+    <div style="font-size:13px;font-weight:500;color:var(--cocoa-2);margin-bottom:10px;">你最希望 SkinKu 加強哪一塊？</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px;">
+      <button class="sq2" style="${btnBase}" onclick="window._sW='保養建議更準確';${selStyle(2)}">保養建議更準確</button>
+      <button class="sq2" style="${btnBase}" onclick="window._sW='提醒功能';${selStyle(2)}">提醒功能</button>
+      <button class="sq2" style="${btnBase}" onclick="window._sW='產品管理更方便';${selStyle(2)}">產品管理更方便</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeModal()" style="flex:1;padding:11px;border-radius:10px;border:1px solid var(--hairline-strong);background:transparent;font-family:var(--sans);font-size:13px;color:var(--muted);cursor:pointer;">跳過</button>
+      <button onclick="submitExitSurvey()" style="flex:2;padding:11px;border-radius:10px;border:none;background:var(--cocoa);color:#FBF7EE;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;">送出</button>
+    </div>
+  </div></div>`);
+}
+function submitExitSurvey(){
+  const reason=window._sR||'',wish=window._sW||'';
+  posthog.capture('exit_survey',{reason,wish});
+  if(reason!=='只是暫時切走'){
+    localStorage.setItem('sv_survey_date_'+window._userId,new Date().toISOString().slice(0,10));
+  }
+  closeModal();
+}
 
 function buildAddModal(){
   return `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
@@ -2074,6 +2111,7 @@ render();
 initFromCloud();
 setTimeout(autofillBenefits,4000);
 setTimeout(autofillDeviceModes, 6000);
+setTimeout(()=>{window._sessionActive=true;},3000);
 async function autofillBenefits(){
   const missing=state.products.filter(p=>!p.benefits);
   if(!missing.length)return;
@@ -2211,6 +2249,16 @@ function _obFinish(){
   el.innerHTML='<div style="width:100%;max-width:360px;text-align:center;"><div style="margin-bottom:20px;display:flex;justify-content:center;"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#FAF8F4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div style="font-size:22px;font-weight:500;color:#FAF8F4;margin-bottom:12px;line-height:1.4;">太棒了！<br>你的專屬保養旅程開始了'+(name?'，'+se(name):'')+'！</div><p style="font-size:14px;color:rgba(255,255,255,0.75);line-height:1.7;margin:0 0 28px;">我們已記錄你的膚質和生活習慣，現在就開始建立你的產品庫，讓 AI 為你量身規劃最適合的保養計畫！</p><button onclick="document.getElementById(\'sv-onboarding\').remove();updateTopbar();render();" style="width:100%;padding:16px;background:linear-gradient(135deg,#FAF8F4 0%,#EDE5D8 100%);color:#2C2824;border:none;border-radius:24px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;">進入 SkinKu 保養酷</button></div>';
 }
 // Welcome is now shown from initFromCloud() based on cloud data availability
+
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden)return;
+  if(!window._sessionActive)return;
+  if(!localStorage.getItem('sv_onboarding_done_'+window._userId))return;
+  if(window._surveyShown)return;
+  const today=new Date().toISOString().slice(0,10);
+  if(localStorage.getItem('sv_survey_date_'+window._userId)===today)return;
+  showExitSurvey();
+});
 
 document.addEventListener('click',function(e){
   const delBtn=e.target.closest('[data-del-id]');
