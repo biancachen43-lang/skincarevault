@@ -13,6 +13,16 @@ async function kvGet(key) {
   return data.result ? JSON.parse(data.result) : null;
 }
 
+async function kvSetRaw(key, value) {
+  const encoded = encodeURIComponent(JSON.stringify(value));
+  const res = await fetch(`${KV_URL}/set/${key}/${encoded}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${KV_TOKEN}` }
+  });
+  const result = await res.json();
+  if (result.error) throw new Error(result.error);
+}
+
 async function kvSet(key, value) {
   // 移除 base64 照片，保留 Blob URL（imgUrl）
   const clean = {
@@ -39,6 +49,10 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const userId = req.body && req.body.userId;
+  const month = new Date().toISOString().slice(0, 7);
+  const usageKey = `sv_usage_${month}_${userId || 'anon'}`;
 
   if (req.body && req.body.action === 'load') {
     try {
@@ -88,6 +102,11 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    const currentUsage = (await kvGet(usageKey)) || 0;
+    if (currentUsage >= 20) {
+      return res.status(429).json({ error: 'limit_reached', message: '本月 AI 生成次數已達上限' });
+    }
+
     const maxTokens = Math.min(req.body.max_tokens || 4000, 8000);
     const model = req.body.model || 'claude-sonnet-4-6';
     const body = { ...req.body, model, max_tokens: maxTokens, temperature: 0.3 };
@@ -107,6 +126,7 @@ module.exports = async function handler(req, res) {
     const data = await response.json();
     console.log('Anthropic response status:', response.status, 'stop_reason:', data.stop_reason);
     if (!response.ok) console.error('Anthropic error:', JSON.stringify(data));
+    if (response.ok) await kvSetRaw(usageKey, currentUsage + 1).catch(() => {});
     res.status(response.status).json(data);
   } catch (error) {
     console.error('Handler error:', error.message);
