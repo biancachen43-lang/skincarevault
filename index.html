@@ -953,7 +953,7 @@ function renderProducts(){
     </div>
     <button class="add-btn" onclick="openAdd()">＋ 新增</button>
   </div>`;
-  const _planStale=window._confirmedPlan&&_planFingerprint()!==window._confirmedPlan.productFingerprint;
+  const _planStale=(window._routine_morning||window._routine_evening)&&(!window._confirmedPlan||_planFingerprint()!==window._confirmedPlan.productFingerprint);
   const regenBanner=_planStale?`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:var(--r-card);background:linear-gradient(135deg,#FBF0DC,#F5E4C4);border:0.5px solid rgba(156,94,46,0.18);margin-bottom:16px;"><div><div style="font-size:13px;font-weight:500;color:var(--cocoa);margin-bottom:2px;">使用清單已更新</div><div style="font-size:12px;color:var(--muted);">建議重新生成保養建議</div></div><button onclick="gotoTab('advice');setTimeout(()=>{if(typeof regenPlan==='function')regenPlan('morning');},120);" style="flex-shrink:0;padding:8px 14px;border-radius:var(--r-chip);background:var(--cocoa);color:#FBF7EE;border:none;font-size:12px;font-weight:500;font-family:var(--sans);cursor:pointer;">前往重新生成</button></div>`:'';
   const hdr=titleBlock+regenBanner+renderPlanningCard();
   if(hasplan){
