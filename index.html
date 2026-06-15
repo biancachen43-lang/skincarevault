@@ -1448,7 +1448,7 @@ function renderRoutineResult(data,tod,isConfirmed){
     const names=(s.product||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
     const prodChip=names.length?`<div style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">${names.map(n=>{
       const prod=findProduct(n);
-      const dn=/[一-鿿]/.test(n)?(n.match(/[一-鿿]+/g)||[]).join('')||n:n;
+      const dn=/[一-鿿]/.test(n)?(prod&&prod.brand&&n.startsWith(prod.brand)?n.slice(prod.brand.length).trimStart()||n:n):n;
       return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--paper-2);border:0.5px solid var(--hairline);">
         ${prodThumb(n)}
         <div style="flex:1;min-width:0;">
@@ -1487,7 +1487,7 @@ function renderRoutineResult(data,tod,isConfirmed){
         const names=(r.products||'').split(/[,，、]+/).map(n=>n.trim()).filter(Boolean);
         return`<div style="border-radius:12px;padding:12px;margin-bottom:8px;background:var(--paper);border:0.5px solid var(--hairline);">
           <div style="font-size:12px;font-weight:600;color:var(--rust);margin-bottom:8px;">${r.days}</div>
-          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">${names.map(n=>{const dn=/[一-鿿]/.test(n)?(n.match(/[一-鿿]+/g)||[]).join('')||n:n;return`
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">${names.map(n=>{const dn=n;return`
             <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--paper-2);border-radius:10px;">${prodThumb(n)}<span style="font-size:12px;color:var(--cocoa);font-weight:400;">${se(dn)}</span></div>`;}).join('')}</div>
           <div style="font-size:12px;color:var(--muted);line-height:1.5;">${r.reason}</div>
         </div>`;
