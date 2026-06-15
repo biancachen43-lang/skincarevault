@@ -2,6 +2,10 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<script>
+  !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]);t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+" (stub)"},o="init capture alias identify set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonPropertiesForFlags".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+  posthog.init('phc_tDnso2Cg2obAoMj9v2sADeQeq2tB4r3XK2UgeP5jjGLj', { api_host: 'https://us.i.posthog.com', defaults: '2026-01-30' })
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1255,6 +1259,7 @@ function confirmAdd(){
   const src=selectedResult!=null?searchResults[selectedResult]:(window._photoInfo||{});
   state.products.push({id:state.nextId++,...v,benefits:v.benefits||src.benefits||'',emoji:src.emoji||window._pendingEmoji||'',advice:src.advice||window._pendingAdvice||'',imgUrl:window._photoUrl||null});
   saveState();clearAdviceCache();window._photoInfo=null;window._pendingAdvice=null;window._pendingEmoji=null;currentImgData=null;window._photoUrl=null;searchResults=[];selectedResult=null;
+  posthog.capture('product_added');
   closeModal();
   // Check if new product has urgent expiry and plan exists
   const plan=state.productPlan;
@@ -1545,6 +1550,7 @@ async function generateAll(startTab){
   document.querySelectorAll('.aseg-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes("'"+startTab+"'")));
   const adviceEl=document.getElementById('advice-content');
   if(adviceEl)adviceEl.innerHTML=`<div class="card" style="text-align:center;padding:32px 16px;"><div style="font-size:14px;color:var(--text2);font-weight:300;letter-spacing:0.05em;">保養建議生成中，請稍候<span class="dots-seq"><span>．</span><span>．</span><span>．</span></span></div></div>`;
+  posthog.capture('generation_started');
   const skinProds=getActiveSkinProds();
   const prods=skinProds.map(p=>`${p.brand} ${p.name}（${p.category}${p.ingredients?'，成分：'+p.ingredients:''}）`).join('；');
   const prodNames=skinProds.map(p=>`${p.brand} ${p.name}`).join('、');
@@ -1650,9 +1656,11 @@ week 計畫中美容儀格式："品牌 名稱 — 模式名"
     window._device_schedule=data.device_schedule||[];
     saveAdviceCache();
     if(adviceEl)adviceEl.innerHTML=renderAdviceContent();
+    posthog.capture('generation_success');
   }catch(e){
     console.error('[generateAll]',e);
     if(adviceEl)adviceEl.innerHTML=`<div class="card"><div class="sbox swarn">生成失敗：${e.message}</div><button class="ghost-btn" style="margin-top:8px;" onclick="generateAll('${startTab}')">重試</button></div>`;
+    posthog.capture('generation_failed');
   }
 }
 
@@ -2197,6 +2205,7 @@ function _obFinish(){
   if(d.environment)state.lifestyle.environment=d.environment;
   saveState();
   localStorage.setItem('sv_onboarding_done_'+window._userId,'1');
+  posthog.capture('onboarding_done');
   var el=_obEl();if(!el)return;
   var name=d.name||'';
   el.innerHTML='<div style="width:100%;max-width:360px;text-align:center;"><div style="margin-bottom:20px;display:flex;justify-content:center;"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#FAF8F4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div style="font-size:22px;font-weight:500;color:#FAF8F4;margin-bottom:12px;line-height:1.4;">太棒了！<br>你的專屬保養旅程開始了'+(name?'，'+se(name):'')+'！</div><p style="font-size:14px;color:rgba(255,255,255,0.75);line-height:1.7;margin:0 0 28px;">我們已記錄你的膚質和生活習慣，現在就開始建立你的產品庫，讓 AI 為你量身規劃最適合的保養計畫！</p><button onclick="document.getElementById(\'sv-onboarding\').remove();updateTopbar();render();" style="width:100%;padding:16px;background:linear-gradient(135deg,#FAF8F4 0%,#EDE5D8 100%);color:#2C2824;border:none;border-radius:24px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;">進入 SkinKu 保養酷</button></div>';
