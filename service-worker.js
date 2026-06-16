@@ -1,4 +1,4 @@
-const CACHE_NAME = 'skinku-20260616024510';  // overwritten by scripts/bump-sw.js at build time
+const CACHE_NAME = 'skinku-20260616031808';  // overwritten by scripts/bump-sw.js at build time
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {
