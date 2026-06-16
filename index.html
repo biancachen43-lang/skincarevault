@@ -315,6 +315,7 @@ const STORAGE_KEY='skincarevault_v2';
 
 // User ID — one per device, persisted in localStorage
 (function(){let id=localStorage.getItem('sv_user_id');if(!id){id='user_'+Math.random().toString(36).slice(2,10);localStorage.setItem('sv_user_id',id);}window._userId=id;})();
+posthog.identify(window._userId);
 
 // 雲端儲存
 async function saveToCloud(data) {
