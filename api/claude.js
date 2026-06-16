@@ -109,7 +109,7 @@ module.exports = async function handler(req, res) {
 
     const maxTokens = Math.min(req.body.max_tokens || 4000, 8000);
     const model = req.body.model || 'claude-sonnet-4-6';
-    const body = { ...req.body, model, max_tokens: maxTokens, temperature: 0.3 };
+    const body = { model, max_tokens: maxTokens, temperature: 0.3, messages: req.body.messages, system: req.body.system, tools: req.body.tools };
     const hasTools = Array.isArray(body.tools) && body.tools.length > 0;
     console.log('Calling Anthropic, model:', body.model, 'max_tokens:', body.max_tokens, 'tools:', hasTools, 'messages_len:', JSON.stringify(body.messages||[]).length);
     const headers = {
