@@ -657,7 +657,7 @@ const today=()=>new Date().toISOString().split('T')[0];
 const fmt=s=>s?s.replace(/-/g,'/'):'—';
 
 async function callClaude(prompt,maxTokens=4096){
-  const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,system:'請使用台灣繁體中文回答，不要使用簡體中文。',messages:[{role:'user',content:prompt}]})});
+  const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,system:'請使用台灣繁體中文回答，不要使用簡體中文。',messages:[{role:'user',content:prompt}],userId:window._userId})});
   if(!res.ok)throw new Error('API '+res.status);
   const data=await res.json();
   if(data.stop_reason&&data.stop_reason!=='end_turn')console.warn('[callClaude] stop_reason:',data.stop_reason);
@@ -671,7 +671,8 @@ async function callClaudeWithSearch(prompt, maxTokens) {
       model: 'claude-sonnet-4-6',
       max_tokens: maxTokens || 1000,
       tools: [{"type": "web_search_20250305", "name": "web_search"}],
-      messages: [{role: 'user', content: prompt}]
+      messages: [{role: 'user', content: prompt}],
+      userId: window._userId
     })
   });
   const data = await res.json();
