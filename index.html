@@ -658,8 +658,8 @@ const fmt=s=>s?s.replace(/-/g,'/'):'—';
 
 async function callClaude(prompt,maxTokens=4096){
   const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,system:'請使用台灣繁體中文回答，不要使用簡體中文。',messages:[{role:'user',content:prompt}],userId:window._userId})});
-  if(!res.ok)throw new Error('API '+res.status);
   const data=await res.json();
+  if(!res.ok)throw new Error(data.message||'API '+res.status);
   if(data.stop_reason&&data.stop_reason!=='end_turn')console.warn('[callClaude] stop_reason:',data.stop_reason);
   return(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
 }

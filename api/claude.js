@@ -103,7 +103,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const currentUsage = (await kvGet(usageKey)) || 0;
-    if (currentUsage >= 20) {
+    if (currentUsage >= 50) {
       return res.status(429).json({ error: 'limit_reached', message: '本月 AI 生成次數已達上限' });
     }
 
