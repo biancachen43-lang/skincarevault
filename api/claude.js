@@ -1,3 +1,5 @@
+const ALLOWED_USERS = ['user_cpurbjnn'];
+
 const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
 const USER_KEY = 'skincarevault_user_data'; // legacy fallback
@@ -51,6 +53,10 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const userId = req.body && req.body.userId;
+  if (!ALLOWED_USERS.includes(userId)) {
+    return res.status(403).json({ error: 'beta_ended', message: 'Beta 測試已結束，感謝你的參與！' });
+  }
+
   const month = new Date().toISOString().slice(0, 7);
   const usageKey = `sv_usage_${month}_${userId || 'anon'}`;
 
